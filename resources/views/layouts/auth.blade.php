@@ -22,7 +22,6 @@
     <link rel="preload" href="{{ asset('assets/icons/finder-icons.woff2') }}" as="font" type="font/woff2" crossorigin>
     <link rel="stylesheet" href="{{ asset('assets/icons/finder-icons.min.css') }}">
     <link rel="preload" href="{{ asset('assets/css/theme.min.css') }}" as="style">
-    <link rel="preload" href="{{ asset('assets/css/theme.rtl.min.css') }}" as="style">
     <link rel="stylesheet" href="{{ asset('assets/css/theme.min.css') }}" id="theme-styles">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles

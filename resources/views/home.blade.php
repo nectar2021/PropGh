@@ -3,6 +3,31 @@
 @section('title', 'Propsgh | Real Estate - Homepage')
 @section('meta_description', 'Finder - Directory & Listings Bootstrap HTML Template')
 
+@push('styles')
+<link rel="stylesheet" href="{{ asset('assets/vendor/nouislider/nouislider.min.css') }}">
+<style>
+  .price-slider .noUi-target {
+    height: 4px;
+    border-radius: 999px;
+  }
+  .price-slider .noUi-connect {
+    background: var(--fn-primary, var(--bs-primary, #d85151));
+  }
+  .price-slider .noUi-horizontal .noUi-handle {
+    width: 14px;
+    height: 14px;
+    right: -7px;
+    top: calc(50% - 7px);
+    border-radius: 999px;
+    box-shadow: 0 2px 4px rgba(15, 23, 42, 0.2);
+  }
+  .price-slider .noUi-handle:before,
+  .price-slider .noUi-handle:after {
+    display: none;
+  }
+</style>
+@endpush
+
 @section('content')
 <main class="content-wrapper">
 
@@ -29,8 +54,9 @@
                   <div class="col-6 col-md-4 d-flex">
                     <div class="w-100">
                       <select class="form-select form-select-lg border-0 ps-3" aria-label="Rent or sale select" required>
-                        <option value="For rent">For rent</option>
-                        <option value="For sale">For sale</option>
+                        @foreach ($listingTypeOptions as $value => $label)
+                          <option value="{{ $value }}">{{ $label }}</option>
+                        @endforeach
                       </select>
                     </div>
                     <hr class="vr m-0">
@@ -39,16 +65,9 @@
                     <div class="w-100">
                       <select class="form-select form-select-lg border-0" aria-label="Location select" required>
                         <option value="">Location</option>
-                        <option value="New York">New York</option>
-                        <option value="Los Angeles">Los Angeles</option>
-                        <option value="Chicago">Chicago</option>
-                        <option value="Houston">Houston</option>
-                        <option value="Phoenix">Phoenix</option>
-                        <option value="Philadelphia">Philadelphia</option>
-                        <option value="San Antonio">San Antonio</option>
-                        <option value="San Diego">San Diego</option>
-                        <option value="Dallas">Dallas</option>
-                        <option value="San Jose">San Jose</option>
+                        @foreach ($cityOptions as $city)
+                          <option value="{{ $city }}">{{ $city }}</option>
+                        @endforeach
                       </select>
                     </div>
                     <hr class="vr d-none d-md-block m-0">
@@ -58,12 +77,9 @@
                       <hr class="d-md-none my-2">
                       <select class="form-select form-select-lg border-0 ps-3" aria-label="Property type select" required>
                         <option value="">Property type</option>
-                        <option value="Houses">Houses</option>
-                        <option value="Apartments">Apartments</option>
-                        <option value="Commercial">Commercial</option>
-                        <option value="Daily rental">Daily rental</option>
-                        <option value="Offices">Offices</option>
-                        <option value="Townhouses">Townhouses</option>
+                        @foreach ($propertyTypes as $type)
+                          <option value="{{ $type }}">{{ \Illuminate\Support\Str::headline($type) }}</option>
+                        @endforeach
                       </select>
                     </div>
                     <hr class="vr d-none d-lg-block m-0">
@@ -72,10 +88,21 @@
               </div>
               <hr class="d-lg-none mt-2 mb-0">
               <div class="col-lg-5 d-flex flex-column flex-sm-row align-items-sm-center gap-2 gap-sm-3 pt-3 pt-lg-0 ps-lg-3">
-                <div class="d-flex align-items-center w-100 gap-2 ps-2 ps-lg-0">
-                  Price
-                  <div class="range-slider w-100">
-                    <div class="range-slider-ui my-4"></div>
+                <div class="d-flex flex-column w-100 gap-1 ps-2 ps-lg-0" data-price-block>
+                  <div class="d-flex align-items-center justify-content-between">
+                    <span class="fw-medium fs-sm text-body-secondary">Price</span>
+                    <span class="fw-semibold fs-sm" data-price-output>$2700</span>
+                  </div>
+                  <div
+                    class="range-slider w-100 price-slider"
+                    data-price-slider
+                    data-price-min="500"
+                    data-price-max="4000"
+                    data-price-step="100"
+                    data-price-start="2700"
+                  >
+                    <div class="range-slider-ui"></div>
+                    <input type="hidden" name="price" value="2700" data-price-input>
                   </div>
                 </div>
                 <button type="submit" class="btn btn-lg btn-primary">
@@ -134,66 +161,30 @@
     <div class="py-5">
       <div class="border rounded py-3 py-xl-4">
         <div class="row row-cols-2 row-cols-md-3 row-cols-xl-6 g-0 py-2">
-          <div class="col d-flex position-relative py-2">
-            <div class="vstack align-items-center text-center py-2 px-3">
-              <h3 class="h5 mb-2">
-                <a class="hover-effect-underline stretched-link" href="#!">Houses</a>
-              </h3>
-              <div class="d-flex align-items-center gap-1 fs-sm">
-                <i class="fi-bookmark fs-base"></i>
-                6.4K offers
+          @php
+            $dividerClasses = [
+              'vr m-0',
+              'vr d-none d-md-block m-0',
+              'vr d-md-none d-xl-block m-0',
+              'vr d-none d-md-block m-0',
+              'vr m-0',
+            ];
+          @endphp
+          @foreach ($categoryStats as $category)
+            @php $dividerClass = $dividerClasses[$loop->index] ?? 'vr m-0'; @endphp
+            <div class="col d-flex position-relative py-2">
+              <div class="vstack align-items-center text-center py-2 px-3">
+                <h3 class="h5 mb-2">
+                  <a class="hover-effect-underline stretched-link" href="{{ route('properties.index') }}">{{ $category['label'] }}</a>
+                </h3>
+                <div class="d-flex align-items-center gap-1 fs-sm">
+                  <i class="fi-bookmark fs-base"></i>
+                  {{ number_format($category['count']) }} offers
+                </div>
               </div>
+              <hr class="{{ $dividerClass }}">
             </div>
-            <hr class="vr m-0">
-          </div>
-          <div class="col d-flex position-relative py-2">
-            <div class="vstack align-items-center text-center py-2 px-3">
-              <h3 class="h5 mb-2">
-                <a class="hover-effect-underline stretched-link" href="#!">Apartments</a>
-              </h3>
-              <div class="d-flex align-items-center gap-1 fs-sm">
-                <i class="fi-bookmark fs-base"></i>
-                12.8K offers
-              </div>
-            </div>
-            <hr class="vr d-none d-md-block m-0">
-          </div>
-          <div class="col d-flex position-relative py-2">
-            <div class="vstack align-items-center text-center py-2 px-3">
-              <h3 class="h5 mb-2">
-                <a class="hover-effect-underline stretched-link" href="#!">Commercial</a>
-              </h3>
-              <div class="d-flex align-items-center gap-1 fs-sm">
-                <i class="fi-bookmark fs-base"></i>
-                9.3K offers
-              </div>
-            </div>
-            <hr class="vr d-md-none d-xl-block m-0">
-          </div>
-          <div class="col d-flex position-relative py-2">
-            <div class="vstack align-items-center text-center py-2 px-3">
-              <h3 class="h5 mb-2">
-                <a class="hover-effect-underline stretched-link" href="#!">Daily rental</a>
-              </h3>
-              <div class="d-flex align-items-center gap-1 fs-sm">
-                <i class="fi-bookmark fs-base"></i>
-                42.4K offers
-              </div>
-            </div>
-            <hr class="vr d-none d-md-block m-0">
-          </div>
-          <div class="col d-flex position-relative py-2">
-            <div class="vstack align-items-center text-center py-2 px-3">
-              <h3 class="h5 mb-2">
-                <a class="hover-effect-underline stretched-link" href="#!">New buildings</a>
-              </h3>
-              <div class="d-flex align-items-center gap-1 fs-sm">
-                <i class="fi-bookmark fs-base"></i>
-                22.5K offers
-              </div>
-            </div>
-            <hr class="vr m-0">
-          </div>
+          @endforeach
           <div class="col d-flex position-relative py-2">
             <div class="vstack dropdown align-items-center text-center py-2 px-3" data-bs-toggle="dropdown" data-bs-display="static">
               <h3 class="h5 mb-2">
@@ -203,11 +194,15 @@
                 <i class="fi-chevron-down fs-xl"></i>
               </div>
               <ul class="dropdown-menu top-100 start-50 translate-middle-x" style="--fn-dropdown-min-width: 11rem">
-                <li><a class="dropdown-item" href="#">Offices</a></li>
-                <li><a class="dropdown-item" href="#">Warehouses</a></li>
-                <li><a class="dropdown-item" href="#">Retail spaces</a></li>
-                <li><a class="dropdown-item" href="#">Townhouses</a></li>
-                <li><a class="dropdown-item" href="#">Vacation homes</a></li>
+                @forelse ($extraPropertyTypes as $type)
+                  <li><a class="dropdown-item" href="{{ route('properties.index') }}">{{ \Illuminate\Support\Str::headline($type) }}</a></li>
+                @empty
+                  <li><a class="dropdown-item" href="{{ route('properties.index') }}">Offices</a></li>
+                  <li><a class="dropdown-item" href="{{ route('properties.index') }}">Warehouses</a></li>
+                  <li><a class="dropdown-item" href="{{ route('properties.index') }}">Retail spaces</a></li>
+                  <li><a class="dropdown-item" href="{{ route('properties.index') }}">Townhouses</a></li>
+                  <li><a class="dropdown-item" href="{{ route('properties.index') }}">Vacation homes</a></li>
+                @endforelse
               </ul>
             </div>
           </div>
@@ -293,68 +288,97 @@
 
     <div class="swiper pb-5" data-swiper='{"slidesPerView":1,"spaceBetween":24,"loop":true,"navigation":{"prevEl":"#offers-prev","nextEl":"#offers-next"},"pagination":{"el":".swiper-pagination","clickable":true},"breakpoints":{"460":{"slidesPerView":2},"768":{"slidesPerView":3},"992":{"slidesPerView":4}}}'>
       <div class="swiper-wrapper">
-        @foreach([1,4,6,2] as $img)
-        <div class="swiper-slide h-auto">
-          <article class="card hover-effect-opacity h-100">
-            <div class="card-img-top position-relative bg-body-tertiary overflow-hidden">
-              <div class="swiper z-2" data-swiper='{"pagination":{"el":".swiper-pagination"},"navigation":{"prevEl":".btn-prev","nextEl":".btn-next"},"breakpoints":{"991":{"allowTouchMove":false}}}'>
-                <a class="swiper-wrapper" href="#!">
-                  <div class="swiper-slide">
-                    <div class="ratio d-block" style="--fn-aspect-ratio: calc(248 / 362 * 100%)">
-                      <img src="{{ asset("assets/img/listings/real-estate/0{$img}.jpg") }}" alt="Image">
-                      <span class="position-absolute top-0 start-0 w-100 h-100 z-1" style="background: linear-gradient(180deg, rgba(0,0,0, 0) 0%, rgba(0,0,0, .11) 100%)"></span>
-                    </div>
+        @forelse ($topOffers as $property)
+          @php
+            $images = $property->images->count() ? $property->images : collect();
+            $detailsUrl = route('properties.show', $property);
+            $listingLabel = match (strtolower($property->listing_type ?? '')) {
+              'sale' => 'For sale',
+              'shortlet' => 'Shortlet',
+              default => 'For rent',
+            };
+          @endphp
+          <div class="swiper-slide h-auto">
+            <article class="card hover-effect-opacity h-100">
+              <div class="card-img-top position-relative bg-body-tertiary overflow-hidden">
+                <div class="swiper z-2" data-swiper='{"pagination":{"el":".swiper-pagination"},"navigation":{"prevEl":".btn-prev","nextEl":".btn-next"},"breakpoints":{"991":{"allowTouchMove":false}}}'>
+                  <a class="swiper-wrapper" href="{{ $detailsUrl }}">
+                    @forelse ($images->take(3) as $image)
+                      <div class="swiper-slide">
+                        <div class="ratio d-block" style="--fn-aspect-ratio: calc(248 / 362 * 100%)">
+                          <img src="{{ asset($image->path) }}" alt="{{ $property->title }}">
+                          <span class="position-absolute top-0 start-0 w-100 h-100 z-1" style="background: linear-gradient(180deg, rgba(0,0,0, 0) 0%, rgba(0,0,0, .11) 100%)"></span>
+                        </div>
+                      </div>
+                    @empty
+                      <div class="swiper-slide">
+                        <div class="ratio d-block" style="--fn-aspect-ratio: calc(248 / 362 * 100%)">
+                          <img src="{{ asset('assets/img/listings/real-estate/01.jpg') }}" alt="{{ $property->title }}">
+                          <span class="position-absolute top-0 start-0 w-100 h-100 z-1" style="background: linear-gradient(180deg, rgba(0,0,0, 0) 0%, rgba(0,0,0, .11) 100%)"></span>
+                        </div>
+                      </div>
+                    @endforelse
+                  </a>
+                  <div class="d-flex flex-column gap-2 align-items-start position-absolute top-0 start-0 z-1 pt-1 pt-sm-0 ps-1 ps-sm-0 mt-2 mt-sm-3 ms-2 ms-sm-3">
+                    @if ($property->is_verified)
+                      <span class="badge text-bg-info d-inline-flex align-items-center">
+                        Verified
+                        <i class="fi-shield ms-1"></i>
+                      </span>
+                    @endif
+                    @if ($property->is_featured)
+                      <span class="badge text-bg-info">Featured</span>
+                    @endif
+                    @if ($property->is_new)
+                      <span class="badge text-bg-primary">New</span>
+                    @endif
                   </div>
-                </a>
-                <div class="d-flex flex-column gap-2 align-items-start position-absolute top-0 start-0 z-1 pt-1 pt-sm-0 ps-1 ps-sm-0 mt-2 mt-sm-3 ms-2 ms-sm-3">
-                  <span class="badge text-bg-info d-inline-flex align-items-center">
-                    Verified
-                    <i class="fi-shield ms-1"></i>
-                  </span>
-                  <span class="badge text-bg-primary">New</span>
+                  <div class="position-absolute top-0 end-0 z-1 hover-effect-target opacity-0 pt-1 pt-sm-0 pe-1 pe-sm-0 mt-2 mt-sm-3 me-2 me-sm-3">
+                    <button type="button" class="btn btn-sm btn-icon btn-light bg-light border-0 rounded-circle animate-pulse" aria-label="Add to wishlist">
+                      <i class="fi-heart animate-target fs-sm"></i>
+                    </button>
+                  </div>
+                  <div class="position-absolute top-50 start-0 z-1 translate-middle-y d-none d-lg-block hover-effect-target opacity-0 ms-3">
+                    <button type="button" class="btn btn-sm btn-prev btn-icon btn-light bg-light rounded-circle animate-slide-start" aria-label="Prev">
+                      <i class="fi-chevron-left fs-lg animate-target"></i>
+                    </button>
+                  </div>
+                  <div class="position-absolute top-50 end-0 z-1 translate-middle-y d-none d-lg-block hover-effect-target opacity-0 me-3">
+                    <button type="button" class="btn btn-sm btn-next btn-icon btn-light bg-light rounded-circle animate-slide-end" aria-label="Next">
+                      <i class="fi-chevron-right fs-lg animate-target"></i>
+                    </button>
+                  </div>
+                  <div class="swiper-pagination bottom-0 mb-2" data-bs-theme="light"></div>
                 </div>
-                <div class="position-absolute top-0 end-0 z-1 hover-effect-target opacity-0 pt-1 pt-sm-0 pe-1 pe-sm-0 mt-2 mt-sm-3 me-2 me-sm-3">
-                  <button type="button" class="btn btn-sm btn-icon btn-light bg-light border-0 rounded-circle animate-pulse" aria-label="Add to wishlist">
-                    <i class="fi-heart animate-target fs-sm"></i>
-                  </button>
+              </div>
+              <div class="card-body p-3">
+                <div class="pb-1 mb-2">
+                  <span class="badge text-body-emphasis bg-body-secondary">{{ $listingLabel }}</span>
                 </div>
-                <div class="position-absolute top-50 start-0 z-1 translate-middle-y d-none d-lg-block hover-effect-target opacity-0 ms-3">
-                  <button type="button" class="btn btn-sm btn-prev btn-icon btn-light bg-light rounded-circle animate-slide-start" aria-label="Prev">
-                    <i class="fi-chevron-left fs-lg animate-target"></i>
-                  </button>
+                <div class="h5 mb-2">${{ number_format($property->price) }}</div>
+                <h3 class="fs-sm fw-normal text-body mb-2">
+                  <a class="stretched-link text-body" href="{{ $detailsUrl }}">{{ $property->title }}</a>
+                </h3>
+                <div class="h6 fs-sm mb-0">{{ $property->area ?? 0 }} sq.m</div>
+              </div>
+              <div class="card-footer d-flex gap-2 border-0 bg-transparent pt-0 pb-3 px-3 mt-n1">
+                <div class="d-flex align-items-center fs-sm gap-1 me-1">
+                  {{ $property->bedrooms }}<i class="fi-bed-single fs-base text-secondary-emphasis"></i>
                 </div>
-                <div class="position-absolute top-50 end-0 z-1 translate-middle-y d-none d-lg-block hover-effect-target opacity-0 me-3">
-                  <button type="button" class="btn btn-sm btn-next btn-icon btn-light bg-light rounded-circle animate-slide-end" aria-label="Next">
-                    <i class="fi-chevron-right fs-lg animate-target"></i>
-                  </button>
+                <div class="d-flex align-items-center fs-sm gap-1 me-1">
+                  {{ $property->bathrooms }}<i class="fi-shower fs-base text-secondary-emphasis"></i>
                 </div>
-                <div class="swiper-pagination bottom-0 mb-2" data-bs-theme="light"></div>
+                <div class="d-flex align-items-center fs-sm gap-1 me-1">
+                  {{ $property->garage_spaces }}<i class="fi-car-garage fs-base text-secondary-emphasis"></i>
+                </div>
               </div>
-            </div>
-            <div class="card-body p-3">
-              <div class="pb-1 mb-2">
-                <span class="badge text-body-emphasis bg-body-secondary">For rent</span>
-              </div>
-              <div class="h5 mb-2">$1,620</div>
-              <h3 class="fs-sm fw-normal text-body mb-2">
-                <a class="stretched-link text-body" href="#!">40 S 9th St, Brooklyn, NY 11249</a>
-              </h3>
-              <div class="h6 fs-sm mb-0">65 sq.m</div>
-            </div>
-            <div class="card-footer d-flex gap-2 border-0 bg-transparent pt-0 pb-3 px-3 mt-n1">
-              <div class="d-flex align-items-center fs-sm gap-1 me-1">
-                2<i class="fi-bed-single fs-base text-secondary-emphasis"></i>
-              </div>
-              <div class="d-flex align-items-center fs-sm gap-1 me-1">
-                1<i class="fi-shower fs-base text-secondary-emphasis"></i>
-              </div>
-              <div class="d-flex align-items-center fs-sm gap-1 me-1">
-                1<i class="fi-car-garage fs-base text-secondary-emphasis"></i>
-              </div>
-            </div>
-          </article>
-        </div>
-        @endforeach
+            </article>
+          </div>
+        @empty
+          <div class="swiper-slide h-auto">
+            <div class="text-center text-body-secondary py-5">No properties available yet.</div>
+          </div>
+        @endforelse
       </div>
       <div class="swiper-pagination position-static pt-lg-1 mt-3 mt-sm-4"></div>
     </div>
@@ -377,33 +401,40 @@
 
     <div class="swiper pb-5" data-swiper='{"slidesPerView":1,"spaceBetween":24,"loop":true,"navigation":{"prevEl":"#city-prev","nextEl":"#city-next"},"pagination":{"el":".swiper-pagination","clickable":true},"breakpoints":{"460":{"slidesPerView":2,"spaceBetween":16},"768":{"slidesPerView":2,"spaceBetween":24},"860":{"slidesPerView":3},"1200":{"slidesPerView":4}}}'>
       <div class="swiper-wrapper">
-        @foreach(['01','02','03','04','05','06'] as $city)
-        <div class="swiper-slide h-auto">
-          <article class="card h-100 hover-effect-scale bg-transparent">
-            <div class="card-img-top bg-body-tertiary overflow-hidden">
-              <div class="ratio hover-effect-target" style="--fn-aspect-ratio: calc(230 / 306 * 100%)">
-                <img src="{{ asset("assets/img/home/real-estate/cities/{$city}.jpg") }}" alt="Image">
+        @forelse ($cityStats as $city)
+          @php
+            $cityImage = $cityImages[$loop->index % count($cityImages)] ?? 'assets/img/home/real-estate/cities/01.jpg';
+          @endphp
+          <div class="swiper-slide h-auto">
+            <article class="card h-100 hover-effect-scale bg-transparent">
+              <div class="card-img-top bg-body-tertiary overflow-hidden">
+                <div class="ratio hover-effect-target" style="--fn-aspect-ratio: calc(230 / 306 * 100%)">
+                  <img src="{{ asset($cityImage) }}" alt="{{ $city->city }}">
+                </div>
               </div>
-            </div>
-            <div class="card-body text-center p-3">
-              <h3 class="h5 mb-0">
-                <a class="hover-effect-underline stretched-link" href="#!">City {{ $city }}</a>
-              </h3>
-            </div>
-            <div class="card-footer d-flex bg-transparent border-0 pt-0 pb-3 px-3 mt-n1">
-              <div class="w-50 text-center pe-1">
-                <i class="fi-zap mb-1"></i>
-                <div class="fs-sm">for sale <span class="fw-semibold">1739</span></div>
+              <div class="card-body text-center p-3">
+                <h3 class="h5 mb-0">
+                  <a class="hover-effect-underline stretched-link" href="{{ route('properties.index') }}">{{ $city->city }}</a>
+                </h3>
               </div>
-              <hr class="vr my-0 mx-2">
-              <div class="w-50 text-center ps-1">
-                <i class="fi-tag mb-1"></i>
-                <div class="fs-sm">for rent <span class="fw-semibold">3845</span></div>
+              <div class="card-footer d-flex bg-transparent border-0 pt-0 pb-3 px-3 mt-n1">
+                <div class="w-50 text-center pe-1">
+                  <i class="fi-zap mb-1"></i>
+                  <div class="fs-sm">for sale <span class="fw-semibold">{{ number_format((int) $city->sale_count) }}</span></div>
+                </div>
+                <hr class="vr my-0 mx-2">
+                <div class="w-50 text-center ps-1">
+                  <i class="fi-tag mb-1"></i>
+                  <div class="fs-sm">for rent <span class="fw-semibold">{{ number_format((int) $city->rent_count) }}</span></div>
+                </div>
               </div>
-            </div>
-          </article>
-        </div>
-        @endforeach
+            </article>
+          </div>
+        @empty
+          <div class="swiper-slide h-auto">
+            <div class="text-center text-body-secondary py-5">No cities available yet.</div>
+          </div>
+        @endforelse
       </div>
       <div class="swiper-pagination position-static pt-lg-1 mt-3 mt-sm-4"></div>
     </div>
@@ -432,32 +463,51 @@
   </section> --}}
 
 
-  <!-- Top agents -->
-  <section class="container pt-2 pt-sm-3 pt-md-4 pt-lg-5 pb-5 my-xxl-3">
-    <h2 class="h1 text-center pt-5 pb-3 mb-2 mb-sm-3 mb-lg-4">Top real estate agents</h2>
-    <div class="row row-cols-2 row-cols-md-4 g-4 mb-n3">
-      @foreach([1,2,3,4] as $agent)
-      <div class="col mb-3">
-        <article class="hover-effect-scale text-center">
-          <div class="position-relative mb-3">
-            <div class="ratio ratio-1x1 bg-body-secondary rounded-circle overflow-hidden mx-auto" style="width: 132px">
-              <img src="{{ asset("assets/img/home/real-estate/agents/0{$agent}.png") }}" class="hover-effect-target" alt="Avatar">
-            </div>
-            <h3 class="h5 pt-3 mt-sm-1 mb-1">
-              <a class="hover-effect-underline stretched-link" href="#!">Agent {{ $agent }}</a>
-            </h3>
-            <p class="fs-sm mb-0">Premium Property Group</p>
-          </div>
-          <div class="d-flex justify-content-center gap-1">
-            <a class="btn btn-icon btn-sm btn-outline-secondary border-0" href="#!" aria-label="Instagram"><i class="fi-instagram fs-base"></i></a>
-            <a class="btn btn-icon btn-sm btn-outline-secondary border-0" href="#!" aria-label="Facebook"><i class="fi-facebook fs-base"></i></a>
-            <a class="btn btn-icon btn-sm btn-outline-secondary border-0" href="#!" aria-label="LinkedIn"><i class="fi-linkedin fs-base"></i></a>
-          </div>
-        </article>
-      </div>
-      @endforeach
-    </div>
-  </section>
-
 </main>
 @endsection
+
+@push('scripts')
+<script src="{{ asset('assets/vendor/nouislider/nouislider.min.js') }}"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const priceBlock = document.querySelector('[data-price-block]');
+    if (!priceBlock || typeof noUiSlider === 'undefined') {
+      return;
+    }
+
+    const sliderWrap = priceBlock.querySelector('[data-price-slider]');
+    const slider = priceBlock.querySelector('.range-slider-ui');
+    const output = priceBlock.querySelector('[data-price-output]');
+    const input = priceBlock.querySelector('[data-price-input]');
+
+    if (!slider || !sliderWrap || slider.noUiSlider) {
+      return;
+    }
+
+    const min = Number(sliderWrap.dataset.priceMin || 0);
+    const max = Number(sliderWrap.dataset.priceMax || 10000);
+    const step = Number(sliderWrap.dataset.priceStep || 100);
+    const start = Number(sliderWrap.dataset.priceStart || min);
+
+    noUiSlider.create(slider, {
+      start,
+      step,
+      connect: [true, false],
+      range: { min, max }
+    });
+
+    const updateOutput = (value) => {
+      const amount = Math.round(Number(value));
+      if (output) {
+        output.textContent = `$${amount}`;
+      }
+      if (input) {
+        input.value = amount;
+      }
+    };
+
+    updateOutput(start);
+    slider.noUiSlider.on('update', (values) => updateOutput(values[0]));
+  });
+</script>
+@endpush

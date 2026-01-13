@@ -1,0 +1,102 @@
+[
+  {
+    "coordinates": {"lat": 40.7032, "lng": -73.9889},
+    "price": "$1,620",
+    "address": "40 S 9th St, Brooklyn, NY 11249",
+    "area": "65",
+    "bedrooms": "2",
+    "bathrooms": "1",
+    "garage": "1",
+    "image": "/assets/img/listings/real-estate/01.jpg"
+  },
+  {
+    "coordinates": {"lat": 40.6212, "lng": -74.0283},
+    "price": "$1,320",
+    "address": "517 82nd St, Brooklyn, NY 11209",
+    "area": "45",
+    "bedrooms": "1",
+    "bathrooms": "1",
+    "garage": "0",
+    "image": "/assets/img/listings/real-estate/02.jpg"
+  },
+  {
+    "coordinates": {"lat": 40.7726, "lng": -73.9091},
+    "price": "$1,890",
+    "address": "3811 Ditmars Blvd, Astoria, NY 11105",
+    "area": "75",
+    "bedrooms": "2",
+    "bathrooms": "1",
+    "garage": "1",
+    "image": "/assets/img/listings/real-estate/03.jpg"
+  },
+  {
+    "coordinates": {"lat": 40.6991, "lng": -73.9851},
+    "price": "$1,170",
+    "address": "67-04 Myrtle Ave, Glendale, NY 11385",
+    "area": "42",
+    "bedrooms": "1",
+    "bathrooms": "1",
+    "garage": "0",
+    "image": "/assets/img/listings/real-estate/04.jpg"
+  },
+  {
+    "coordinates": {"lat": 40.6959, "lng": -73.9626},
+    "price": "$1,250",
+    "address": "444 Park Ave, Brooklyn, NY 11205",
+    "area": "54",
+    "bedrooms": "1",
+    "bathrooms": "1",
+    "garage": "0",
+    "image": "/assets/img/listings/real-estate/05.jpg"
+  },
+  {
+    "coordinates": {"lat": 40.7054, "lng": -73.9334},
+    "price": "$2,750",
+    "address": "929 Hart St, Brooklyn, NY 11237",
+    "area": "108",
+    "bedrooms": "3",
+    "bathrooms": "2",
+    "garage": "1",
+    "image": "/assets/img/listings/real-estate/06.jpg"
+  },
+  {
+    "coordinates": {"lat": 40.7174, "lng": -73.9571},
+    "price": "$1,490",
+    "address": "123 Bedford Avenue, Brooklyn, NY 11211",
+    "area": "80",
+    "bedrooms": "2",
+    "bathrooms": "1",
+    "garage": "1",
+    "image": "/assets/img/listings/real-estate/07.jpg"
+  },
+  {
+    "coordinates": {"lat": 40.7129, "lng": -73.9538},
+    "price": "$1,560",
+    "address": "124 Maple Street, Brooklyn, NY 11211",
+    "area": "50",
+    "bedrooms": "1",
+    "bathrooms": "1",
+    "garage": "1",
+    "image": "/assets/img/listings/real-estate/08.jpg"
+  },
+  {
+    "coordinates": {"lat": 40.6962, "lng": -73.9749},
+    "price": "$3,860",
+    "address": "212 Harrison Street, Brooklyn, NY 11240",
+    "area": "130",
+    "bedrooms": "3",
+    "bathrooms": "2",
+    "garage": "2",
+    "image": "/assets/img/listings/real-estate/09.jpg"
+  },
+  {
+    "coordinates": {"lat": 40.6746, "lng": -73.9904},
+    "price": "$2,950",
+    "address": "456 Court Street, Brooklyn, NY 11231",
+    "area": "96",
+    "bedrooms": "3",
+    "bathrooms": "1",
+    "garage": "1",
+    "image": "/assets/img/listings/real-estate/10.jpg"
+  }
+]

@@ -1,209 +1,602 @@
 @extends('layouts.app')
 
-@section('title', 'Propsgh | Browse Properties')
-@section('meta_description', 'Browse premium apartments, houses, shortlets, and commercial spaces across Ghana.')
+@section('title', 'Propsgh | Properties')
+@section('meta_description', 'Browse available properties and shortlets on Propsgh.')
 
 @push('styles')
-<style>
-  .browse-hero {
-    background: radial-gradient(140% 160% at 10% -20%, rgba(216,81,81,.03), transparent 45%), #f7f8fb;
-  }
-  .chip {
-    border-radius: 999px;
-    border: 1px solid var(--bs-border-color);
-    padding: .35rem .9rem;
-    font-weight: 600;
-    color: var(--bs-body-color);
-    background: var(--bs-body-bg);
-    transition: all .18s ease;
-  }
-  .chip:hover {
-    border-color: var(--bs-primary);
-    color: var(--bs-primary);
-    box-shadow: 0 10px 24px rgba(15,23,42,.08);
-  }
-  .property-card img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-</style>
+<link rel="stylesheet" href="{{ asset('assets/vendor/leaflet/leaflet.css') }}">
+<link rel="stylesheet" href="{{ asset('assets/vendor/choices.js/choices.min.css') }}">
 @endpush
 
 @section('content')
-<div class="browse-hero">
-  <section class="container-xxl py-4 py-lg-5">
-    {{-- Page heading --}}
-    <div class="row align-items-center mb-3 mb-lg-4">
-      <div class="col-md-7">
-        <nav class="mb-2" aria-label="breadcrumb">
-          <ol class="breadcrumb mb-1">
-            <li class="breadcrumb-item"><a href="{{ route('home') }}">Home</a></li>
-            <li class="breadcrumb-item active" aria-current="page">Browse properties</li>
-          </ol>
-        </nav>
-        <h1 class="h3 h-lg-2 fw-bold mb-1">Browse Properties</h1>
-        <p class="text-body-secondary mb-0">
-          25+ homes, apartments, shortlets and investments available across Ghana.
-        </p>
+<!-- Filters offcanvas -->
+    <div class="offcanvas offcanvas-end" id="filters" tabindex="-1" style="width: 820px">
+
+      <!-- Header -->
+      <div class="offcanvas-header px-sm-5">
+        <h4 class="h5 offcanvas-title">All filters</h4>
+        <button class="btn-close" type="button" data-bs-dismiss="offcanvas" aria-label="Close"></button>
       </div>
-      <div class="col-md-5 text-md-end mt-3 mt-md-0">
-        <div class="d-inline-flex align-items-center gap-2">
-          <span class="fs-sm text-body-secondary">Sort by</span>
-          <select class="form-select form-select-sm" style="min-width: 170px;">
-            <option selected>Newest first</option>
-            <option>Price: Low to High</option>
-            <option>Price: High to Low</option>
-            <option>Highest rated</option>
-          </select>
-        </div>
-      </div>
-    </div>
 
-    <div class="row g-4">
-      {{-- Filters on the right for more breathing room --}}
-      <aside class="col-lg-4 col-xxl-3 order-lg-2">
-        <div class="bg-body border rounded-4 shadow-sm p-3 p-lg-4 position-sticky" style="top: 92px;">
-          <div class="d-flex align-items-center justify-content-between mb-3">
-            <h6 class="mb-0">Filters</h6>
-            <button class="btn btn-sm btn-link px-0 fs-sm text-decoration-none">Reset</button>
-          </div>
-
-          <div class="mb-3">
-            <label class="form-label fs-sm text-body-secondary">Search</label>
-            <input type="search" class="form-control" placeholder="Search by area or title">
-          </div>
-
-          <div class="mb-3">
-            <label class="form-label fs-sm text-body-secondary">Location</label>
-            <select class="form-select">
-              <option selected>Accra</option>
-              <option>Kumasi</option>
-              <option>Tema</option>
-              <option>Takoradi</option>
-            </select>
-          </div>
-
-          <div class="mb-3">
-            <label class="form-label fs-sm text-body-secondary">Property type</label>
-            @php $types = ['Apartments','Houses','Shortlets','Commercial']; @endphp
-            @foreach($types as $index => $type)
-              <div class="form-check">
-                <input class="form-check-input" type="checkbox" id="type-{{ $index }}" @checked($index === 0)>
-                <label class="form-check-label fs-sm" for="type-{{ $index }}">{{ $type }}</label>
-              </div>
-            @endforeach
-          </div>
-
-          <div class="mb-3">
-            <label class="form-label fs-sm text-body-secondary">Price range (GHS)</label>
-            <div class="row g-2">
-              <div class="col-6"><input type="number" class="form-control form-control-sm" placeholder="Min"></div>
-              <div class="col-6"><input type="number" class="form-control form-control-sm" placeholder="Max"></div>
+      <!-- Body (Filter inputs) -->
+      <div class="offcanvas-body pt-2 pb-3 px-sm-5">
+        <div class="row row-cols-1 row-cols-md-2 g-4 pb-3 mb-3">
+          <div class="col">
+            <h6>Choose your location</h6>
+            <div class="position-relative w-100">
+              <i class="fi-map-pin position-absolute top-50 start-0 translate-middle-y z-1 ms-3"></i>
+              <input type="search" class="form-control form-icon-start" value="New York, Brooklyn" placeholder="Search for location">
             </div>
           </div>
-
-          <div class="mb-3">
-            <label class="form-label fs-sm text-body-secondary">Bedrooms</label>
-            <select class="form-select form-select-sm">
-              <option selected>Any</option>
-              <option>1+</option>
-              <option>2+</option>
-              <option>3+</option>
-              <option>4+</option>
-            </select>
-          </div>
-
-          <div class="mb-3">
-            <label class="form-label fs-sm text-body-secondary">Amenities</label>
-            @php $amenities = ['Wi‑Fi','Pool','Backup power','Parking']; @endphp
-            @foreach($amenities as $index => $amenity)
-              <div class="form-check">
-                <input class="form-check-input" type="checkbox" id="amenity-{{ $index }}" @checked($index === 0)>
-                <label class="form-check-label fs-sm" for="amenity-{{ $index }}">{{ $amenity }}</label>
+          <div class="col">
+            <h6>Home type</h6>
+            <div class="row g-3">
+              <div class="col-5">
+                <select class="form-select" data-select="{&quot;removeItemButton&quot;: false}" aria-label="Rent or sale select">
+                  <option value="For rent">For rent</option>
+                  <option value="For sale">For sale</option>
+                </select>
               </div>
-            @endforeach
-          </div>
-
-          <button class="btn btn-primary w-100">
-            <i class="fi-search me-2"></i>Apply filters
-          </button>
-        </div>
-      </aside>
-
-      {{-- Results --}}
-      <div class="col-lg-8 col-xxl-9 order-lg-1">
-        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
-          <span class="fs-sm text-body-secondary">Showing <strong>12</strong> of <strong>148</strong> properties</span>
-          <div class="d-flex gap-2">
-            <span class="chip">Beachfront</span>
-            <span class="chip">Serviced apartments</span>
-            <span class="chip">Gated communities</span>
-          </div>
-        </div>
-
-        <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 row-cols-xxl-4 g-4 g-xxl-5">
-          @php
-            $cards = [
-              ['img' => 'assets/img/listings/real-estate/01.jpg', 'tag' => 'New', 'status' => 'Featured', 'badge' => 'For rent', 'title' => '$2,750', 'subtitle' => '929 Hart St, Brooklyn, NY 11237', 'area' => '108 sq.m', 'stats' => ['3','2','1']],
-              ['img' => 'assets/img/listings/real-estate/featured/02.jpg', 'tag' => 'New', 'status' => 'Featured', 'badge' => 'For rent', 'title' => '$1,890', 'subtitle' => '3811 Ditmars Blvd Astoria, NY 11105', 'area' => '75 sq.m', 'stats' => ['2','1','1']],
-              ['img' => 'assets/img/listings/real-estate/featured/01.jpg', 'tag' => 'Verified', 'status' => 'Featured', 'badge' => 'For rent', 'title' => '$1,250', 'subtitle' => '444 Park Ave, Brooklyn, NY 11205', 'area' => '54 sq.m', 'stats' => ['1','1','0']],
-              ['img' => 'assets/img/listings/real-estate/featured/03.jpg', 'tag' => 'New', 'status' => 'Hot', 'badge' => 'For rent', 'title' => '$1,620', 'subtitle' => '40 S 9th St, Brooklyn, NY 11249', 'area' => '65 sq.m', 'stats' => ['2','1','1']],
-              ['img' => 'assets/img/listings/real-estate/07.jpg', 'tag' => 'Verified', 'status' => 'New', 'badge' => 'For sale', 'title' => '$475,000', 'subtitle' => '929 Hart St, Brooklyn, NY 11237', 'area' => '108 sq.m', 'stats' => ['3','2','1']],
-              ['img' => 'assets/img/listings/real-estate/02.jpg', 'tag' => 'New', 'status' => 'Good', 'badge' => 'For rent', 'title' => '$1,320', 'subtitle' => '517 82nd St, Brooklyn, NY 11209', 'area' => '45 sq.m', 'stats' => ['1','1','0']],
-              ['img' => 'assets/img/listings/real-estate/06.jpg', 'tag' => 'Verified', 'status' => 'Prime', 'badge' => 'For rent', 'title' => '$1,490', 'subtitle' => '123 Bedford Avenue, Brooklyn, NY 11211', 'area' => '80 sq.m', 'stats' => ['2','1','1']],
-              ['img' => 'assets/img/listings/real-estate/04.jpg', 'tag' => 'New', 'status' => 'Good', 'badge' => 'For rent', 'title' => '$3,860', 'subtitle' => '456 Court Street, Brooklyn, NY 11231', 'area' => '130 sq.m', 'stats' => ['3','2','2']],
-            ];
-          @endphp
-
-          @foreach($cards as $card)
-            <div class="col">
-              <article class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden property-card">
-                <div class="position-relative" style="aspect-ratio: 4/3;">
-                  <img src="{{ asset($card['img']) }}" alt="Property">
-                  <div class="position-absolute top-0 start-0 z-1 m-2 d-flex gap-2">
-                    <span class="badge bg-body text-body-emphasis shadow-sm">{{ $card['tag'] }}</span>
-                    <span class="badge bg-primary-subtle text-primary-emphasis shadow-sm">{{ $card['status'] }}</span>
-                  </div>
-                  <button type="button" class="btn btn-sm btn-icon btn-light border-0 rounded-circle position-absolute top-0 end-0 m-2" aria-label="Add to wishlist">
-                    <i class="fi-heart fs-sm"></i>
+              <div class="col-7">
+                <div class="dropdown w-100">
+                  <button type="button" class="btn btn-outline-secondary dropdown-toggle justify-content-between w-100 text-body fw-normal px-3" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-haspopup="true" aria-expanded="false">
+                    <i class="fi-home fs-base me-2"></i>
+                    Home type <span class="ms-1 me-auto" id="typeCountOffcanvas"></span>
                   </button>
-                  <div class="position-absolute bottom-0 start-50 translate-middle-x d-flex gap-2 pb-2">
-                    <span class="badge bg-body-secondary rounded-pill">•</span>
-                    <span class="badge bg-body-secondary rounded-pill">•</span>
-                    <span class="badge bg-body-secondary rounded-pill">•</span>
+                  <div class="dropdown-menu w-100 p-3" style="--fn-dropdown-min-width: 0">
+                    <div class="d-flex flex-column gap-2">
+                      <div class="form-check m-0">
+                        <input type="checkbox" class="form-check-input fs-base" id="apartments-offcanvas" checked="" onclick="updateFilterCount('typeCountOffcanvas')" data-count-id="typeCountOffcanvas">
+                        <label for="apartments-offcanvas" class="form-check-label d-flex align-items-end">
+                          Apartments
+                          <span class="fs-xs text-body-secondary ps-2 ms-auto">621</span>
+                        </label>
+                      </div>
+                      <div class="form-check m-0">
+                        <input type="checkbox" class="form-check-input fs-base" id="houses-offcanvas" onclick="updateFilterCount('typeCountOffcanvas')" data-count-id="typeCountOffcanvas">
+                        <label for="houses-offcanvas" class="form-check-label d-flex align-items-end">
+                          Houses
+                          <span class="fs-xs text-body-secondary ps-2 ms-auto">157</span>
+                        </label>
+                      </div>
+                      <div class="form-check m-0">
+                        <input type="checkbox" class="form-check-input fs-base" id="condos-offcanvas" onclick="updateFilterCount('typeCountOffcanvas')" data-count-id="typeCountOffcanvas">
+                        <label for="condos-offcanvas" class="form-check-label d-flex align-items-end">
+                          Condos
+                          <span class="fs-xs text-body-secondary ps-2 ms-auto">283</span>
+                        </label>
+                      </div>
+                      <div class="form-check m-0">
+                        <input type="checkbox" class="form-check-input fs-base" id="townhomes-offcanvas" onclick="updateFilterCount('typeCountOffcanvas')" data-count-id="typeCountOffcanvas">
+                        <label for="townhomes-offcanvas" class="form-check-label d-flex align-items-end">
+                          Townhomes
+                          <span class="fs-xs text-body-secondary ps-2 ms-auto">346</span>
+                        </label>
+                      </div>
+                    </div>
                   </div>
                 </div>
-                <div class="card-body p-3">
-                  <span class="badge text-body-emphasis bg-body-secondary mb-2">{{ $card['badge'] }}</span>
-                  <h3 class="fs-5 fw-semibold mb-1">{{ $card['title'] }}</h3>
-                  <p class="fs-sm text-body-secondary mb-2">{{ $card['subtitle'] }}</p>
-                  <div class="h6 fs-sm mb-3">{{ $card['area'] }}</div>
-                  <div class="d-flex gap-3 fs-sm text-body-secondary">
-                    <span class="d-inline-flex align-items-center gap-1">{{ $card['stats'][0] }}<i class="fi-bed-single text-secondary-emphasis"></i></span>
-                    <span class="d-inline-flex align-items-center gap-1">{{ $card['stats'][1] }}<i class="fi-shower text-secondary-emphasis"></i></span>
-                    <span class="d-inline-flex align-items-center gap-1">{{ $card['stats'][2] }}<i class="fi-car-garage text-secondary-emphasis"></i></span>
-                  </div>
-                </div>
-              </article>
+              </div>
             </div>
-          @endforeach
+          </div>
         </div>
+        <div class="row row-cols-1 row-cols-md-2 g-4 pb-3 mb-3">
+          <div class="col">
+            <h6>Price per month, $</h6>
+            <div class="d-flex align-items-center">
+              <input type="number" class="form-control w-50" min="0" step="50" placeholder="Min">
+              <i class="fi-minus mx-2"></i>
+              <input type="number" class="form-control w-50" step="50" placeholder="Max">
+            </div>
+          </div>
+          <div class="col">
+            <h6>Square metres</h6>
+            <div class="d-flex align-items-center">
+              <input type="number" class="form-control w-50" min="0" step="10" placeholder="Min">
+              <i class="fi-minus mx-2"></i>
+              <input type="number" class="form-control w-50" step="10" placeholder="Max">
+            </div>
+          </div>
+        </div>
+        <div class="row row-cols-1 row-cols-md-2 g-4 pb-3 mb-3">
+          <div class="col">
+            <h6>Bedrooms</h6>
+            <div class="nav nav-pills gap-2">
+              <div>
+                <input type="radio" class="btn-check" id="bedrooms-any" name="bedrooms" checked="">
+                <label class="nav-link rounded" for="bedrooms-any">Any</label>
+              </div>
+              <div>
+                <input type="radio" class="btn-check" id="bedrooms-1" name="bedrooms">
+                <label class="nav-link rounded" for="bedrooms-1">1</label>
+              </div>
+              <div>
+                <input type="radio" class="btn-check" id="bedrooms-2" name="bedrooms">
+                <label class="nav-link rounded" for="bedrooms-2">2</label>
+              </div>
+              <div>
+                <input type="radio" class="btn-check" id="bedrooms-3" name="bedrooms">
+                <label class="nav-link rounded" for="bedrooms-3">3</label>
+              </div>
+              <div>
+                <input type="radio" class="btn-check" id="bedrooms-4" name="bedrooms">
+                <label class="nav-link rounded" for="bedrooms-4">4+</label>
+              </div>
+            </div>
+          </div>
+          <div class="col">
+            <h6>Bathrooms</h6>
+            <div class="nav nav-pills gap-2">
+              <div>
+                <input type="radio" class="btn-check" id="bathrooms-any" name="bathrooms" checked="">
+                <label class="nav-link rounded" for="bathrooms-any">Any</label>
+              </div>
+              <div>
+                <input type="radio" class="btn-check" id="bathrooms-1" name="bathrooms">
+                <label class="nav-link rounded" for="bathrooms-1">1</label>
+              </div>
+              <div>
+                <input type="radio" class="btn-check" id="bathrooms-2" name="bathrooms">
+                <label class="nav-link rounded" for="bathrooms-2">2</label>
+              </div>
+              <div>
+                <input type="radio" class="btn-check" id="bathrooms-3" name="bathrooms">
+                <label class="nav-link rounded" for="bathrooms-3">3</label>
+              </div>
+              <div>
+                <input type="radio" class="btn-check" id="bathrooms-4" name="bathrooms">
+                <label class="nav-link rounded" for="bathrooms-4">4+</label>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="row row-cols-1 row-cols-md-2 g-4 pb-3 mb-3">
+          <div class="col">
+            <h6>Year built</h6>
+            <div class="d-flex align-items-center">
+              <div class="w-50">
+                <select class="form-select" data-select="" aria-label="Min year built select">
+                  <option value="">Min</option>
+                  <option value="2024">2024</option>
+                  <option value="2023">2023</option>
+                  <option value="2022">2022</option>
+                  <option value="2021">2021</option>
+                  <option value="2020">2020</option>
+                  <option value="2019">2019</option>
+                  <option value="2018">2018</option>
+                  <option value="2017">2017</option>
+                  <option value="2016">2016</option>
+                  <option value="2015">2015</option>
+                  <option value="2014">2014</option>
+                  <option value="2013">2013</option>
+                  <option value="2012">2012</option>
+                  <option value="2011">2011</option>
+                  <option value="2010">2010</option>
+                </select>
+              </div>
+              <i class="fi-minus mx-2"></i>
+              <div class="w-50">
+                <select class="form-select" data-select="" aria-label="Max year built select">
+                  <option value="">Max</option>
+                  <option value="2024">2024</option>
+                  <option value="2023">2023</option>
+                  <option value="2022">2022</option>
+                  <option value="2021">2021</option>
+                  <option value="2020">2020</option>
+                  <option value="2019">2019</option>
+                  <option value="2018">2018</option>
+                  <option value="2017">2017</option>
+                  <option value="2016">2016</option>
+                  <option value="2015">2015</option>
+                  <option value="2014">2014</option>
+                  <option value="2013">2013</option>
+                  <option value="2012">2012</option>
+                  <option value="2011">2011</option>
+                  <option value="2010">2010</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+        <h6>Amenities</h6>
+        <div class="row row-cols-2 gy-2 gx-4 pb-3 mb-3">
+          <div class="col vstack gap-2">
+            <div class="form-check m-0">
+              <input type="checkbox" class="form-check-input" id="ac" checked="">
+              <label for="ac" class="form-check-label">Air conditioning</label>
+            </div>
+            <div class="form-check m-0">
+              <input type="checkbox" class="form-check-input" id="balcony">
+              <label for="balcony" class="form-check-label">Balcony</label>
+            </div>
+            <div class="form-check m-0">
+              <input type="checkbox" class="form-check-input" id="garage">
+              <label for="garage" class="form-check-label">Garage</label>
+            </div>
+            <div class="form-check m-0">
+              <input type="checkbox" class="form-check-input" id="gym">
+              <label for="gym" class="form-check-label">Gym</label>
+            </div>
+            <div class="form-check m-0">
+              <input type="checkbox" class="form-check-input" id="parking" checked="">
+              <label for="parking" class="form-check-label">Parking</label>
+            </div>
+          </div>
+          <div class="col vstack gap-2">
+            <div class="form-check m-0">
+              <input type="checkbox" class="form-check-input" id="pool">
+              <label for="pool" class="form-check-label">Pool</label>
+            </div>
+            <div class="form-check m-0">
+              <input type="checkbox" class="form-check-input" id="cctv">
+              <label for="cctv" class="form-check-label">Security cameras</label>
+            </div>
+            <div class="form-check m-0">
+              <input type="checkbox" class="form-check-input" id="wifi" checked="">
+              <label for="wifi" class="form-check-label">WiFi</label>
+            </div>
+            <div class="form-check m-0">
+              <input type="checkbox" class="form-check-input" id="laundry">
+              <label for="laundry" class="form-check-label">Laundry</label>
+            </div>
+            <div class="form-check m-0">
+              <input type="checkbox" class="form-check-input" id="dishwasher">
+              <label for="dishwasher" class="form-check-label">Dishwasher</label>
+            </div>
+          </div>
+        </div>
+        <div class="row row-cols-2 g-4">
+          <div class="col">
+            <h6>Pets</h6>
+            <div class="vstack gap-2">
+              <div class="form-check m-0">
+                <input type="checkbox" class="form-check-input" id="cats" checked="">
+                <label for="cats" class="form-check-label">Cats allowed</label>
+              </div>
+              <div class="form-check m-0">
+                <input type="checkbox" class="form-check-input" id="dogs">
+                <label for="dogs" class="form-check-label">Dogs allowed</label>
+              </div>
+            </div>
+          </div>
+          <div class="col">
+            <h6>Additional options</h6>
+            <div class="vstack gap-2">
+              <div class="form-check m-0">
+                <input type="checkbox" class="form-check-input" id="verified">
+                <label for="verified" class="form-check-label">Verified</label>
+              </div>
+              <div class="form-check m-0">
+                <input type="checkbox" class="form-check-input" id="featured">
+                <label for="featured" class="form-check-label">Featured</label>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
-        {{-- Pagination --}}
-        <nav class="pt-4 mt-3" aria-label="Properties pagination">
-          <ul class="pagination pagination-lg justify-content-center justify-content-lg-start">
-            <li class="page-item disabled"><span class="page-link"><i class="fi-chevron-left"></i></span></li>
-            <li class="page-item active" aria-current="page"><span class="page-link">1</span></li>
-            <li class="page-item"><a class="page-link" href="#!">2</a></li>
-            <li class="page-item"><a class="page-link" href="#!">3</a></li>
-            <li class="page-item"><span class="page-link pe-none">...</span></li>
-            <li class="page-item"><a class="page-link" href="#!">8</a></li>
-            <li class="page-item"><a class="page-link" href="#!" aria-label="Next"><i class="fi-chevron-right"></i></a></li>
-          </ul>
-        </nav>
+      <!-- Footer: Action buttons -->
+      <div class="d-flex justify-content-between align-items-center p-4 px-sm-5">
+        <div class="nav">
+          <a class="nav-link fs-xs text-decoration-underline text-nowrap p-0" href="#!">Clear all</a>
+        </div>
+        <button type="button" class="btn btn-primary" data-bs-dismiss="offcanvas">See 156 properties</button>
       </div>
     </div>
-  </section>
-</div>
+
+
+    <!-- Page content -->
+    <div class="d-lg-flex">
+      <div class="d-lg-flex flex-grow-1">
+
+        <!-- Interactive map that turns into offcanvas on screens < 992px wide (lg breakpoint) -->
+        <div class="map-section">
+          <div class="offcanvas-lg offcanvas-start d-flex flex-column w-100 h-100" id="map">
+            <div class="offcanvas-body position-relative h-100 p-0">
+              <button type="button" class="btn btn-icon btn-outline-secondary bg-body shadow position-absolute top-0 z-5 mt-2 d-lg-none" style="right: 0; margin-right: 8px; z-index: 500" data-bs-dismiss="offcanvas" data-bs-target="#map" aria-label="Close">
+                <i class="fi-close fs-lg"></i>
+              </button>
+              <div class="position-absolute top-0 start-0 w-100 h-100 bg-body-tertiary" data-map="{
+                &quot;tileLayer&quot;: &quot;https://api.maptiler.com/maps/pastel/{z}/{x}/{y}.png?key=rqrCHwDtUZCUA2fCt3vV&quot;,
+                &quot;attribution&quot;: &quot;© Maptiler © OpenStreetMap contributors&quot;,
+                &quot;zoom&quot;: 15,
+                &quot;tileSize&quot;: 512,
+                &quot;zoomOffset&quot;: -1,
+                &quot;templates&quot;: {
+                  &quot;marker&quot;: &quot;<div class=\&quot;map-marker\&quot;><i class=\&quot;fi-map-pin-filled text-primary fs-4\&quot;></i><span class=\&quot;map-marker-price\&quot;>$@{{price}}</span></div>&quot;,
+                  &quot;popup&quot;: &quot;<div class=\&quot;card bg-transparent border-0\&quot; data-bs-theme=\&quot;light\&quot;><div class=\&quot;card-img-top position-relative bg-body-tertiary overflow-hidden\&quot;><div class=\&quot;ratio d-block\&quot; style=\&quot;--fn-aspect-ratio: calc(248 / 362 * 100%)\&quot;><img src=\&quot;@{{image}}\&quot; alt=\&quot;Image\&quot;></div></div><div class=\&quot;card-body p-3\&quot;><div class=\&quot;h5 mb-2\&quot;>$@{{price}}</div><h3 class=\&quot;fs-sm fw-normal text-body mb-2\&quot;><a class=\&quot;stretched-link text-body\&quot; href=\&quot;#\&quot;>@{{address}}</a></h3><div class=\&quot;h6 fs-sm mb-0\&quot;>@{{area}} sq.m</div></div><div class=\&quot;card-footer d-flex gap-2 border-0 bg-transparent pt-0 pb-3 px-3 mt-n1\&quot;><div class=\&quot;d-flex align-items-center fs-sm gap-1 me-1\&quot;>@{{bedrooms}}<i class=\&quot;fi-bed-single fs-base text-secondary-emphasis\&quot;></i></div><div class=\&quot;d-flex align-items-center fs-sm gap-1 me-1\&quot;>@{{bathrooms}}<i class=\&quot;fi-shower fs-base text-secondary-emphasis\&quot;></i></div><div class=\&quot;d-flex align-items-center fs-sm gap-1 me-1\&quot;>@{{garage}}<i class=\&quot;fi-car-garage fs-base text-secondary-emphasis\&quot;></i></div></div></div>&quot;
+                }
+              }" data-map-markers="{{ route('properties.map') }}"></div>
+            </div>
+          </div>
+        </div>
+
+
+        <!-- Listings with filters -->
+        <div class="listings-section px-3 px-lg-4 pe-xxl-5">
+
+          <!-- Sticky filters -->
+          <div class="sticky-top bg-body mb-2 mb-sm-1">
+            <div class="propsgh-sticky-spacer"></div>
+            <div class="d-flex gap-2 gap-sm-3 py-2 py-sm-3">
+              <div class="position-relative w-100">
+                <i class="fi-map-pin position-absolute top-50 start-0 translate-middle-y z-1 ms-3"></i>
+                <input type="search" class="form-control form-icon-start" value="New York, Brooklyn" placeholder="Search for location">
+              </div>
+              <div class="flex-shrink-0 d-none d-md-block" style="width: 140px">
+                <select class="form-select" data-select="{&quot;removeItemButton&quot;: false}" aria-label="Rent or sale select">
+                  <option value="For rent">For rent</option>
+                  <option value="For sale">For sale</option>
+                </select>
+              </div>
+              <div class="dropdown flex-shrink-0 d-none d-xxl-block" style="width: 180px">
+                <button type="button" class="btn btn-outline-secondary dropdown-toggle justify-content-between w-100 text-body fw-normal px-3" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-haspopup="true" aria-expanded="false">
+                  <i class="fi-home fs-base me-2"></i>
+                  Home type <span class="ms-1 me-auto" id="typeCount"></span>
+                </button>
+                <div class="dropdown-menu w-100 p-3" style="--fn-dropdown-min-width: 0">
+                  <div class="d-flex flex-column gap-2">
+                    <div class="form-check m-0">
+                      <input type="checkbox" class="form-check-input fs-base" id="apartments" checked="" onclick="updateFilterCount('typeCount')" data-count-id="typeCount">
+                      <label for="apartments" class="form-check-label d-flex align-items-end">
+                        Apartments
+                        <span class="fs-xs text-body-secondary ps-2 ms-auto">621</span>
+                      </label>
+                    </div>
+                    <div class="form-check m-0">
+                      <input type="checkbox" class="form-check-input fs-base" id="houses" onclick="updateFilterCount('typeCount')" data-count-id="typeCount">
+                      <label for="houses" class="form-check-label d-flex align-items-end">
+                        Houses
+                        <span class="fs-xs text-body-secondary ps-2 ms-auto">157</span>
+                      </label>
+                    </div>
+                    <div class="form-check m-0">
+                      <input type="checkbox" class="form-check-input fs-base" id="condos" onclick="updateFilterCount('typeCount')" data-count-id="typeCount">
+                      <label for="condos" class="form-check-label d-flex align-items-end">
+                        Condos
+                        <span class="fs-xs text-body-secondary ps-2 ms-auto">283</span>
+                      </label>
+                    </div>
+                    <div class="form-check m-0">
+                      <input type="checkbox" class="form-check-input fs-base" id="townhomes" onclick="updateFilterCount('typeCount')" data-count-id="typeCount">
+                      <label for="townhomes" class="form-check-label d-flex align-items-end">
+                        Townhomes
+                        <span class="fs-xs text-body-secondary ps-2 ms-auto">346</span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Map offcanvas toggle button visible on screens < 992px wide (lg breakpoint) -->
+              <button type="button" class="btn btn-outline-dark pe-3 d-lg-none" data-bs-toggle="offcanvas" data-bs-target="#map" aria-controls="map">
+                <i class="fi-map fs-base me-2 ms-n1"></i>
+                <span class="d-none d-sm-inline">Show on map</span>
+                <span class="d-sm-none">Map</span>
+              </button>
+
+              <!-- Filters offcanvas toggle button -->
+              <div class="position-relative">
+                <span class="badge text-bg-primary rounded-pill position-absolute top-0 start-100 translate-middle mt-1 ms-n1">3</span>
+                <button type="button" class="btn btn-icon btn-dark" data-bs-toggle="offcanvas" data-bs-target="#filters" aria-controls="filters" aria-label="Toogle filters">
+                  <i class="fi-sliders fs-base"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+
+          <!-- Sort selector -->
+          <div class="d-flex align-items-center gap-2 gap-sm-3 mb-3">
+            <div class="fs-sm text-nowrap">Showing {{ $properties->count() }} results</div>
+            <div class="position-relative ms-auto" style="width: 150px">
+              <i class="fi-sort position-absolute top-50 start-0 translate-middle-y z-2"></i>
+              <select class="form-select border-0 rounded-0 ps-4 pe-1" data-select="{
+                &quot;removeItemButton&quot;: false,
+                &quot;classNames&quot;: {
+                  &quot;containerInner&quot;: [&quot;form-select&quot;, &quot;border-0&quot;, &quot;rounded-0&quot;, &quot;ps-4&quot;, &quot;pe-1&quot;]
+                }
+              }">
+              <option value="Price Asc">Price Asc</option>
+              <option value="Price Desc">Price Desc</option>
+              <option value="Updated">Updated</option>
+              <option value="Video">Video</option>
+              <option value="3D Tour">3D Tour</option>
+              </select>
+            </div>
+          </div>
+
+
+          <!-- Listings grid -->
+          <div class="row row-cols-1 row-cols-sm-2 g-4">
+            @forelse ($properties as $property)
+              @php
+                $images = $property->images->count() ? $property->images : collect();
+                $detailsUrl = route('properties.show', $property);
+              @endphp
+              <div class="col">
+                <article class="card hover-effect-opacity h-100" data-map-bind-to-marker="{{ $loop->iteration }}">
+                  <div class="card-img-top position-relative bg-body-tertiary overflow-hidden">
+                    <div class="swiper z-2" data-swiper="{
+                      &quot;pagination&quot;: {
+                        &quot;el&quot;: &quot;.swiper-pagination&quot;
+                      },
+                      &quot;navigation&quot;: {
+                        &quot;prevEl&quot;: &quot;.btn-prev&quot;,
+                        &quot;nextEl&quot;: &quot;.btn-next&quot;
+                      },
+                      &quot;breakpoints&quot;: {
+                        &quot;991&quot;: {
+                          &quot;allowTouchMove&quot;: false
+                        }
+                      }
+                    }">
+                      <a class="swiper-wrapper" href="{{ $detailsUrl }}">
+                        @forelse ($images->take(3) as $image)
+                          <div class="swiper-slide">
+                            <div class="ratio d-block" style="--fn-aspect-ratio: calc(248 / 362 * 100%)">
+                              <img src="{{ asset($image->path) }}" alt="{{ $property->title }}">
+                              <span class="position-absolute top-0 start-0 w-100 h-100 z-1" style="background: linear-gradient(180deg, rgba(0,0,0, 0) 0%, rgba(0,0,0, .11) 100%)"></span>
+                            </div>
+                          </div>
+                        @empty
+                          <div class="swiper-slide">
+                            <div class="ratio d-block" style="--fn-aspect-ratio: calc(248 / 362 * 100%)">
+                              <img src="{{ asset('assets/img/listings/real-estate/01.jpg') }}" alt="{{ $property->title }}">
+                              <span class="position-absolute top-0 start-0 w-100 h-100 z-1" style="background: linear-gradient(180deg, rgba(0,0,0, 0) 0%, rgba(0,0,0, .11) 100%)"></span>
+                            </div>
+                          </div>
+                        @endforelse
+                      </a>
+                      <div class="d-flex flex-column gap-2 align-items-start position-absolute top-0 start-0 z-1 pt-1 pt-sm-0 ps-1 ps-sm-0 mt-2 mt-sm-3 ms-2 ms-sm-3">
+                        @if ($property->is_verified)
+                          <span class="badge text-bg-info d-inline-flex align-items-center">
+                            Verified
+                            <i class="fi-shield ms-1"></i>
+                          </span>
+                        @endif
+                        @if ($property->is_featured)
+                          <span class="badge text-bg-info">Featured</span>
+                        @endif
+                        @if ($property->is_new)
+                          <span class="badge text-bg-primary">New</span>
+                        @endif
+                      </div>
+                      <div class="position-absolute top-0 end-0 z-1 hover-effect-target opacity-0 pt-1 pt-sm-0 pe-1 pe-sm-0 mt-2 mt-sm-3 me-2 me-sm-3">
+                        <button type="button" class="btn btn-sm btn-icon btn-light bg-light border-0 rounded-circle animate-pulse" aria-label="Add to wishlist">
+                          <i class="fi-heart animate-target fs-sm"></i>
+                        </button>
+                      </div>
+                      <div class="position-absolute top-50 start-0 z-1 translate-middle-y d-none d-lg-block hover-effect-target opacity-0 ms-3">
+                        <button type="button" class="btn btn-sm btn-prev btn-icon btn-light bg-light rounded-circle animate-slide-start" aria-label="Prev">
+                          <i class="fi-chevron-left fs-lg animate-target"></i>
+                        </button>
+                      </div>
+                      <div class="position-absolute top-50 end-0 z-1 translate-middle-y d-none d-lg-block hover-effect-target opacity-0 me-3">
+                        <button type="button" class="btn btn-sm btn-next btn-icon btn-light bg-light rounded-circle animate-slide-end" aria-label="Next">
+                          <i class="fi-chevron-right fs-lg animate-target"></i>
+                        </button>
+                      </div>
+                      <div class="swiper-pagination bottom-0 mb-2" data-bs-theme="light"></div>
+                    </div>
+                  </div>
+                  <div class="card-body p-3">
+                    <div class="h5 mb-2">${{ number_format($property->price) }}</div>
+                    <h3 class="fs-sm fw-normal text-body mb-2">
+                      <a class="stretched-link text-body" href="{{ $detailsUrl }}">{{ $property->title }}</a>
+                    </h3>
+                    <div class="h6 fs-sm mb-0">{{ $property->area ?? 0 }} sq.m</div>
+                  </div>
+                  <div class="card-footer d-flex gap-2 border-0 bg-transparent pt-0 pb-3 px-3 mt-n1">
+                    <div class="d-flex align-items-center fs-sm gap-1 me-1">
+                      {{ $property->bedrooms }}<i class="fi-bed-single fs-base text-secondary-emphasis"></i>
+                    </div>
+                    <div class="d-flex align-items-center fs-sm gap-1 me-1">
+                      {{ $property->bathrooms }}<i class="fi-shower fs-base text-secondary-emphasis"></i>
+                    </div>
+                    <div class="d-flex align-items-center fs-sm gap-1 me-1">
+                      {{ $property->garage_spaces }}<i class="fi-car-garage fs-base text-secondary-emphasis"></i>
+                    </div>
+                  </div>
+                </article>
+              </div>
+            @empty
+              <div class="col-12">
+                <div class="text-center text-body-secondary py-5">No properties found.</div>
+              </div>
+            @endforelse
+          </div>
+
+          <!-- Pagination -->
+          <nav class="pt-3 mt-3" aria-label="Listings pagination">
+            <ul class="pagination pagination-lg justify-content-center">
+              <li class="page-item active" aria-current="page">
+                <span class="page-link">
+                  1
+                  <span class="visually-hidden">(current)</span>
+                </span>
+              </li>
+              <li class="page-item">
+                <a class="page-link" href="#!">2</a>
+              </li>
+              <li class="page-item">
+                <a class="page-link" href="#!">3</a>
+              </li>
+              <li class="page-item">
+                <a class="page-link" href="#!">4</a>
+              </li>
+              <li class="page-item">
+                <a class="page-link" href="#!">5</a>
+              </li>
+              <li class="page-item">
+                <span class="page-link px-2 pe-none">...</span>
+              </li>
+              <li class="page-item">
+                <a class="page-link" href="#!">16</a>
+              </li>
+            </ul>
+          </nav>
+
+          <!-- Footer -->
+          <footer class="text-center pt-4 pt-md-5">
+            <hr class="pb-4">
+            <a class="d-inline-flex align-items-center text-dark-emphasis text-decoration-none mb-4" href="#">
+              <span class="flex-shrink-0 text-primary rtl-flip me-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="35" height="34"><path d="M34.5 16.894v10.731c0 3.506-2.869 6.375-6.375 6.375H17.5h-.85C7.725 33.575.5 26.138.5 17c0-9.35 7.65-17 17-17s17 7.544 17 16.894z" fill="currentColor"></path><g fill-rule="evenodd"><path d="M17.5 13.258c-3.101 0-5.655 2.554-5.655 5.655s2.554 5.655 5.655 5.655 5.655-2.554 5.655-5.655-2.554-5.655-5.655-5.655zm-9.433 5.655c0-5.187 4.246-9.433 9.433-9.433s9.433 4.246 9.433 9.433a9.36 9.36 0 0 1-1.569 5.192l2.397 2.397a1.89 1.89 0 0 1 0 2.671 1.89 1.89 0 0 1-2.671 0l-2.397-2.397a9.36 9.36 0 0 1-5.192 1.569c-5.187 0-9.433-4.246-9.433-9.433z" fill="#000" fill-opacity=".05"></path><g fill="#fff"><path d="M17.394 10.153c-3.723 0-6.741 3.018-6.741 6.741s3.018 6.741 6.741 6.741 6.741-3.018 6.741-6.741-3.018-6.741-6.741-6.741zM7.347 16.894A10.05 10.05 0 0 1 17.394 6.847 10.05 10.05 0 0 1 27.44 16.894 10.05 10.05 0 0 1 17.394 26.94 10.05 10.05 0 0 1 7.347 16.894z"></path><path d="M23.025 22.525c.645-.645 1.692-.645 2.337 0l3.188 3.188c.645.645.645 1.692 0 2.337s-1.692.645-2.337 0l-3.187-3.187c-.645-.646-.645-1.692 0-2.337z"></path></g></g><path d="M23.662 14.663c2.112 0 3.825-1.713 3.825-3.825s-1.713-3.825-3.825-3.825-3.825 1.713-3.825 3.825 1.713 3.825 3.825 3.825z" fill="#fff"></path><path fill-rule="evenodd" d="M23.663 8.429a2.41 2.41 0 0 0-2.408 2.408 2.41 2.41 0 0 0 2.408 2.408 2.41 2.41 0 0 0 2.408-2.408 2.41 2.41 0 0 0-2.408-2.408zm-5.242 2.408c0-2.895 2.347-5.242 5.242-5.242s5.242 2.347 5.242 5.242-2.347 5.242-5.242 5.242-5.242-2.347-5.242-5.242z" fill="currentColor"></path></svg>
+              </span>
+              <span class="fs-4 fw-semibold">Finder</span>
+            </a>
+            <ul class="list-inline justify-content-center gap-2">
+              <li class="me-3">
+                <div class="position-relative d-flex align-items-center">
+                  <i class="fi-mail fs-lg text-body me-2"></i>
+                  <a class="text-dark-emphasis text-decoration-none hover-effect-underline stretched-link" href="mailto:contact@example.com">contact@example.com</a>
+                </div>
+              </li>
+              <li>
+                <div class="position-relative d-flex align-items-center">
+                  <i class="fi-phone-call fs-lg text-body me-2"></i>
+                  <a class="text-dark-emphasis text-decoration-none hover-effect-underline stretched-link" href="tel:+15053753082">+1&nbsp;50&nbsp;537&nbsp;53&nbsp;082</a>
+                </div>
+              </li>
+            </ul>
+            <div class="d-flex justify-content-center pt-2 mt-3">
+              <a class="btn btn-icon fs-base btn-outline-secondary border-0" href="#!" data-bs-toggle="tooltip" data-bs-template="<div class=&quot;tooltip fs-xs mb-n2&quot; role=&quot;tooltip&quot;><div class=&quot;tooltip-inner bg-transparent text-body opacity-75 p-0&quot;></div></div>" title="Instagram" aria-label="Follow us on Instagram">
+                <i class="fi-instagram"></i>
+              </a>
+              <a class="btn btn-icon fs-base btn-outline-secondary border-0" href="#!" data-bs-toggle="tooltip" data-bs-template="<div class=&quot;tooltip fs-xs mb-n2&quot; role=&quot;tooltip&quot;><div class=&quot;tooltip-inner bg-transparent text-body opacity-75 p-0&quot;></div></div>" title="Facebook" aria-label="Follow us on Facebook">
+                <i class="fi-facebook"></i>
+              </a>
+              <a class="btn btn-icon fs-base btn-outline-secondary border-0" href="#!" data-bs-toggle="tooltip" data-bs-template="<div class=&quot;tooltip fs-xs mb-n2&quot; role=&quot;tooltip&quot;><div class=&quot;tooltip-inner bg-transparent text-body opacity-75 p-0&quot;></div></div>" title="X (Twitter)" aria-label="Follow us on X (Twitter)">
+                <i class="fi-x"></i>
+              </a>
+            </div>
+            <div class="py-4">
+              <p class="text-body-secondary fs-sm mb-0 mb-sm-2">© All rights reserved. Made by <a class="text-body fw-medium text-decoration-none hover-effect-underline" href="https://createx.studio/" target="_blank" rel="noreferrer">Createx Studio</a></p>
+            </div>
+          </footer>
+        </div>
+      </div>
+    </div>
+
+
+    
 @endsection
+
+@push('scripts')
+<script src="{{ asset('assets/vendor/leaflet/leaflet.js') }}"></script>
+<script src="{{ asset('assets/vendor/choices.js/choices.min.js') }}"></script>
+<script>
+  window.onload = () => {
+    updateFilterCount('typeCount');
+    updateFilterCount('typeCountOffcanvas');
+  };
+
+  const updateFilterCount = (countId) => {
+    const checkedCheckboxes = document.querySelectorAll(`[data-count-id="${countId}"]:checked`);
+    const countElement = document.getElementById(countId);
+    if (!countElement) return;
+    countElement.textContent = checkedCheckboxes.length ? `(${checkedCheckboxes.length})` : '';
+  };
+</script>
+@endpush
