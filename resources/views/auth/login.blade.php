@@ -62,80 +62,179 @@
     .login-shell .ls-stat-grid {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
-        gap: 0.85rem;
+        gap: 0.75rem;
     }
     .login-shell .ls-stat-card {
         background: rgba(255, 255, 255, 0.1);
-        backdrop-filter: blur(16px);
-        -webkit-backdrop-filter: blur(16px);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
         border: 1px solid rgba(255, 255, 255, 0.15);
-        border-radius: 1.1rem;
-        padding: 1.1rem 1rem;
+        border-radius: 1.15rem;
+        padding: 1.15rem 0.9rem;
         text-align: center;
-        transition: transform 0.3s ease, background 0.3s ease;
+        transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), background 0.3s ease, box-shadow 0.3s ease;
     }
     .login-shell .ls-stat-card:hover {
-        transform: translateY(-3px);
-        background: rgba(255, 255, 255, 0.16);
+        transform: translateY(-4px);
+        background: rgba(255, 255, 255, 0.18);
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+    }
+    .login-shell .ls-stat-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 0.65rem;
+        background: rgba(255, 255, 255, 0.12);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 0.5rem;
+        font-size: 0.9rem;
+        color: rgba(255, 255, 255, 0.8);
     }
     .login-shell .ls-stat-value {
-        font-size: 1.65rem;
+        font-size: 1.55rem;
         font-weight: 700;
         letter-spacing: -0.03em;
         line-height: 1.15;
         color: #ffffff;
     }
     .login-shell .ls-stat-label {
-        font-size: 0.72rem;
+        font-size: 0.68rem;
         text-transform: uppercase;
         letter-spacing: 0.1em;
-        color: rgba(255, 255, 255, 0.65);
-        margin-top: 0.3rem;
+        color: rgba(255, 255, 255, 0.55);
+        margin-top: 0.2rem;
+    }
+
+    /* Property preview card */
+    .login-shell .ls-property-preview {
+        background: rgba(255, 255, 255, 0.12);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        border-radius: 1.25rem;
+        padding: 1rem;
+        margin-top: 0.85rem;
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+        transition: transform 0.3s ease;
+    }
+    .login-shell .ls-property-preview:hover {
+        transform: translateY(-2px);
+    }
+    .login-shell .ls-property-thumb {
+        width: 72px;
+        height: 72px;
+        border-radius: 0.85rem;
+        object-fit: cover;
+        flex-shrink: 0;
+        border: 2px solid rgba(255, 255, 255, 0.15);
+    }
+    .login-shell .ls-property-info {
+        flex: 1;
+        min-width: 0;
+    }
+    .login-shell .ls-property-tag {
+        display: inline-block;
+        font-size: 0.6rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        padding: 0.15rem 0.5rem;
+        border-radius: 999px;
+        background: rgba(16, 185, 129, 0.25);
+        color: #6ee7b7;
+        margin-bottom: 0.3rem;
+    }
+    .login-shell .ls-property-name {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #fff;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .login-shell .ls-property-location {
+        font-size: 0.72rem;
+        color: rgba(255, 255, 255, 0.55);
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+        margin-top: 0.15rem;
+    }
+    .login-shell .ls-property-price {
+        font-size: 0.82rem;
+        font-weight: 700;
+        color: var(--ls-accent);
+        margin-top: 0.2rem;
     }
 
     /* Testimonial card */
     .login-shell .ls-testimonial {
         background: rgba(255, 255, 255, 0.08);
-        backdrop-filter: blur(14px);
-        -webkit-backdrop-filter: blur(14px);
-        border: 1px solid rgba(255, 255, 255, 0.12);
+        backdrop-filter: blur(18px);
+        -webkit-backdrop-filter: blur(18px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
         border-radius: 1.25rem;
-        padding: 1.35rem 1.5rem;
-        margin-top: 1.5rem;
+        padding: 1.25rem 1.35rem;
+        margin-top: 0.85rem;
+        position: relative;
+    }
+    .login-shell .ls-testimonial::before {
+        content: '\201C';
+        position: absolute;
+        top: 0.6rem;
+        left: 1rem;
+        font-size: 2.5rem;
+        line-height: 1;
+        color: rgba(255, 255, 255, 0.12);
+        font-family: Georgia, serif;
     }
     .login-shell .ls-testimonial-quote {
-        font-size: 0.92rem;
+        font-size: 0.88rem;
         line-height: 1.6;
-        color: rgba(255, 255, 255, 0.9);
+        color: rgba(255, 255, 255, 0.88);
         font-style: italic;
+        padding-left: 0.15rem;
     }
     .login-shell .ls-testimonial-author {
         display: flex;
         align-items: center;
-        gap: 0.65rem;
-        margin-top: 0.85rem;
+        gap: 0.6rem;
+        margin-top: 0.75rem;
     }
     .login-shell .ls-testimonial-avatar {
-        width: 36px;
-        height: 36px;
+        width: 38px;
+        height: 38px;
         border-radius: 50%;
         background: linear-gradient(135deg, var(--ls-accent), var(--ls-sky));
         display: flex;
         align-items: center;
         justify-content: center;
         font-weight: 700;
-        font-size: 0.8rem;
+        font-size: 0.78rem;
         color: #fff;
         flex-shrink: 0;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
     }
     .login-shell .ls-testimonial-name {
-        font-size: 0.82rem;
+        font-size: 0.8rem;
         font-weight: 600;
         color: #fff;
     }
     .login-shell .ls-testimonial-role {
-        font-size: 0.72rem;
-        color: rgba(255, 255, 255, 0.55);
+        font-size: 0.68rem;
+        color: rgba(255, 255, 255, 0.5);
+    }
+    .login-shell .ls-testimonial-stars {
+        display: flex;
+        gap: 2px;
+        margin-top: 0.15rem;
+    }
+    .login-shell .ls-testimonial-stars i {
+        font-size: 0.65rem;
+        color: var(--ls-accent);
     }
 
     /* ── Right: form panel ── */
@@ -227,42 +326,79 @@
     .login-shell .ls-card {
         background: var(--ls-surface);
         border: 1px solid var(--ls-border);
-        border-radius: 1.35rem;
-        padding: 1.75rem;
+        border-radius: 1.5rem;
+        padding: 2rem;
         box-shadow:
-            0 1px 3px rgba(15, 23, 42, 0.04),
-            0 12px 40px rgba(15, 23, 42, 0.06);
+            0 1px 2px rgba(15, 23, 42, 0.03),
+            0 8px 24px rgba(15, 23, 42, 0.06),
+            0 24px 48px rgba(15, 23, 42, 0.04);
         margin-top: 1.5rem;
+        position: relative;
+        overflow: hidden;
+    }
+    .login-shell .ls-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, var(--ls-sky), var(--ls-accent), var(--ls-sky));
+        border-radius: 1.5rem 1.5rem 0 0;
+    }
+    .login-shell .ls-card::after {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -30%;
+        width: 200px;
+        height: 200px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(14, 165, 233, 0.06), transparent 65%);
+        pointer-events: none;
     }
 
     /* Input styling */
     .login-shell .ls-input-group {
         margin-bottom: 1.25rem;
+        position: relative;
+        z-index: 1;
     }
     .login-shell .ls-input-group label {
-        display: block;
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
         font-size: 0.78rem;
         font-weight: 600;
         color: var(--ls-slate);
         margin-bottom: 0.4rem;
         letter-spacing: 0.02em;
     }
+    .login-shell .ls-input-group label i {
+        font-size: 0.8rem;
+        color: var(--ls-muted);
+        opacity: 0.7;
+    }
     .login-shell .ls-card .form-control {
         border-radius: 0.85rem;
-        border: 1.5px solid rgba(148, 163, 184, 0.4);
+        border: 1.5px solid rgba(148, 163, 184, 0.35);
         background: #f8fafc;
-        padding: 0.7rem 1rem;
+        padding: 0.75rem 1rem;
         font-size: 0.92rem;
         color: var(--ls-dark);
         transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     }
+    .login-shell .ls-card .form-control::placeholder {
+        color: rgba(100, 116, 139, 0.5);
+    }
     .login-shell .ls-card .form-control:hover {
-        border-color: rgba(148, 163, 184, 0.7);
+        border-color: rgba(148, 163, 184, 0.65);
+        background: #fafbfe;
     }
     .login-shell .ls-card .form-control:focus {
         border-color: var(--ls-sky);
         background: #ffffff;
-        box-shadow: 0 0 0 3px var(--ls-sky-glow);
+        box-shadow: 0 0 0 3.5px var(--ls-sky-glow);
     }
 
     /* Submit button */
@@ -462,29 +598,52 @@
                 {{-- Stats --}}
                 <div class="ls-stat-grid ls-slide-left" data-d="2">
                     <div class="ls-stat-card">
+                        <div class="ls-stat-icon"><i class="fi-home"></i></div>
                         <div class="ls-stat-value">2k+</div>
                         <div class="ls-stat-label">Properties</div>
                     </div>
                     <div class="ls-stat-card">
+                        <div class="ls-stat-icon"><i class="fi-user"></i></div>
                         <div class="ls-stat-value">850+</div>
-                        <div class="ls-stat-label">Happy Tenants</div>
+                        <div class="ls-stat-label">Tenants</div>
                     </div>
                     <div class="ls-stat-card">
+                        <div class="ls-stat-icon"><i class="fi-map-pin"></i></div>
                         <div class="ls-stat-value">15+</div>
                         <div class="ls-stat-label">Cities</div>
+                    </div>
+                </div>
+
+                {{-- Property preview --}}
+                <div class="ls-property-preview ls-slide-left" data-d="2">
+                    <img src="{{ asset('assets/img/home/real-estate/hero/03.jpg') }}" alt="" class="ls-property-thumb">
+                    <div class="ls-property-info">
+                        <span class="ls-property-tag">Available</span>
+                        <div class="ls-property-name">Modern 3-Bed Apartment</div>
+                        <div class="ls-property-location">
+                            <i class="fi-map-pin" style="font-size:0.65rem;"></i> East Legon, Accra
+                        </div>
+                        <div class="ls-property-price">GH₵ 3,500/mo</div>
                     </div>
                 </div>
 
                 {{-- Testimonial --}}
                 <div class="ls-testimonial ls-slide-left" data-d="3">
                     <div class="ls-testimonial-quote">
-                        "Propsgh made finding my apartment incredibly easy. Signed the lease within a week!"
+                        Propsgh made finding my apartment incredibly easy. Signed the lease within a week!
                     </div>
                     <div class="ls-testimonial-author">
                         <div class="ls-testimonial-avatar">AK</div>
                         <div>
                             <div class="ls-testimonial-name">Ama Kofi</div>
                             <div class="ls-testimonial-role">Tenant in Accra</div>
+                            <div class="ls-testimonial-stars">
+                                <i class="fi-star-filled"></i>
+                                <i class="fi-star-filled"></i>
+                                <i class="fi-star-filled"></i>
+                                <i class="fi-star-filled"></i>
+                                <i class="fi-star-filled"></i>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -522,7 +681,7 @@
 
                     {{-- Email --}}
                     <div class="ls-input-group">
-                        <label for="email">Email address</label>
+                        <label for="email"><i class="fi-mail"></i> Email address</label>
                         <input
                             type="email"
                             id="email"
@@ -544,7 +703,7 @@
 
                     {{-- Password --}}
                     <div class="ls-input-group">
-                        <label for="password">Password</label>
+                        <label for="password"><i class="fi-lock"></i> Password</label>
                         <div class="password-toggle">
                             <input
                                 type="password"

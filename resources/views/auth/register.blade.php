@@ -6,261 +6,729 @@
 
 @push('styles')
 <style>
-    .auth-register {
-        --auth-accent: #f97316;
-        --auth-accent-strong: #ea580c;
-        --auth-cool: #0ea5e9;
-        --auth-ink: #0f172a;
-        --auth-muted: #475569;
+    /* ── Register page shell ── */
+    .reg-shell {
+        --rs-dark: #0c1220;
+        --rs-slate: #1e293b;
+        --rs-muted: #64748b;
+        --rs-accent: #f59e0b;
+        --rs-accent-hover: #d97706;
+        --rs-sky: #0ea5e9;
+        --rs-sky-glow: rgba(14, 165, 233, 0.15);
+        --rs-emerald: #10b981;
+        --rs-surface: #ffffff;
+        --rs-border: rgba(226, 232, 240, 0.7);
+        min-height: 100vh;
+        display: flex;
     }
-    .auth-register .auth-left {
-        max-width: 520px;
-    }
-    .auth-register .auth-intro {
-        max-width: 28rem;
-    }
-    .auth-register .benefits-wrap {
-        max-width: 1034px;
-    }
-    .auth-register .auth-panel {
-        position: relative;
-        padding: 1.75rem;
-        border-radius: 1.6rem;
-        background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
-        border: 1px solid rgba(226, 232, 240, 0.9);
-        box-shadow: 0 30px 60px rgba(15, 23, 42, 0.12);
-    }
-    .auth-register .auth-panel::after {
-        content: "";
-        position: absolute;
-        top: -45%;
-        right: -25%;
-        width: 260px;
-        height: 260px;
-        border-radius: 999px;
-        background: radial-gradient(circle, rgba(14, 165, 233, 0.18), transparent 65%);
-        pointer-events: none;
-    }
-    .auth-register .auth-panel > * {
-        position: relative;
+
+    /* ── Left: cinematic panel ── */
+    .reg-shell .rs-visual {
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        width: 42%;
+        background: var(--rs-dark);
+        overflow: hidden;
         z-index: 1;
     }
-    .auth-register .auth-panel .form-control {
-        border-radius: 0.95rem;
-        border-color: rgba(148, 163, 184, 0.55);
-        background: #fbfdff;
-        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.6);
-        transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+    .reg-shell .rs-visual-img {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        filter: saturate(1.1) brightness(0.82);
     }
-    .auth-register .auth-panel .form-control:focus {
-        border-color: rgba(14, 165, 233, 0.55);
-        background: #ffffff;
-        box-shadow: 0 0 0 0.2rem rgba(14, 165, 233, 0.12);
-    }
-    .auth-register .auth-chip {
-        background: #ffffff;
-        border: 1px solid rgba(148, 163, 184, 0.35);
-        color: var(--auth-ink);
-    }
-    .auth-register .benefits-shell {
-        position: relative;
-        border-radius: 2.2rem;
-        padding: 2.6rem;
+    .reg-shell .rs-visual-overlay {
+        position: absolute;
+        inset: 0;
         background:
-            radial-gradient(circle at top right, rgba(14, 165, 233, 0.18), transparent 55%),
-            radial-gradient(circle at bottom left, rgba(249, 115, 22, 0.16), transparent 50%),
-            linear-gradient(160deg, #f8fbff 0%, #f2f6ff 45%, #f7f3ff 100%);
-        border: 1px solid rgba(226, 232, 240, 0.85);
-        box-shadow: 0 35px 80px rgba(15, 23, 42, 0.14);
+            linear-gradient(180deg, rgba(12, 18, 32, 0.5) 0%, rgba(12, 18, 32, 0.1) 35%, rgba(12, 18, 32, 0.78) 100%),
+            linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, transparent 55%);
+    }
+    .reg-shell .rs-visual-inner {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        padding: 2.5rem 2.5rem;
+        color: #ffffff;
+        z-index: 2;
+    }
+
+    /* Benefit cards on image panel */
+    .reg-shell .rs-benefit-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
+    }
+    .reg-shell .rs-benefit-card {
+        background: rgba(255, 255, 255, 0.09);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.13);
+        border-radius: 1.1rem;
+        padding: 1.05rem;
+        transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), background 0.3s ease, box-shadow 0.3s ease;
+        position: relative;
         overflow: hidden;
     }
-    .auth-register .benefits-shell::before,
-    .auth-register .benefits-shell::after {
-        content: "";
+    .reg-shell .rs-benefit-card::before {
+        content: '';
         position: absolute;
-        width: 240px;
-        height: 240px;
-        border-radius: 999px;
-        background: radial-gradient(circle, rgba(255, 255, 255, 0.7), transparent 65%);
-        opacity: 0.85;
-        pointer-events: none;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, rgba(16, 185, 129, 0.5), rgba(14, 165, 233, 0.4));
+        opacity: 0;
+        transition: opacity 0.3s ease;
     }
-    .auth-register .benefits-shell::before {
-        top: -120px;
-        right: -80px;
-    }
-    .auth-register .benefits-shell::after {
-        bottom: -140px;
-        left: -90px;
-    }
-    .auth-register .benefits-shell > * {
-        position: relative;
-        z-index: 1;
-    }
-    .auth-register .benefits-badge {
-        background: rgba(14, 165, 233, 0.14);
-        color: #0369a1;
-        border: 1px solid rgba(14, 165, 233, 0.28);
-    }
-    .auth-register .benefits-title {
-        letter-spacing: -0.02em;
-    }
-    .auth-register .benefit-card {
-        background: rgba(255, 255, 255, 0.95);
-        border: 1px solid rgba(148, 163, 184, 0.35);
-        border-radius: 1.35rem;
-        padding: 1.15rem 1.25rem;
-        box-shadow: 0 20px 40px rgba(15, 23, 42, 0.08);
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-        height: 100%;
-    }
-    .auth-register .benefit-card:hover {
+    .reg-shell .rs-benefit-card:hover {
         transform: translateY(-3px);
-        box-shadow: 0 25px 50px rgba(15, 23, 42, 0.12);
+        background: rgba(255, 255, 255, 0.16);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.18);
     }
-    .auth-register .benefit-icon {
-        width: 46px;
-        height: 46px;
-        border-radius: 1rem;
-        background: rgba(14, 165, 233, 0.12);
-        color: #0284c7;
+    .reg-shell .rs-benefit-card:hover::before {
+        opacity: 1;
+    }
+    .reg-shell .rs-benefit-icon {
+        width: 38px;
+        height: 38px;
+        border-radius: 0.8rem;
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(14, 165, 233, 0.15));
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        flex-shrink: 0;
+        margin-bottom: 0.55rem;
+        font-size: 1rem;
+        color: rgba(255, 255, 255, 0.9);
     }
-    .auth-register .benefit-stats {
+    .reg-shell .rs-benefit-title {
+        font-size: 0.82rem;
+        font-weight: 600;
+        color: #ffffff;
+        margin-bottom: 0.2rem;
+    }
+    .reg-shell .rs-benefit-desc {
+        font-size: 0.7rem;
+        color: rgba(255, 255, 255, 0.5);
+        line-height: 1.4;
+    }
+
+    /* Stats bar */
+    .reg-shell .rs-stats-bar {
         display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 0.6rem;
+        gap: 0.65rem;
+        margin-bottom: 0.85rem;
     }
-    .auth-register .benefit-stat {
+    .reg-shell .rs-mini-stat {
+        flex: 1;
+        background: rgba(255, 255, 255, 0.07);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 0.85rem;
+        padding: 0.65rem 0.5rem;
+        text-align: center;
+    }
+    .reg-shell .rs-mini-stat-value {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #fff;
+        letter-spacing: -0.02em;
+    }
+    .reg-shell .rs-mini-stat-label {
+        font-size: 0.6rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: rgba(255, 255, 255, 0.45);
+        margin-top: 0.1rem;
+    }
+
+    /* Social proof strip */
+    .reg-shell .rs-social-proof {
+        display: flex;
+        align-items: center;
+        gap: 0.85rem;
+        background: rgba(255, 255, 255, 0.08);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 1.1rem;
+        padding: 1rem 1.25rem;
+        margin-top: 1rem;
+    }
+    .reg-shell .rs-avatar-stack {
+        display: flex;
+    }
+    .reg-shell .rs-avatar-stack span {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.65rem;
+        font-weight: 700;
+        color: #fff;
+        border: 2px solid rgba(12, 18, 32, 0.5);
+        margin-left: -8px;
+    }
+    .reg-shell .rs-avatar-stack span:first-child { margin-left: 0; }
+    .reg-shell .rs-proof-text {
+        font-size: 0.78rem;
+        color: rgba(255, 255, 255, 0.8);
+        line-height: 1.35;
+    }
+    .reg-shell .rs-proof-text strong {
+        color: #fff;
+    }
+    .reg-shell .rs-proof-stars {
+        display: flex;
+        gap: 2px;
+        margin-top: 0.2rem;
+    }
+    .reg-shell .rs-proof-stars i {
+        font-size: 0.6rem;
+        color: #f59e0b;
+    }
+
+    /* ── Right: form side ── */
+    .reg-shell .rs-form-side {
+        margin-left: 42%;
+        width: 58%;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem 2.5rem;
+        background:
+            radial-gradient(ellipse at 15% 0%, rgba(16, 185, 129, 0.03) 0%, transparent 50%),
+            radial-gradient(ellipse at 85% 100%, rgba(14, 165, 233, 0.03) 0%, transparent 50%),
+            #fafbfc;
+        position: relative;
+        z-index: 2;
+    }
+    .reg-shell .rs-form-container {
+        width: 100%;
+        max-width: 480px;
+    }
+
+    /* Brand */
+    .reg-shell .rs-brand {
+        display: flex;
+        align-items: center;
+        gap: 0.85rem;
+        margin-bottom: 1.75rem;
+    }
+    .reg-shell .rs-brand-logo {
+        width: 48px;
+        height: 48px;
+        border-radius: 0.9rem;
+        object-fit: contain;
+        background: #fff;
+        box-shadow: 0 4px 18px rgba(15, 23, 42, 0.1);
+        border: 1px solid var(--rs-border);
+        padding: 3px;
+    }
+    .reg-shell .rs-brand-name {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--rs-dark);
+        letter-spacing: -0.02em;
+    }
+    .reg-shell .rs-brand-tagline {
+        font-size: 0.72rem;
+        color: var(--rs-muted);
+    }
+
+    /* Heading */
+    .reg-shell .rs-heading-tag {
         display: inline-flex;
         align-items: center;
         gap: 0.4rem;
-        padding: 0.35rem 0.9rem;
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.08), rgba(14, 165, 233, 0.06));
+        border: 1px solid rgba(16, 185, 129, 0.18);
         border-radius: 999px;
-        background: rgba(255, 255, 255, 0.92);
-        border: 1px solid rgba(148, 163, 184, 0.28);
-        color: var(--auth-ink);
-        font-size: 0.78rem;
+        padding: 0.28rem 0.8rem;
+        font-size: 0.68rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--rs-emerald);
+        margin-bottom: 0.75rem;
     }
-    @media (max-width: 575.98px) {
-        .auth-register .auth-panel {
-            padding: 1.25rem;
+    .reg-shell .rs-heading-tag .rs-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--rs-emerald);
+        animation: rsDotPulse 2s ease-in-out infinite;
+    }
+    .reg-shell .rs-heading h1 {
+        font-size: 1.65rem;
+        font-weight: 700;
+        color: var(--rs-dark);
+        letter-spacing: -0.03em;
+        margin-bottom: 0.3rem;
+    }
+    .reg-shell .rs-heading p {
+        font-size: 0.86rem;
+        color: var(--rs-muted);
+        margin-bottom: 0;
+    }
+
+    /* Steps indicator */
+    .reg-shell .rs-steps {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-top: 1rem;
+        margin-bottom: 0.25rem;
+    }
+    .reg-shell .rs-step {
+        flex: 1;
+        height: 3px;
+        border-radius: 999px;
+        background: rgba(148, 163, 184, 0.25);
+    }
+    .reg-shell .rs-step.active {
+        background: linear-gradient(90deg, var(--rs-emerald), var(--rs-sky));
+    }
+
+    /* Form card */
+    .reg-shell .rs-card {
+        background: var(--rs-surface);
+        border: 1px solid var(--rs-border);
+        border-radius: 1.5rem;
+        padding: 1.85rem;
+        box-shadow:
+            0 1px 2px rgba(15, 23, 42, 0.03),
+            0 8px 24px rgba(15, 23, 42, 0.06),
+            0 24px 48px rgba(15, 23, 42, 0.04);
+        margin-top: 1.25rem;
+        position: relative;
+        overflow: hidden;
+    }
+    .reg-shell .rs-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, var(--rs-emerald), var(--rs-sky), var(--rs-emerald));
+        border-radius: 1.5rem 1.5rem 0 0;
+    }
+    .reg-shell .rs-card::after {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -25%;
+        width: 180px;
+        height: 180px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(16, 185, 129, 0.05), transparent 65%);
+        pointer-events: none;
+    }
+
+    /* Inputs */
+    .reg-shell .rs-input-group {
+        margin-bottom: 1.1rem;
+        position: relative;
+        z-index: 1;
+    }
+    .reg-shell .rs-input-group label {
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+        font-size: 0.76rem;
+        font-weight: 600;
+        color: var(--rs-slate);
+        margin-bottom: 0.35rem;
+        letter-spacing: 0.02em;
+    }
+    .reg-shell .rs-input-group label i {
+        font-size: 0.78rem;
+        color: var(--rs-muted);
+        opacity: 0.7;
+    }
+    .reg-shell .rs-card .form-control {
+        border-radius: 0.85rem;
+        border: 1.5px solid rgba(148, 163, 184, 0.35);
+        background: #f8fafc;
+        padding: 0.68rem 0.95rem;
+        font-size: 0.9rem;
+        color: var(--rs-dark);
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .reg-shell .rs-card .form-control::placeholder {
+        color: rgba(100, 116, 139, 0.5);
+    }
+    .reg-shell .rs-card .form-control:hover {
+        border-color: rgba(148, 163, 184, 0.65);
+        background: #fafbfe;
+    }
+    .reg-shell .rs-card .form-control:focus {
+        border-color: var(--rs-sky);
+        background: #ffffff;
+        box-shadow: 0 0 0 3.5px var(--rs-sky-glow);
+    }
+
+    /* Two-column row */
+    .reg-shell .rs-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.85rem;
+    }
+
+    /* Submit */
+    .reg-shell .rs-submit {
+        width: 100%;
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 0.85rem;
+        font-size: 0.93rem;
+        font-weight: 600;
+        letter-spacing: 0.01em;
+        color: #ffffff;
+        background: linear-gradient(135deg, var(--rs-dark) 0%, var(--rs-slate) 100%);
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+    .reg-shell .rs-submit::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent);
+        transition: left 0.5s ease;
+    }
+    .reg-shell .rs-submit:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 8px 25px rgba(12, 18, 32, 0.25);
+    }
+    .reg-shell .rs-submit:hover::before {
+        left: 100%;
+    }
+    .reg-shell .rs-submit:active {
+        transform: translateY(0);
+    }
+
+    /* Quick benefits row inside form */
+    .reg-shell .rs-quick-benefits {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-top: 1rem;
+    }
+    .reg-shell .rs-quick-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.3rem 0.7rem;
+        border-radius: 999px;
+        background: rgba(16, 185, 129, 0.06);
+        border: 1px solid rgba(16, 185, 129, 0.15);
+        font-size: 0.72rem;
+        font-weight: 500;
+        color: var(--rs-muted);
+    }
+    .reg-shell .rs-quick-chip i {
+        color: var(--rs-emerald);
+        font-size: 0.7rem;
+    }
+
+    /* Trust row */
+    .reg-shell .rs-trust {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1.5rem;
+        margin-top: 1.5rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--rs-border);
+    }
+    .reg-shell .rs-trust-item {
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+        font-size: 0.72rem;
+        color: var(--rs-muted);
+    }
+    .reg-shell .rs-trust-item i {
+        font-size: 0.82rem;
+        color: var(--rs-emerald);
+    }
+
+    /* Footer */
+    .reg-shell .rs-footer {
+        text-align: center;
+        margin-top: 1.35rem;
+        font-size: 0.78rem;
+        color: var(--rs-muted);
+    }
+    .reg-shell .rs-footer a {
+        color: var(--rs-dark);
+        font-weight: 600;
+        text-decoration: none;
+        transition: color 0.2s ease;
+    }
+    .reg-shell .rs-footer a:hover {
+        color: var(--rs-sky);
+    }
+
+    /* ── Animations ── */
+    @media (prefers-reduced-motion: no-preference) {
+        .reg-shell .rs-fade {
+            opacity: 0;
+            transform: translateY(14px);
+            animation: rsFadeUp 0.65s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        .reg-shell .rs-fade[data-d="1"] { animation-delay: 0.05s; }
+        .reg-shell .rs-fade[data-d="2"] { animation-delay: 0.12s; }
+        .reg-shell .rs-fade[data-d="3"] { animation-delay: 0.2s; }
+        .reg-shell .rs-fade[data-d="4"] { animation-delay: 0.28s; }
+        .reg-shell .rs-fade[data-d="5"] { animation-delay: 0.36s; }
+        .reg-shell .rs-fade[data-d="6"] { animation-delay: 0.44s; }
+        .reg-shell .rs-fade[data-d="7"] { animation-delay: 0.52s; }
+
+        .reg-shell .rs-slide {
+            opacity: 0;
+            transform: translateX(-25px);
+            animation: rsSlide 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        .reg-shell .rs-slide[data-d="2"] { animation-delay: 0.15s; }
+        .reg-shell .rs-slide[data-d="3"] { animation-delay: 0.3s; }
+        .reg-shell .rs-slide[data-d="4"] { animation-delay: 0.45s; }
+    }
+
+    @keyframes rsFadeUp {
+        to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes rsSlide {
+        to { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes rsDotPulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.35; }
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 991.98px) {
+        .reg-shell .rs-visual { display: none; }
+        .reg-shell .rs-form-side {
+            margin-left: 0;
+            width: 100%;
         }
     }
-    @media (max-width: 991.98px) {
-        .auth-register .benefits-shell {
-            padding: 1.6rem;
-            border-radius: 1.6rem;
+    @media (max-width: 575.98px) {
+        .reg-shell .rs-form-side {
+            padding: 1.5rem 1rem;
+        }
+        .reg-shell .rs-card {
+            padding: 1.25rem;
+        }
+        .reg-shell .rs-row {
+            grid-template-columns: 1fr;
+            gap: 0;
+        }
+        .reg-shell .rs-trust {
+            flex-direction: column;
+            gap: 0.4rem;
         }
     }
 </style>
 @endpush
 
 @section('content')
-<main class="content-wrapper w-100 px-3 ps-lg-5 pe-lg-4 mx-auto auth-wrapper auth-register" style="max-width: 1920px">
-    <div class="row g-4 g-lg-5 align-items-stretch">
-        <!-- Left: Form -->
-        <div class="col-lg-5">
-            <div class="d-flex flex-column min-vh-100 py-4 auth-left">
-                <header class="px-0 pb-4 mb-2 mb-md-3 mb-lg-4">
-                    <a href="{{ url('/') }}"
-                       class="d-flex flex-column flex-sm-row align-items-center justify-content-center justify-content-sm-start text-decoration-none gap-3">
-                        <div class="brand-logo-wrapper d-flex align-items-center justify-content-center">
-                            <img src="{{ asset('assets/img/francee.jpeg') }}" alt="Propsgh Logo">
-                        </div>
-                        <div class="text-center text-sm-start">
-                            <span class="d-block fs-3 fw-semibold text-dark-emphasis">Propsgh</span>
-                            <span class="d-none d-sm-block text-body-secondary fs-sm">
-                                Properties &amp; shortlet stays made simple.
-                            </span>
-                        </div>
-                    </a>
-                </header>
+<div class="reg-shell">
 
-                <div class="auth-intro">
-                    <span class="badge-soft mb-2">Create account</span>
-                    <h1 class="display-6 fw-semibold text-dark-emphasis mb-2">Join Propsgh</h1>
-                    <p class="text-body-secondary mb-3">
-                        Save listings, schedule tours, and book shortlets faster.
-                    </p>
-                    <div class="d-flex flex-wrap gap-2">
-                        <span class="badge auth-chip rounded-pill px-3 py-2">Houses</span>
-                        <span class="badge auth-chip rounded-pill px-3 py-2">Apartments</span>
-                        <span class="badge auth-chip rounded-pill px-3 py-2">Shortlets</span>
+    {{-- Left: cinematic image panel (desktop only) --}}
+    <aside class="rs-visual" aria-hidden="true">
+        <img src="{{ asset('assets/img/home/real-estate/hero/01.jpg') }}" alt="" class="rs-visual-img">
+        <div class="rs-visual-overlay"></div>
+        <div class="rs-visual-inner">
+            {{-- Top --}}
+            <div class="rs-slide">
+                <a href="{{ url('/') }}" class="d-inline-flex align-items-center gap-2 text-decoration-none mb-4">
+                    <img src="{{ asset('assets/img/francee.jpeg') }}" alt="Propsgh" style="height:34px; width:34px; border-radius:0.6rem; object-fit:contain; background:#fff; padding:2px;">
+                    <span style="font-weight:700; font-size:1rem; color:#fff; letter-spacing:-0.01em;">Propsgh</span>
+                </a>
+                <h2 class="fw-bold mb-2" style="font-size:1.7rem; letter-spacing:-0.03em; line-height:1.2;">
+                    Your next home<br>starts here.
+                </h2>
+                <p style="font-size:0.85rem; color:rgba(255,255,255,0.65); max-width:300px;">
+                    Join thousands finding their perfect property across Ghana.
+                </p>
+            </div>
+
+            {{-- Bottom --}}
+            <div>
+                {{-- Stats bar --}}
+                <div class="rs-stats-bar rs-slide" data-d="2">
+                    <div class="rs-mini-stat">
+                        <div class="rs-mini-stat-value">2k+</div>
+                        <div class="rs-mini-stat-label">Properties</div>
                     </div>
-                    <div class="nav fs-sm">
-                        I already have an account
-                        <a class="nav-link text-decoration-underline p-0 ms-2" href="{{ route('login') }}">Sign in</a>
+                    <div class="rs-mini-stat">
+                        <div class="rs-mini-stat-value">850+</div>
+                        <div class="rs-mini-stat-label">Users</div>
                     </div>
-                    <div class="nav fs-sm mt-3 d-lg-none">
-                        <span class="me-2">Want to see benefits?</span>
-                        <a class="nav-link text-decoration-underline p-0" href="#benefits" data-bs-toggle="offcanvas" aria-controls="benefits">
-                            Explore benefits
-                        </a>
+                    <div class="rs-mini-stat">
+                        <div class="rs-mini-stat-value">4.8</div>
+                        <div class="rs-mini-stat-label">Rating</div>
                     </div>
                 </div>
 
-                <div class="auth-panel mt-4">
-                    <form class="needs-validation" novalidate method="POST" action="{{ route('register') }}">
-                        @csrf
+                {{-- Benefit cards --}}
+                <div class="rs-benefit-grid rs-slide" data-d="3">
+                    <div class="rs-benefit-card">
+                        <div class="rs-benefit-icon"><i class="fi-bookmark"></i></div>
+                        <div class="rs-benefit-title">Save Listings</div>
+                        <div class="rs-benefit-desc">Bookmark favorites for quick access later.</div>
+                    </div>
+                    <div class="rs-benefit-card">
+                        <div class="rs-benefit-icon"><i class="fi-bell"></i></div>
+                        <div class="rs-benefit-title">Instant Alerts</div>
+                        <div class="rs-benefit-desc">Get notified when new places match your criteria.</div>
+                    </div>
+                    <div class="rs-benefit-card">
+                        <div class="rs-benefit-icon"><i class="fi-calendar"></i></div>
+                        <div class="rs-benefit-title">Book Tours</div>
+                        <div class="rs-benefit-desc">Schedule property visits at your convenience.</div>
+                    </div>
+                    <div class="rs-benefit-card">
+                        <div class="rs-benefit-icon"><i class="fi-home"></i></div>
+                        <div class="rs-benefit-title">Shortlet Stays</div>
+                        <div class="rs-benefit-desc">Flexible short-term rentals across the country.</div>
+                    </div>
+                </div>
 
-                        <div class="position-relative mb-4">
-                            <label for="name" class="form-label fs-sm text-body-secondary mb-1">Full name</label>
-                            <input
-                                type="text"
-                                id="name"
-                                name="name"
-                                class="form-control form-control-lg @error('name') is-invalid @enderror"
-                                placeholder="Your full name"
-                                value="{{ old('name') }}"
-                                required
-                                autocomplete="name"
-                                autofocus
-                            >
-                            <div class="invalid-tooltip bg-transparent py-0">Please enter your name.</div>
-                            @error('name')
-                                <div class="invalid-feedback d-block">{{ $message }}</div>
-                            @enderror
+                {{-- Social proof --}}
+                <div class="rs-social-proof rs-slide" data-d="4">
+                    <div class="rs-avatar-stack">
+                        <span style="background:linear-gradient(135deg,#f59e0b,#ef4444);">AK</span>
+                        <span style="background:linear-gradient(135deg,#10b981,#0ea5e9);">NM</span>
+                        <span style="background:linear-gradient(135deg,#8b5cf6,#ec4899);">KA</span>
+                        <span style="background:linear-gradient(135deg,#0ea5e9,#6366f1);">EO</span>
+                    </div>
+                    <div>
+                        <div class="rs-proof-text">
+                            <strong>850+ tenants</strong> found their home through Propsgh
                         </div>
-
-                        <div class="position-relative mb-4">
-                            <label for="email" class="form-label fs-sm text-body-secondary mb-1">Email address</label>
-                            <input
-                                type="email"
-                                id="email"
-                                name="email"
-                                class="form-control form-control-lg @error('email') is-invalid @enderror"
-                                placeholder="you@example.com"
-                                value="{{ old('email') }}"
-                                required
-                                inputmode="email"
-                                autocapitalize="none"
-                                spellcheck="false"
-                                autocomplete="email"
-                            >
-                            <div class="invalid-tooltip bg-transparent py-0">Enter a valid email address.</div>
-                            @error('email')
-                                <div class="invalid-feedback d-block">{{ $message }}</div>
-                            @enderror
+                        <div class="rs-proof-stars">
+                            <i class="fi-star-filled"></i>
+                            <i class="fi-star-filled"></i>
+                            <i class="fi-star-filled"></i>
+                            <i class="fi-star-filled"></i>
+                            <i class="fi-star-filled"></i>
                         </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </aside>
 
-                        <div class="mb-4">
-                            <label for="password" class="form-label fs-sm text-body-secondary mb-1">Password</label>
+    {{-- Right: form panel --}}
+    <div class="rs-form-side">
+        <div class="rs-form-container">
+
+            {{-- Brand (mobile only) --}}
+            <div class="rs-brand rs-fade d-lg-none" data-d="1">
+                <img src="{{ asset('assets/img/francee.jpeg') }}" alt="Propsgh" class="rs-brand-logo">
+                <div>
+                    <div class="rs-brand-name">Propsgh</div>
+                    <div class="rs-brand-tagline">Properties &amp; shortlet stays</div>
+                </div>
+            </div>
+
+            {{-- Heading --}}
+            <div class="rs-heading rs-fade" data-d="2">
+                <div class="rs-heading-tag">
+                    <span class="rs-dot"></span>
+                    Get started free
+                </div>
+                <h1>Create your account</h1>
+                <p>Join Propsgh to save listings, book tours, and manage rentals.</p>
+                <div class="rs-steps">
+                    <div class="rs-step active"></div>
+                    <div class="rs-step"></div>
+                    <div class="rs-step"></div>
+                </div>
+            </div>
+
+            {{-- Form card --}}
+            <div class="rs-card rs-fade" data-d="3">
+                <form class="needs-validation" novalidate method="POST" action="{{ route('register') }}">
+                    @csrf
+
+                    {{-- Full name --}}
+                    <div class="rs-input-group">
+                        <label for="name"><i class="fi-user"></i> Full name</label>
+                        <input
+                            type="text"
+                            id="name"
+                            name="name"
+                            class="form-control @error('name') is-invalid @enderror"
+                            placeholder="Your full name"
+                            value="{{ old('name') }}"
+                            required
+                            autocomplete="name"
+                            autofocus
+                        >
+                        @error('name')
+                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    {{-- Email --}}
+                    <div class="rs-input-group">
+                        <label for="email"><i class="fi-mail"></i> Email address</label>
+                        <input
+                            type="email"
+                            id="email"
+                            name="email"
+                            class="form-control @error('email') is-invalid @enderror"
+                            placeholder="you@example.com"
+                            value="{{ old('email') }}"
+                            required
+                            inputmode="email"
+                            autocapitalize="none"
+                            spellcheck="false"
+                            autocomplete="email"
+                        >
+                        @error('email')
+                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    {{-- Password row --}}
+                    <div class="rs-row">
+                        <div class="rs-input-group">
+                            <label for="password"><i class="fi-lock"></i> Password</label>
                             <div class="password-toggle">
                                 <input
                                     type="password"
                                     id="password"
                                     name="password"
-                                    class="form-control form-control-lg @error('password') is-invalid @enderror"
-                                    placeholder="Minimum 8 characters"
+                                    class="form-control @error('password') is-invalid @enderror"
+                                    placeholder="Min. 8 characters"
                                     required
                                     autocomplete="new-password"
                                 >
-                                <div class="invalid-tooltip bg-transparent py-0">Password must be at least 8 characters.</div>
                                 <label class="password-toggle-button fs-lg" aria-label="Show/hide password">
                                     <input type="checkbox" class="btn-check">
                                 </label>
@@ -269,20 +737,18 @@
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
                             @enderror
                         </div>
-
-                        <div class="mb-4">
-                            <label for="password_confirmation" class="form-label fs-sm text-body-secondary mb-1">Confirm password</label>
+                        <div class="rs-input-group">
+                            <label for="password_confirmation"><i class="fi-lock"></i> Confirm</label>
                             <div class="password-toggle">
                                 <input
                                     type="password"
                                     id="password_confirmation"
                                     name="password_confirmation"
-                                    class="form-control form-control-lg @error('password_confirmation') is-invalid @enderror"
-                                    placeholder="Retype your password"
+                                    class="form-control @error('password_confirmation') is-invalid @enderror"
+                                    placeholder="Retype password"
                                     required
                                     autocomplete="new-password"
                                 >
-                                <div class="invalid-tooltip bg-transparent py-0">Passwords should match.</div>
                                 <label class="password-toggle-button fs-lg" aria-label="Show/hide password">
                                     <input type="checkbox" class="btn-check">
                                 </label>
@@ -291,116 +757,75 @@
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
                             @enderror
                         </div>
-
-                        <div class="d-flex flex-column gap-2 mb-4">
-                            <div class="form-check">
-                                <input type="checkbox" class="form-check-input" id="save-pass">
-                                <label for="save-pass" class="form-check-label">Remember this device</label>
-                            </div>
-                            <div class="form-check">
-                                <input
-                                    type="checkbox"
-                                    class="form-check-input @error('terms') is-invalid @enderror"
-                                    id="terms"
-                                    name="terms"
-                                    value="1"
-                                    {{ old('terms') ? 'checked' : '' }}
-                                    required
-                                >
-                                <label for="terms" class="form-check-label">
-                                    I accept the
-                                    <a class="text-dark-emphasis" href="{{ url('/terms') }}">Terms</a>
-                                    &amp;
-                                    <a class="text-dark-emphasis" href="{{ url('/privacy') }}">Privacy Policy</a>
-                                </label>
-                                @error('terms')
-                                    <div class="invalid-feedback d-block">{{ $message }}</div>
-                                @else
-                                    <div class="invalid-feedback">You must accept the Terms &amp; Privacy to continue.</div>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <button type="submit" class="btn btn-lg btn-primary w-100">
-                            Create an account
-                            <i class="fi-chevron-right fs-lg ms-1 me-n1"></i>
-                        </button>
-
-                        <div class="d-flex flex-wrap gap-2 mt-3">
-                            <span class="badge auth-chip d-inline-flex align-items-center gap-2 rounded-pill px-3 py-2">
-                                <i class="fi-shield fs-sm"></i>
-                                Secure signup
-                            </span>
-                            <span class="badge auth-chip d-inline-flex align-items-center gap-2 rounded-pill px-3 py-2">
-                                <i class="fi-clock fs-sm"></i>
-                                2 min setup
-                            </span>
-                        </div>
-                    </form>
-                </div>
-
-                <footer class="mt-auto pt-4">
-                    <div class="nav mb-3">
-                        <a class="nav-link text-decoration-underline p-0" href="{{ route('contact') }}">Need help?</a>
                     </div>
-                    <p class="fs-xs mb-0">© {{ now()->year }} Propsgh. All rights reserved.</p>
-                </footer>
-            </div>
-        </div>
 
-        <!-- Right: Benefits -->
-        <div class="col-lg-7 d-lg-flex align-items-center">
-            <div class="offcanvas-lg offcanvas-end w-100 py-lg-4 ms-auto benefits-wrap" id="benefits" style="max-width: 1034px">
-                <div class="offcanvas-header justify-content-end position-relative z-2 p-3 d-lg-none">
-                    <button type="button" class="btn btn-icon btn-outline-dark text-dark border-dark bg-transparent rounded-circle"
-                            data-bs-dismiss="offcanvas" data-bs-target="#benefits" aria-label="Close">
-                        <i class="fi-close fs-lg"></i>
+                    {{-- Terms --}}
+                    <div class="form-check mb-3" style="margin-top:0.25rem;">
+                        <input
+                            type="checkbox"
+                            class="form-check-input @error('terms') is-invalid @enderror"
+                            id="terms"
+                            name="terms"
+                            value="1"
+                            {{ old('terms') ? 'checked' : '' }}
+                            required
+                        >
+                        <label for="terms" class="form-check-label" style="font-size:0.8rem;">
+                            I accept the
+                            <a style="color:var(--rs-dark); font-weight:600;" href="{{ url('/terms') }}">Terms</a>
+                            &amp;
+                            <a style="color:var(--rs-dark); font-weight:600;" href="{{ url('/privacy') }}">Privacy Policy</a>
+                        </label>
+                        @error('terms')
+                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                        @else
+                            <div class="invalid-feedback">You must accept to continue.</div>
+                        @enderror
+                    </div>
+
+                    {{-- Submit --}}
+                    <button type="submit" class="rs-submit">
+                        Create account
+                        <i class="fi-chevron-right" style="font-size:0.85rem;"></i>
                     </button>
-                </div>
 
-                <div class="offcanvas-body position-relative z-2 d-lg-flex flex-column align-items-center justify-content-center h-100 pt-2 px-3 p-lg-0">
-                    <div class="benefits-shell w-100">
-                        <div class="text-center mb-4">
-                            <span class="badge benefits-badge rounded-pill px-3 py-2 mb-3">Propsgh membership</span>
-                            <h2 class="benefits-title display-6 fw-semibold text-dark-emphasis mb-2">Move faster, book smarter</h2>
-                            <p class="text-secondary mb-0">One account to track homes, rentals, and shortlets.</p>
-                        </div>
-
-                        <div class="benefit-stats mb-4">
-                            <span class="benefit-stat"><i class="fi-shield fs-sm"></i> Verified listings</span>
-                            <span class="benefit-stat"><i class="fi-mail fs-sm"></i> Instant alerts</span>
-                            <span class="benefit-stat"><i class="fi-clock fs-sm"></i> Flexible stays</span>
-                        </div>
-
-                        <div class="mx-auto" style="max-width: 820px">
-                            <div class="row row-cols-1 row-cols-sm-2 g-3 g-md-4">
-                                @php
-                                    $benefits = [
-                                        ['icon' => 'fi-bookmark', 'title' => 'Save favorite listings'],
-                                        ['icon' => 'fi-mail',     'title' => 'Get new listing alerts'],
-                                        ['icon' => 'fi-home',     'title' => 'Schedule property tours'],
-                                        ['icon' => 'fi-clock',    'title' => 'Track shortlet dates'],
-                                        ['icon' => 'fi-tag',      'title' => 'Exclusive member offers'],
-                                        ['icon' => 'fi-heart',    'title' => 'Create wishlists fast'],
-                                    ];
-                                @endphp
-
-                                @foreach ($benefits as $b)
-                                    <div class="col">
-                                        <div class="benefit-card">
-                                            <div class="benefit-icon mb-3">
-                                                <i class="{{ $b['icon'] }} fs-4"></i>
-                                            </div>
-                                            <h3 class="h6 mb-0 text-dark-emphasis">{{ $b['title'] }}</h3>
-                                        </div>
-                                    </div>
-                                @endforeach
-                            </div>
-                        </div>
+                    {{-- Quick benefits --}}
+                    <div class="rs-quick-benefits">
+                        <span class="rs-quick-chip"><i class="fi-shield"></i> Secure signup</span>
+                        <span class="rs-quick-chip"><i class="fi-clock"></i> 2 min setup</span>
+                        <span class="rs-quick-chip"><i class="fi-check-circle"></i> Free forever</span>
                     </div>
+                </form>
+            </div>
+
+            {{-- Trust indicators --}}
+            <div class="rs-trust rs-fade" data-d="5">
+                <div class="rs-trust-item">
+                    <i class="fi-shield"></i>
+                    <span>Encrypted data</span>
                 </div>
+                <div class="rs-trust-item">
+                    <i class="fi-check-circle"></i>
+                    <span>Verified listings</span>
+                </div>
+                <div class="rs-trust-item">
+                    <i class="fi-headset"></i>
+                    <span>24/7 support</span>
+                </div>
+            </div>
+
+            {{-- Footer --}}
+            <div class="rs-footer rs-fade" data-d="6">
+                Already have an account?
+                <a href="{{ route('login') }}">Sign in</a>
+            </div>
+
+            <div class="rs-fade" data-d="7" style="text-align:center; margin-top:0.85rem;">
+                <span style="font-size:0.68rem; color:var(--rs-muted);">
+                    &copy; {{ now()->year }} Propsgh. All rights reserved.
+                </span>
             </div>
         </div>
     </div>
-</main>
+</div>
 @endsection
