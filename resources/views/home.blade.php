@@ -29,7 +29,6 @@
 @endpush
 
 @section('content')
-<main class="content-wrapper">
 
   <!-- Hero with search form -->
   <section class="position-relative mt-md-5">
@@ -462,8 +461,6 @@
     </div>
   </section> --}}
 
-
-</main>
 @endsection
 
 @push('scripts')
