@@ -1,0 +1,1 @@
+const e=()=>{const t=document.querySelector("header.navbar.fixed-top");if(!t)return;const d=Math.ceil(t.getBoundingClientRect().height);document.documentElement.style.setProperty("--propsgh-header-height",`${d}px`)},n=()=>{e(),window.addEventListener("resize",e),window.addEventListener("load",e)};document.readyState==="loading"?document.addEventListener("DOMContentLoaded",n):n();
