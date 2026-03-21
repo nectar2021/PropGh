@@ -3,18 +3,21 @@
 >
     <div class="container-fluid">
         {{-- Brand / Logo --}}
-        <a
-            class="navbar-brand d-flex align-items-center p-0 me-3 me-lg-4 brand-shift-left"
-            href="{{ route('home') }}"
+<a
+    class="navbar-brand d-flex align-items-center p-0 me-3 me-lg-4"
+    href="{{ route('home') }}"
+>
+    <span
+        class="d-inline-flex align-items-center justify-content-center rounded-circle overflow-hidden"
+        style="width: 44px; height: 44px;"
+    >
+        <img
+            src="{{ asset('assets/img/francee.jpeg') }}"
+            alt="Propsgh"
+            style="width: 100%; height: 100%; object-fit: cover; display: block;"
         >
-            <span class="brand-mark">
-                <img
-                    class="nav-profile-icon"
-                    src="{{ asset('assets/img/francee.jpeg') }}"
-                    alt="Propsgh"
-                >
-            </span>
-        </a>
+    </span>
+</a>
 
         {{-- Mobile toggler --}}
         <button
