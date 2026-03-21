@@ -22,35 +22,42 @@
       {{-- Brand column --}}
       <div class="ft-brand-col">
         <a href="{{ route('home') }}" class="ft-brand-link">
-       <span class="ft-logo-wrap" style="padding: .35rem .6rem;">
-  <img
-    src="{{ asset('assets/img/francee.jpeg') }}"
-    alt="Propsgh"
-    class="ft-logo"
-    style="height: 38px; width: auto; object-fit: contain; display: block;"
-  >
-</span>
+          <span class="ft-logo-wrap">
+            <img
+              src="{{ asset('assets/img/francee.jpeg') }}"
+              alt="Propsgh"
+              class="ft-logo"
+            >
+          </span>
           <span class="ft-brand-text">
             <span class="ft-brand-name">Propsgh</span>
             <span class="ft-brand-tag">Discover &middot; Book &middot; Host</span>
           </span>
         </a>
-        <p class="ft-brand-desc">{{ $footerSettings['brand_description'] ?? 'Premium stays and investments across Ghana — curated, verified, and supported by local experts.' }}</p>
+        <p class="ft-brand-desc">{{ ($footerSettings['brand_description'] ?? '') ?: 'Premium stays and investments across Ghana — curated, verified, and supported by local experts.' }}</p>
 
         <div class="ft-contact-list">
-          <a href="mailto:{{ $footerSettings['contact_email'] ?? 'hello@propsgh.com' }}" class="ft-contact-item">
-            <i class="fi-mail"></i> {{ $footerSettings['contact_email'] ?? 'hello@propsgh.com' }}
+          <a href="mailto:{{ ($footerSettings['contact_email'] ?? '') ?: 'hello@propsgh.com' }}" class="ft-contact-item">
+            <i class="fi-mail"></i> {{ ($footerSettings['contact_email'] ?? '') ?: 'hello@propsgh.com' }}
           </a>
-          <a href="tel:{{ Str::replace(' ', '', $footerSettings['contact_phone'] ?? '+233200000000') }}" class="ft-contact-item">
-            <i class="fi-phone-call"></i> {{ $footerSettings['contact_phone'] ?? '+233 20 000 0000' }}
+          <a href="tel:{{ Str::replace(' ', '', ($footerSettings['contact_phone'] ?? '') ?: '+233200000000') }}" class="ft-contact-item">
+            <i class="fi-phone-call"></i> {{ ($footerSettings['contact_phone'] ?? '') ?: '+233 20 000 0000' }}
           </a>
         </div>
 
         <div class="ft-socials">
-          <a href="{{ $footerSettings['social_instagram'] ?? '#!' }}" class="ft-social" aria-label="Instagram" @if($footerSettings['social_instagram']) target="_blank" rel="noopener" @endif><i class="fi-instagram"></i></a>
-          <a href="{{ $footerSettings['social_facebook'] ?? '#!' }}" class="ft-social" aria-label="Facebook" @if($footerSettings['social_facebook']) target="_blank" rel="noopener" @endif><i class="fi-facebook"></i></a>
-          <a href="{{ $footerSettings['social_twitter'] ?? '#!' }}" class="ft-social" aria-label="Twitter" @if($footerSettings['social_twitter']) target="_blank" rel="noopener" @endif><i class="fi-x"></i></a>
-          <a href="{{ $footerSettings['social_youtube'] ?? '#!' }}" class="ft-social" aria-label="YouTube" @if($footerSettings['social_youtube']) target="_blank" rel="noopener" @endif><i class="fi-youtube"></i></a>
+          @php
+            $socials = [
+              'instagram' => ['icon' => 'fi-instagram', 'label' => 'Instagram'],
+              'facebook'  => ['icon' => 'fi-facebook',  'label' => 'Facebook'],
+              'twitter'   => ['icon' => 'fi-x',         'label' => 'Twitter'],
+              'youtube'   => ['icon' => 'fi-youtube',    'label' => 'YouTube'],
+            ];
+          @endphp
+          @foreach($socials as $key => $social)
+            @php $url = ($footerSettings["social_{$key}"] ?? '') ?: ''; @endphp
+            <a href="{{ $url ?: '#!' }}" class="ft-social" aria-label="{{ $social['label'] }}" @if($url) target="_blank" rel="noopener" @endif><i class="{{ $social['icon'] }}"></i></a>
+          @endforeach
         </div>
       </div>
 
@@ -99,23 +106,23 @@
     {{-- ── Stats ribbon ── --}}
     <div class="ft-stats">
       <div class="ft-stat">
-        <span class="ft-stat-num">{{ $footerSettings['stat_rating'] ?? '4.9/5' }}</span>
-        <span class="ft-stat-label">{{ $footerSettings['stat_rating_label'] ?? 'Guest rating' }}</span>
+        <span class="ft-stat-num">{{ ($footerSettings['stat_rating'] ?? '') ?: '4.9/5' }}</span>
+        <span class="ft-stat-label">{{ ($footerSettings['stat_rating_label'] ?? '') ?: 'Guest rating' }}</span>
       </div>
       <div class="ft-stat-sep"></div>
       <div class="ft-stat">
-        <span class="ft-stat-num">{{ number_format($livePropertyCount) }}+</span>
+        <span class="ft-stat-num">{{ number_format($livePropertyCount ?? 0) }}+</span>
         <span class="ft-stat-label">Verified homes</span>
       </div>
       <div class="ft-stat-sep"></div>
       <div class="ft-stat">
-        <span class="ft-stat-num">{{ $footerSettings['stat_support'] ?? '24/7' }}</span>
-        <span class="ft-stat-label">{{ $footerSettings['stat_support_label'] ?? 'Support' }}</span>
+        <span class="ft-stat-num">{{ ($footerSettings['stat_support'] ?? '') ?: '24/7' }}</span>
+        <span class="ft-stat-label">{{ ($footerSettings['stat_support_label'] ?? '') ?: 'Support' }}</span>
       </div>
       <div class="ft-stat-sep"></div>
       <div class="ft-stat">
-        <span class="ft-stat-num">{{ $footerSettings['stat_satisfaction'] ?? '98%' }}</span>
-        <span class="ft-stat-label">{{ $footerSettings['stat_satisfaction_label'] ?? 'Satisfaction' }}</span>
+        <span class="ft-stat-num">{{ ($footerSettings['stat_satisfaction'] ?? '') ?: '98%' }}</span>
+        <span class="ft-stat-label">{{ ($footerSettings['stat_satisfaction_label'] ?? '') ?: 'Satisfaction' }}</span>
       </div>
     </div>
 
