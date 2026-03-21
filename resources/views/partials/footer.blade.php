@@ -22,9 +22,14 @@
       {{-- Brand column --}}
       <div class="ft-brand-col">
         <a href="{{ route('home') }}" class="ft-brand-link">
-          <span class="ft-logo-wrap">
-            <img src="{{ asset('assets/img/francee.jpeg') }}" alt="Propsgh" class="ft-logo">
-          </span>
+       <span class="ft-logo-wrap" style="padding: .35rem .6rem;">
+  <img
+    src="{{ asset('assets/img/francee.jpeg') }}"
+    alt="Propsgh"
+    class="ft-logo"
+    style="height: 38px; width: auto; object-fit: contain; display: block;"
+  >
+</span>
           <span class="ft-brand-text">
             <span class="ft-brand-name">Propsgh</span>
             <span class="ft-brand-tag">Discover &middot; Book &middot; Host</span>
