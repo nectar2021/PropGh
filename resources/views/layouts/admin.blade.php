@@ -63,11 +63,23 @@
                             <span class="admin-nav-badge">{{ $subCount }}</span>
                         @endif
                     </a>
+                    <a class="nav-link {{ request()->routeIs('admin.agents.*') ? 'active' : '' }}" href="{{ route('admin.agents.index') }}">
+                        <i class="fi-briefcase fs-base"></i>
+                        Agents
+                        @php $pendingAgentCount = \App\Models\User::where('role', 'agent')->where('is_verified', false)->count(); @endphp
+                        @if($pendingAgentCount > 0)
+                            <span class="admin-nav-badge">{{ $pendingAgentCount }}</span>
+                        @endif
+                    </a>
                 </nav>
 
                 {{-- Account section --}}
                 <span class="admin-nav-label">Account</span>
                 <nav class="nav flex-column gap-1 px-1">
+                    <a class="nav-link {{ request()->routeIs('admin.legal-pages.*') ? 'active' : '' }}" href="{{ route('admin.legal-pages.index') }}">
+                        <i class="fi-file-text fs-base"></i>
+                        Legal pages
+                    </a>
                     <a class="nav-link {{ request()->routeIs('admin.settings.*') ? 'active' : '' }}" href="{{ route('admin.settings.edit') }}">
                         <i class="fi-sliders fs-base"></i>
                         Site settings

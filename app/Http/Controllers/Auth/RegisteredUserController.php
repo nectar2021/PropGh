@@ -25,14 +25,20 @@ class RegisteredUserController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
             'password' => ['required', 'confirmed', Password::defaults()],
+            'account_type' => ['required', 'in:client,agent'],
+            'company_name' => ['nullable', 'required_if:account_type,agent', 'string', 'max:255'],
         ]);
+
+        $role = $validated['account_type'];
 
         $user = User::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
-            'role' => 'host',
+            'role' => $role,
             'is_admin' => false,
+            'is_verified' => false,
+            'company_name' => $role === 'agent' ? $validated['company_name'] : null,
         ]);
 
         event(new Registered($user));
@@ -40,6 +46,10 @@ class RegisteredUserController extends Controller
         Auth::login($user);
 
         $request->session()->regenerate();
+
+        if ($role === 'agent') {
+            return redirect()->intended('/')->with('status', 'Your agent account has been created. It will be reviewed and verified by our team shortly.');
+        }
 
         return redirect()->intended('/');
     }

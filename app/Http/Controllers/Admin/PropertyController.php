@@ -65,7 +65,7 @@ class PropertyController extends Controller
 
     public function create(): View
     {
-        $property = new Property();
+        $property = new Property;
 
         return view('admin.properties.create', [
             'property' => $property,
@@ -224,7 +224,7 @@ class PropertyController extends Controller
     private function syncImages(Property $property, ?string $imagesText): void
     {
         $paths = collect(preg_split('/\r\n|\r|\n/', (string) $imagesText))
-            ->map(fn ($path) => trim($path))
+            ->map(fn($path) => trim($path))
             ->filter()
             ->values();
 
@@ -241,7 +241,8 @@ class PropertyController extends Controller
 
     private function ownerOptions()
     {
-        return User::orderBy('name')
+        return User::whereIn('role', ['agent', 'admin'])
+            ->orderBy('name')
             ->get(['id', 'name', 'role', 'email']);
     }
 

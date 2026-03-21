@@ -75,8 +75,8 @@
         <ul class="ft-links">
           <li><a href="{{ route('contact') }}">Help center</a></li>
           <li><a href="{{ route('contact') }}">FAQs</a></li>
-          <li><a href="#!">Terms of service</a></li>
-          <li><a href="#!">Privacy policy</a></li>
+          <li><a href="{{ route('terms') }}">Terms of service</a></li>
+          <li><a href="{{ route('privacy') }}">Privacy policy</a></li>
           <li><a href="{{ route('contact') }}">Report a listing</a></li>
         </ul>
       </div>
@@ -118,9 +118,9 @@
     <div class="ft-bottom">
       <p class="ft-copy">&copy; {{ now()->year }} Propsgh. All rights reserved.</p>
       <div class="ft-bottom-links">
-        <a href="#!">Terms</a>
-        <a href="#!">Privacy</a>
-        <a href="#!">Sitemap</a>
+        <a href="{{ route('terms') }}">Terms</a>
+        <a href="{{ route('privacy') }}">Privacy</a>
+        <a href="{{ route('home') }}">Sitemap</a>
       </div>
     </div>
   </div>

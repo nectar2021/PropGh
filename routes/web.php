@@ -1,8 +1,10 @@
 <?php
 
+use App\Http\Controllers\Admin\AgentController as AdminAgentController;
 use App\Http\Controllers\Admin\AuthenticatedSessionController as AdminAuthenticatedSessionController;
 use App\Http\Controllers\Admin\ContactMessageController as AdminContactMessageController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Admin\LegalPageController as AdminLegalPageController;
 use App\Http\Controllers\Admin\ProfileController as AdminProfileController;
 use App\Http\Controllers\Admin\PropertyController as AdminPropertyController;
 use App\Http\Controllers\Admin\SiteSettingController as AdminSiteSettingController;
@@ -21,6 +23,16 @@ Route::get('/properties/map', [PropertyController::class, 'map'])->name('propert
 Route::get('/properties/{property}', [PropertyController::class, 'show'])->name('properties.show');
 Route::view('/contact', 'contact')->name('contact');
 Route::post('/contact', [ContactController::class, 'store'])->name('contact.store');
+Route::get('/terms', function () {
+    $page = \App\Models\LegalPage::findBySlug('terms');
+
+    return view('terms', ['page' => $page]);
+})->name('terms');
+Route::get('/privacy', function () {
+    $page = \App\Models\LegalPage::findBySlug('privacy');
+
+    return view('privacy', ['page' => $page]);
+})->name('privacy');
 
 Route::middleware('guest')->group(function (): void {
     Route::view('/register', 'auth.register')->name('register');
@@ -57,4 +69,10 @@ Route::middleware('admin.auth')->prefix('admin')->name('admin.')->group(function
     Route::put('/settings', [AdminSiteSettingController::class, 'update'])->name('settings.update');
     Route::get('/subscribers', [AdminSubscriberController::class, 'index'])->name('subscribers.index');
     Route::delete('/subscribers/{subscriber}', [AdminSubscriberController::class, 'destroy'])->name('subscribers.destroy');
+    Route::get('/legal-pages', [AdminLegalPageController::class, 'index'])->name('legal-pages.index');
+    Route::get('/legal-pages/{legalPage}/edit', [AdminLegalPageController::class, 'edit'])->name('legal-pages.edit');
+    Route::put('/legal-pages/{legalPage}', [AdminLegalPageController::class, 'update'])->name('legal-pages.update');
+    Route::get('/agents', [AdminAgentController::class, 'index'])->name('agents.index');
+    Route::put('/agents/{user}/verify', [AdminAgentController::class, 'verify'])->name('agents.verify');
+    Route::put('/agents/{user}/unverify', [AdminAgentController::class, 'unverify'])->name('agents.unverify');
 });

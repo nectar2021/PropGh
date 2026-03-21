@@ -23,8 +23,10 @@ class User extends Authenticatable
         'password',
         'role',
         'is_admin',
+        'is_verified',
         'phone',
         'avatar_path',
+        'company_name',
     ];
 
     /**
@@ -48,6 +50,27 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'is_admin' => 'boolean',
+            'is_verified' => 'boolean',
         ];
+    }
+
+    public function isAgent(): bool
+    {
+        return $this->role === 'agent';
+    }
+
+    public function isClient(): bool
+    {
+        return $this->role === 'client';
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
+    }
+
+    public function isVerifiedAgent(): bool
+    {
+        return $this->isAgent() && $this->is_verified;
     }
 }

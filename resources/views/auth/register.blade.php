@@ -591,6 +591,99 @@
             padding: 1rem;
         }
     }
+
+    /* ── Role picker ── */
+    .reg-shell .rs-role-picker {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.75rem;
+        margin-top: 1.15rem;
+    }
+    .reg-shell .rs-role-card {
+        position: relative;
+        background: var(--rs-surface);
+        border: 2px solid var(--rs-border);
+        border-radius: 1.15rem;
+        padding: 1.1rem 1rem;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        text-align: center;
+    }
+    .reg-shell .rs-role-card:hover {
+        border-color: rgba(14, 165, 233, 0.35);
+        box-shadow: 0 4px 16px rgba(14, 165, 233, 0.08);
+    }
+    .reg-shell .rs-role-card.selected {
+        border-color: var(--rs-sky);
+        background: rgba(14, 165, 233, 0.03);
+        box-shadow: 0 0 0 3px var(--rs-sky-glow), 0 4px 16px rgba(14, 165, 233, 0.1);
+    }
+    .reg-shell .rs-role-card.selected .rs-role-check {
+        opacity: 1;
+        transform: scale(1);
+    }
+    .reg-shell .rs-role-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 0.85rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 0.55rem;
+        font-size: 1.1rem;
+    }
+    .reg-shell .rs-role-card[data-role="client"] .rs-role-icon {
+        background: rgba(16, 185, 129, 0.1);
+        color: var(--rs-emerald);
+    }
+    .reg-shell .rs-role-card[data-role="agent"] .rs-role-icon {
+        background: rgba(14, 165, 233, 0.1);
+        color: var(--rs-sky);
+    }
+    .reg-shell .rs-role-name {
+        font-size: 0.88rem;
+        font-weight: 700;
+        color: var(--rs-dark);
+        margin-bottom: 0.15rem;
+    }
+    .reg-shell .rs-role-desc {
+        font-size: 0.7rem;
+        color: var(--rs-muted);
+        line-height: 1.35;
+    }
+    .reg-shell .rs-role-check {
+        position: absolute;
+        top: 0.55rem;
+        right: 0.55rem;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: var(--rs-sky);
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.6rem;
+        opacity: 0;
+        transform: scale(0.5);
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .reg-shell .rs-agent-fields {
+        max-height: 0;
+        overflow: hidden;
+        opacity: 0;
+        transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+    }
+    .reg-shell .rs-agent-fields.show {
+        max-height: 120px;
+        opacity: 1;
+    }
+    @media (max-width: 575.98px) {
+        .reg-shell .rs-role-picker { gap: 0.5rem; }
+        .reg-shell .rs-role-icon { width: 36px; height: 36px; font-size: 0.95rem; }
+        .reg-shell .rs-role-name { font-size: 0.82rem; }
+        .reg-shell .rs-role-desc { font-size: 0.65rem; }
+    }
 </style>
 @endpush
 
@@ -703,11 +796,22 @@
                     Get started free
                 </div>
                 <h1>Create your account</h1>
-                <p>Join Propsgh to save listings, book tours, and manage rentals.</p>
-                <div class="rs-steps">
-                    <div class="rs-step active"></div>
-                    <div class="rs-step"></div>
-                    <div class="rs-step"></div>
+                <p>Choose your account type and get started with Propsgh.</p>
+
+                {{-- Role picker --}}
+                <div class="rs-role-picker">
+                    <div class="rs-role-card {{ old('account_type', 'client') === 'client' ? 'selected' : '' }}" data-role="client">
+                        <span class="rs-role-check"><i class="fi-check"></i></span>
+                        <div class="rs-role-icon"><i class="fi-user"></i></div>
+                        <div class="rs-role-name">Individual</div>
+                        <div class="rs-role-desc">Browse &amp; book properties</div>
+                    </div>
+                    <div class="rs-role-card {{ old('account_type') === 'agent' ? 'selected' : '' }}" data-role="agent">
+                        <span class="rs-role-check"><i class="fi-check"></i></span>
+                        <div class="rs-role-icon"><i class="fi-briefcase"></i></div>
+                        <div class="rs-role-name">Agent</div>
+                        <div class="rs-role-desc">List &amp; manage properties</div>
+                    </div>
                 </div>
             </div>
 
@@ -715,6 +819,11 @@
             <div class="rs-card rs-fade" data-d="3">
                 <form class="needs-validation" novalidate method="POST" action="{{ route('register') }}">
                     @csrf
+                    <input type="hidden" name="account_type" id="account_type" value="{{ old('account_type', 'client') }}">
+
+                    @error('account_type')
+                        <div class="alert alert-danger py-2 fs-sm mb-3">{{ $message }}</div>
+                    @enderror
 
                     {{-- Full name --}}
                     <div class="rs-input-group">
@@ -754,6 +863,25 @@
                         @error('email')
                             <div class="invalid-feedback d-block">{{ $message }}</div>
                         @enderror
+                    </div>
+
+                    {{-- Company name (agent only) --}}
+                    <div class="rs-agent-fields {{ old('account_type') === 'agent' ? 'show' : '' }}" id="agentFields">
+                        <div class="rs-input-group">
+                            <label for="company_name"><i class="fi-briefcase"></i> Company / Agency name</label>
+                            <input
+                                type="text"
+                                id="company_name"
+                                name="company_name"
+                                class="form-control @error('company_name') is-invalid @enderror"
+                                placeholder="Your company or agency name"
+                                value="{{ old('company_name') }}"
+                                autocomplete="organization"
+                            >
+                            @error('company_name')
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                            @enderror
+                        </div>
                     </div>
 
                     {{-- Password row --}}
@@ -870,3 +998,27 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const cards = document.querySelectorAll('.rs-role-card');
+    const input = document.getElementById('account_type');
+    const agentFields = document.getElementById('agentFields');
+
+    cards.forEach(function (card) {
+        card.addEventListener('click', function () {
+            cards.forEach(function (c) { c.classList.remove('selected'); });
+            card.classList.add('selected');
+            input.value = card.dataset.role;
+
+            if (card.dataset.role === 'agent') {
+                agentFields.classList.add('show');
+            } else {
+                agentFields.classList.remove('show');
+            }
+        });
+    });
+});
+</script>
+@endpush
