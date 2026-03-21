@@ -297,11 +297,11 @@
                 <i class="fi-close fs-lg"></i>
               </button>
               <div class="position-absolute top-0 start-0 w-100 h-100 bg-body-tertiary" data-map="{
-                &quot;tileLayer&quot;: &quot;https://api.maptiler.com/maps/pastel/{z}/{x}/{y}.png?key=rqrCHwDtUZCUA2fCt3vV&quot;,
-                &quot;attribution&quot;: &quot;© Maptiler © OpenStreetMap contributors&quot;,
-                &quot;zoom&quot;: 15,
-                &quot;tileSize&quot;: 512,
-                &quot;zoomOffset&quot;: -1,
+                &quot;tileLayer&quot;: &quot;https://tile.openstreetmap.org/{z}/{x}/{y}.png&quot;,
+                &quot;attribution&quot;: &quot;© OpenStreetMap contributors&quot;,
+                &quot;zoom&quot;: 12,
+                &quot;tileSize&quot;: 256,
+                &quot;zoomOffset&quot;: 0,
                 &quot;templates&quot;: {
                   &quot;marker&quot;: &quot;<div class=\&quot;map-marker\&quot;><i class=\&quot;fi-map-pin-filled text-primary fs-4\&quot;></i><span class=\&quot;map-marker-price\&quot;>$@{{price}}</span></div>&quot;,
                   &quot;popup&quot;: &quot;<div class=\&quot;card bg-transparent border-0\&quot; data-bs-theme=\&quot;light\&quot;><div class=\&quot;card-img-top position-relative bg-body-tertiary overflow-hidden\&quot;><div class=\&quot;ratio d-block\&quot; style=\&quot;--fn-aspect-ratio: calc(248 / 362 * 100%)\&quot;><img src=\&quot;@{{image}}\&quot; alt=\&quot;Image\&quot;></div></div><div class=\&quot;card-body p-3\&quot;><div class=\&quot;h5 mb-2\&quot;>$@{{price}}</div><h3 class=\&quot;fs-sm fw-normal text-body mb-2\&quot;><a class=\&quot;stretched-link text-body\&quot; href=\&quot;#\&quot;>@{{address}}</a></h3><div class=\&quot;h6 fs-sm mb-0\&quot;>@{{area}} sq.m</div></div><div class=\&quot;card-footer d-flex gap-2 border-0 bg-transparent pt-0 pb-3 px-3 mt-n1\&quot;><div class=\&quot;d-flex align-items-center fs-sm gap-1 me-1\&quot;>@{{bedrooms}}<i class=\&quot;fi-bed-single fs-base text-secondary-emphasis\&quot;></i></div><div class=\&quot;d-flex align-items-center fs-sm gap-1 me-1\&quot;>@{{bathrooms}}<i class=\&quot;fi-shower fs-base text-secondary-emphasis\&quot;></i></div><div class=\&quot;d-flex align-items-center fs-sm gap-1 me-1\&quot;>@{{garage}}<i class=\&quot;fi-car-garage fs-base text-secondary-emphasis\&quot;></i></div></div></div>&quot;

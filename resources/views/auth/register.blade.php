@@ -534,20 +534,61 @@
             width: 100%;
         }
     }
+    @media (max-width: 767.98px) {
+        .reg-shell .rs-form-side {
+            padding: 2rem 1.25rem;
+        }
+        .reg-shell .rs-heading h1 {
+            font-size: 1.45rem;
+        }
+        .reg-shell .rs-form-container {
+            max-width: 100%;
+        }
+    }
     @media (max-width: 575.98px) {
         .reg-shell .rs-form-side {
-            padding: 1.5rem 1rem;
+            padding: 1.25rem 0.85rem;
+        }
+        .reg-shell .rs-brand-logo {
+            width: 42px;
+            height: 42px;
+        }
+        .reg-shell .rs-brand-name {
+            font-size: 1.15rem;
+        }
+        .reg-shell .rs-heading h1 {
+            font-size: 1.3rem;
+        }
+        .reg-shell .rs-heading p {
+            font-size: 0.82rem;
         }
         .reg-shell .rs-card {
             padding: 1.25rem;
+            border-radius: 1.15rem;
+        }
+        .reg-shell .rs-card .form-control {
+            padding: 0.65rem 0.85rem;
+            font-size: 0.88rem;
         }
         .reg-shell .rs-row {
             grid-template-columns: 1fr;
             gap: 0;
         }
+        .reg-shell .rs-submit {
+            padding: 0.65rem;
+            font-size: 0.88rem;
+        }
         .reg-shell .rs-trust {
             flex-direction: column;
             gap: 0.4rem;
+        }
+    }
+    @media (max-width: 374.98px) {
+        .reg-shell .rs-form-side {
+            padding: 1rem 0.65rem;
+        }
+        .reg-shell .rs-card {
+            padding: 1rem;
         }
     }
 </style>

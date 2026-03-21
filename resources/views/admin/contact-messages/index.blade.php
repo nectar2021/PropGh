@@ -3,15 +3,17 @@
 @section('title', 'Propsgh | Contact Messages')
 
 @section('content')
-<div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+<div class="admin-page-header d-flex flex-wrap align-items-center justify-content-between gap-3">
     <div>
         <h1 class="h3 mb-1">Contact messages</h1>
-        <p class="text-body-secondary mb-0">Review and respond to customer inquiries.</p>
+        <p class="text-body-secondary mb-0">{{ $messages->total() }} messages &middot; Review and respond to inquiries.</p>
     </div>
 </div>
 
 @if (session('status'))
-    <div class="alert alert-success">{{ session('status') }}</div>
+    <div class="alert alert-success d-flex align-items-center gap-2">
+        <i class="fi-check-circle"></i>{{ session('status') }}
+    </div>
 @endif
 
 <div class="card border-0 shadow-sm">

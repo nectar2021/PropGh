@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Property;
 use App\Models\PropertyImage;
+use App\Models\SiteSetting;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -77,6 +78,8 @@ class DatabaseSeeder extends Seeder
                 'bathrooms' => 1,
                 'garage_spaces' => 1,
                 'is_verified' => true,
+                'latitude' => 40.7143,
+                'longitude' => -73.9582,
                 'image_set' => ['assets/img/listings/real-estate/01.jpg'],
             ],
             [
@@ -86,6 +89,8 @@ class DatabaseSeeder extends Seeder
                 'bedrooms' => 1,
                 'bathrooms' => 1,
                 'garage_spaces' => 0,
+                'latitude' => 40.6197,
+                'longitude' => -74.0011,
                 'image_set' => ['assets/img/listings/real-estate/02.jpg'],
             ],
             [
@@ -96,6 +101,8 @@ class DatabaseSeeder extends Seeder
                 'bathrooms' => 1,
                 'garage_spaces' => 1,
                 'is_featured' => true,
+                'latitude' => 40.7801,
+                'longitude' => -73.9060,
                 'image_set' => ['assets/img/listings/real-estate/03.jpg'],
             ],
             [
@@ -106,6 +113,8 @@ class DatabaseSeeder extends Seeder
                 'bathrooms' => 1,
                 'garage_spaces' => 0,
                 'is_verified' => true,
+                'latitude' => 40.7001,
+                'longitude' => -73.8695,
                 'image_set' => ['assets/img/listings/real-estate/04.jpg'],
             ],
             [
@@ -116,6 +125,8 @@ class DatabaseSeeder extends Seeder
                 'bathrooms' => 1,
                 'garage_spaces' => 0,
                 'is_verified' => true,
+                'latitude' => 40.6964,
+                'longitude' => -73.9571,
                 'image_set' => ['assets/img/listings/real-estate/05.jpg'],
             ],
             [
@@ -125,6 +136,8 @@ class DatabaseSeeder extends Seeder
                 'bedrooms' => 3,
                 'bathrooms' => 2,
                 'garage_spaces' => 1,
+                'latitude' => 40.6899,
+                'longitude' => -73.9217,
                 'image_set' => ['assets/img/listings/real-estate/06.jpg'],
             ],
         ];
@@ -156,8 +169,8 @@ class DatabaseSeeder extends Seeder
                     'region' => 'NY',
                     'country' => 'USA',
                     'postal_code' => '11211',
-                    'latitude' => 40.7128,
-                    'longitude' => -73.9352,
+                    'latitude' => $data['latitude'],
+                    'longitude' => $data['longitude'],
                     'map_embed_url' => 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2311.3724100313693!2d-73.82417211551919!3d42.62335692577899!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89dde016efd1fe73%3A0x6861561b35064fe9!2sGlendale%20Ave!5e0!3m2!1sen!2suk!4v1726842151281!5m2!1sen!2suk',
                     'amenities' => [
                         'WiFi',
@@ -189,6 +202,27 @@ class DatabaseSeeder extends Seeder
                     'sort_order' => $imageIndex,
                 ]);
             }
+        }
+
+        // Default site settings
+        $defaults = [
+            'contact_email' => 'hello@propsgh.com',
+            'contact_phone' => '+233 20 000 0000',
+            'brand_description' => 'Premium stays and investments across Ghana — curated, verified, and supported by local experts.',
+            'social_instagram' => '',
+            'social_facebook' => '',
+            'social_twitter' => '',
+            'social_youtube' => '',
+            'stat_rating' => '4.9/5',
+            'stat_rating_label' => 'Guest rating',
+            'stat_support' => '24/7',
+            'stat_support_label' => 'Support',
+            'stat_satisfaction' => '98%',
+            'stat_satisfaction_label' => 'Satisfaction',
+        ];
+
+        foreach ($defaults as $key => $value) {
+            SiteSetting::firstOrCreate(['key' => $key], ['value' => $value]);
         }
     }
 }

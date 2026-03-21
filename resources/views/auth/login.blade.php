@@ -556,16 +556,57 @@
             width: 100%;
         }
     }
+    @media (max-width: 767.98px) {
+        .login-shell .ls-form-side {
+            padding: 2rem 1.25rem;
+        }
+        .login-shell .ls-heading h1 {
+            font-size: 1.45rem;
+        }
+        .login-shell .ls-form-container {
+            max-width: 100%;
+        }
+    }
     @media (max-width: 575.98px) {
         .login-shell .ls-form-side {
-            padding: 1.5rem 1rem;
+            padding: 1.25rem 0.85rem;
+        }
+        .login-shell .ls-brand-logo {
+            width: 42px;
+            height: 42px;
+        }
+        .login-shell .ls-brand-name {
+            font-size: 1.15rem;
+        }
+        .login-shell .ls-heading h1 {
+            font-size: 1.3rem;
+        }
+        .login-shell .ls-heading p {
+            font-size: 0.82rem;
         }
         .login-shell .ls-card {
             padding: 1.25rem;
+            border-radius: 1.15rem;
+        }
+        .login-shell .ls-card .form-control {
+            padding: 0.65rem 0.85rem;
+            font-size: 0.88rem;
+        }
+        .login-shell .ls-submit {
+            padding: 0.65rem;
+            font-size: 0.88rem;
         }
         .login-shell .ls-trust {
             flex-direction: column;
             gap: 0.5rem;
+        }
+    }
+    @media (max-width: 374.98px) {
+        .login-shell .ls-form-side {
+            padding: 1rem 0.65rem;
+        }
+        .login-shell .ls-card {
+            padding: 1rem;
         }
     }
 </style>

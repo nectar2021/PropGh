@@ -3,19 +3,17 @@
 @section('title', 'Propsgh | Properties')
 
 @section('content')
-<div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+<div class="admin-page-header d-flex flex-wrap align-items-center justify-content-between gap-3">
     <div>
         <h1 class="h3 mb-1">Properties</h1>
-        <p class="text-body-secondary mb-0">Manage listings, pricing, and availability.</p>
+        <p class="text-body-secondary mb-0">{{ $properties->total() }} listings &middot; Manage pricing and availability.</p>
     </div>
     <div class="d-flex gap-2">
-        <a class="btn btn-outline-secondary btn-sm" href="{{ route('properties.index') }}">
-            <i class="fi-eye fs-sm me-1"></i>
-            Preview site
+        <a class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center gap-1" href="{{ route('properties.index') }}">
+            <i class="fi-eye fs-sm"></i> Preview site
         </a>
-        <a class="btn btn-primary btn-sm" href="{{ route('admin.properties.create') }}">
-            <i class="fi-plus fs-sm me-1"></i>
-            Add property
+        <a class="btn btn-primary btn-sm d-inline-flex align-items-center gap-1" href="{{ route('admin.properties.create') }}">
+            <i class="fi-plus fs-sm"></i> Add property
         </a>
     </div>
 </div>
