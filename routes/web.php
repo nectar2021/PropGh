@@ -2,18 +2,22 @@
 
 use App\Http\Controllers\Admin\AgentController as AdminAgentController;
 use App\Http\Controllers\Admin\AuthenticatedSessionController as AdminAuthenticatedSessionController;
+use App\Http\Controllers\Admin\ClientController as AdminClientController;
 use App\Http\Controllers\Admin\ContactMessageController as AdminContactMessageController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\LegalPageController as AdminLegalPageController;
 use App\Http\Controllers\Admin\ProfileController as AdminProfileController;
 use App\Http\Controllers\Admin\PropertyController as AdminPropertyController;
+use App\Http\Controllers\Admin\PropertyInquiryController as AdminPropertyInquiryController;
 use App\Http\Controllers\Admin\SiteSettingController as AdminSiteSettingController;
 use App\Http\Controllers\Admin\SubscriberController as AdminSubscriberController;
+use App\Http\Controllers\Agent\PropertyController as AgentPropertyController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PropertyController;
+use App\Http\Controllers\PropertyInquiryController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -21,6 +25,8 @@ Route::redirect('/home', '/');
 Route::get('/properties', [PropertyController::class, 'index'])->name('properties.index');
 Route::get('/properties/map', [PropertyController::class, 'map'])->name('properties.map');
 Route::get('/properties/{property}', [PropertyController::class, 'show'])->name('properties.show');
+Route::post('/properties/{property}/tour', [PropertyInquiryController::class, 'storeTour'])->name('properties.tour');
+Route::post('/properties/{property}/message', [PropertyInquiryController::class, 'storeMessage'])->name('properties.message');
 Route::view('/contact', 'contact')->name('contact');
 Route::post('/contact', [ContactController::class, 'store'])->name('contact.store');
 Route::get('/terms', function () {
@@ -45,6 +51,15 @@ Route::middleware('guest')->group(function (): void {
 Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
     ->middleware('auth')
     ->name('logout');
+
+Route::middleware('auth')->prefix('dashboard')->name('agent.')->group(function (): void {
+    Route::get('/properties', [AgentPropertyController::class, 'index'])->name('properties.index');
+    Route::get('/properties/create', [AgentPropertyController::class, 'create'])->name('properties.create');
+    Route::post('/properties', [AgentPropertyController::class, 'store'])->name('properties.store');
+    Route::get('/properties/{property}/edit', [AgentPropertyController::class, 'edit'])->name('properties.edit');
+    Route::put('/properties/{property}', [AgentPropertyController::class, 'update'])->name('properties.update');
+    Route::delete('/properties/{property}', [AgentPropertyController::class, 'destroy'])->name('properties.destroy');
+});
 
 Route::middleware('guest')->prefix('admin')->name('admin.')->group(function (): void {
     Route::get('/login', [AdminAuthenticatedSessionController::class, 'create'])->name('login');
@@ -75,4 +90,8 @@ Route::middleware('admin.auth')->prefix('admin')->name('admin.')->group(function
     Route::get('/agents', [AdminAgentController::class, 'index'])->name('agents.index');
     Route::put('/agents/{user}/verify', [AdminAgentController::class, 'verify'])->name('agents.verify');
     Route::put('/agents/{user}/unverify', [AdminAgentController::class, 'unverify'])->name('agents.unverify');
+    Route::get('/clients', [AdminClientController::class, 'index'])->name('clients.index');
+    Route::delete('/clients/{user}', [AdminClientController::class, 'destroy'])->name('clients.destroy');
+    Route::get('/inquiries', [AdminPropertyInquiryController::class, 'index'])->name('inquiries.index');
+    Route::delete('/inquiries/{inquiry}', [AdminPropertyInquiryController::class, 'destroy'])->name('inquiries.destroy');
 });

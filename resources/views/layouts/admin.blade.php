@@ -47,6 +47,14 @@
                         <i class="fi-grid fs-base"></i>
                         Properties
                     </a>
+                    <a class="nav-link {{ request()->routeIs('admin.inquiries.*') ? 'active' : '' }}" href="{{ route('admin.inquiries.index') }}">
+                        <i class="fi-inbox fs-base"></i>
+                        Inquiries
+                        @php $inquiryCount = \App\Models\PropertyInquiry::count(); @endphp
+                        @if($inquiryCount > 0)
+                            <span class="admin-nav-badge">{{ $inquiryCount }}</span>
+                        @endif
+                    </a>
                     <a class="nav-link {{ request()->routeIs('admin.messages.*') ? 'active' : '' }}" href="{{ route('admin.messages.index') }}">
                         <i class="fi-mail fs-base"></i>
                         Messages
@@ -69,6 +77,14 @@
                         @php $pendingAgentCount = \App\Models\User::where('role', 'agent')->where('is_verified', false)->count(); @endphp
                         @if($pendingAgentCount > 0)
                             <span class="admin-nav-badge">{{ $pendingAgentCount }}</span>
+                        @endif
+                    </a>
+                    <a class="nav-link {{ request()->routeIs('admin.clients.*') ? 'active' : '' }}" href="{{ route('admin.clients.index') }}">
+                        <i class="fi-user fs-base"></i>
+                        Clients
+                        @php $clientCount = \App\Models\User::where('role', 'client')->count(); @endphp
+                        @if($clientCount > 0)
+                            <span class="admin-nav-badge">{{ $clientCount }}</span>
                         @endif
                     </a>
                 </nav>

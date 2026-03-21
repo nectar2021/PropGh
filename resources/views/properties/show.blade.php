@@ -12,37 +12,42 @@
   <!-- Tour booking form modal -->
   <div class="modal fade" id="tourBooking" tabindex="-1" aria-labelledby="tourBookingLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" style="max-width: 400px">
-      <form class="modal-content needs-validation" novalidate>
+      <form class="modal-content" method="POST" action="{{ route('properties.tour', $property) }}">
+        @csrf
         <div class="modal-header border-0">
           <h5 class="modal-title" id="tourBookingLabel">Schedule a tour</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body pb-4 pt-0">
-          <ul class="nav nav-pills nav-justified mb-4">
-            <li class="nav-item">
-              <a class="nav-link active" aria-current="page" href="#">In-person</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#">Video chat</a>
-            </li>
-          </ul>
+          <div class="nav nav-pills nav-justified mb-4">
+            <button type="button" class="nav-link active" data-tour-type="in-person" onclick="selectTourType(this)">In-person</button>
+            <button type="button" class="nav-link" data-tour-type="video" onclick="selectTourType(this)">Video chat</button>
+          </div>
+          <input type="hidden" name="tour_type" value="in-person">
           <div class="vstack gap-3">
             <div class="position-relative">
               <i class="fi-calendar position-absolute top-50 start-0 translate-middle-y ms-3"></i>
-              <input type="text" class="form-control form-icon-start bg-transparent" data-datepicker='{"dateFormat":"M j, Y"}' placeholder="Choose date *" required>
+              <input type="text" name="tour_date" class="form-control form-icon-start bg-transparent" data-datepicker='{"dateFormat":"Y-m-d","minDate":"today"}' placeholder="Choose date *" required>
             </div>
             <div class="position-relative">
               <i class="fi-clock position-absolute top-50 start-0 translate-middle-y ms-3"></i>
-              <input type="text" class="form-control form-icon-start" id="time-12" data-datepicker='{"enableTime":true,"noCalendar":true,"dateFormat":"h:i K"}' placeholder="Choose time *" required>
+              <input type="text" name="tour_time" class="form-control form-icon-start" data-datepicker='{"enableTime":true,"noCalendar":true,"dateFormat":"h:i K"}' placeholder="Choose time *" required>
             </div>
-            <input type="text" class="form-control" placeholder="Name *" required>
-            <input type="email" class="form-control" placeholder="Email *" required>
-            <input type="tel" class="form-control" data-input-format='{"numericOnly":true,"delimiters":["+1 "," "," "],"blocks":[0,3,3,2]}' placeholder="Phone number">
+            <input type="text" name="name" class="form-control" placeholder="Name *" value="{{ auth()->user()?->name }}" required>
+            <input type="email" name="email" class="form-control" placeholder="Email *" value="{{ auth()->user()?->email }}" required>
+            <input type="tel" name="phone" class="form-control" placeholder="Phone number" value="{{ auth()->user()?->phone }}">
           </div>
+          @if ($errors->any() && old('_token') && request()->routeIs('properties.show'))
+            <div class="text-danger fs-xs mt-2">
+              @foreach ($errors->all() as $error)
+                <div>{{ $error }}</div>
+              @endforeach
+            </div>
+          @endif
         </div>
         <div class="modal-footer border-0 pt-0 pb-4 px-4">
           <button type="submit" class="btn btn-lg btn-primary w-100 m-0 mb-3">Schedule a tour</button>
-          <p class="fs-xs m-0">This site is protected by reCAPTCHA and the Google <a class="hover-effect-underline text-decoration-none" href="#!">Privacy Policy</a> and <a class="hover-effect-underline text-decoration-none" href="#!">Terms of Service</a> apply.</p>
+          <p class="fs-xs m-0">By submitting, you agree to our <a class="hover-effect-underline text-decoration-none" href="{{ route('privacy') }}">Privacy Policy</a> and <a class="hover-effect-underline text-decoration-none" href="{{ route('terms') }}">Terms of Service</a>.</p>
         </div>
       </form>
     </div>
@@ -51,7 +56,8 @@
   <!-- Contact form modal -->
   <div class="modal fade" id="contactForm" tabindex="-1" aria-labelledby="contactFormLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" style="max-width: 400px">
-      <form class="modal-content needs-validation" novalidate>
+      <form class="modal-content" method="POST" action="{{ route('properties.message', $property) }}">
+        @csrf
         <div class="modal-header border-0">
           <h5 class="modal-title" id="contactFormLabel">Learn more about this property</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -59,21 +65,36 @@
         <div class="modal-body pb-4 pt-0">
           <p class="fs-sm">Complete this form so we can get in touch</p>
           <div class="vstack gap-3">
-            <input type="text" class="form-control" placeholder="Name *" required>
-            <input type="email" class="form-control" placeholder="Email *" required>
-            <input type="tel" class="form-control" data-input-format='{"numericOnly":true,"delimiters":["+1 "," "," "],"blocks":[0,3,3,2]}' placeholder="Phone number">
-            <textarea class="form-control" rows="5" placeholder="Write your message" required></textarea>
+            <input type="text" name="name" class="form-control" placeholder="Name *" value="{{ auth()->user()?->name }}" required>
+            <input type="email" name="email" class="form-control" placeholder="Email *" value="{{ auth()->user()?->email }}" required>
+            <input type="tel" name="phone" class="form-control" placeholder="Phone number" value="{{ auth()->user()?->phone }}">
+            <textarea name="message" class="form-control" rows="5" placeholder="Write your message *" required></textarea>
           </div>
+          @if ($errors->any() && old('_token') && request()->routeIs('properties.show'))
+            <div class="text-danger fs-xs mt-2">
+              @foreach ($errors->all() as $error)
+                <div>{{ $error }}</div>
+              @endforeach
+            </div>
+          @endif
         </div>
         <div class="modal-footer border-0 pt-0 pb-4 px-4">
           <button type="submit" class="btn btn-lg btn-primary w-100 m-0 mb-3">Send message</button>
-          <p class="fs-xs m-0">This site is protected by reCAPTCHA and the Google <a class="hover-effect-underline text-decoration-none" href="#!">Privacy Policy</a> and <a class="hover-effect-underline text-decoration-none" href="#!">Terms of Service</a> apply.</p>
+          <p class="fs-xs m-0">By submitting, you agree to our <a class="hover-effect-underline text-decoration-none" href="{{ route('privacy') }}">Privacy Policy</a> and <a class="hover-effect-underline text-decoration-none" href="{{ route('terms') }}">Terms of Service</a>.</p>
         </div>
       </form>
     </div>
   </div>
 
   <div class="container pt-4 pb-5 mb-xxl-3">
+
+    @if (session('inquiry_success'))
+      <div class="alert alert-success d-flex align-items-center gap-2 mb-4" role="alert">
+        <i class="fi-check-circle fs-lg"></i>
+        <div>{{ session('inquiry_success') }}</div>
+      </div>
+    @endif
+
     <!-- Breadcrumb -->
     @php
       $listingTypeLabel = match (strtolower($property->listing_type ?? '')) {
@@ -396,9 +417,11 @@
               @php
                 $owner = $property->owner;
                 $ownerName = $owner?->name ?? 'Propsgh Team';
-                $ownerRole = $owner?->role ? ucfirst($owner->role) : 'Host';
+                $ownerRole = $owner?->isAgent() ? 'Agent' : ($owner?->isAdmin() ? 'Admin' : 'Owner');
                 $ownerEmail = $owner?->email;
                 $ownerPhone = $owner?->phone;
+                $ownerCompany = $owner?->company_name;
+                $ownerVerified = $owner?->is_verified ?? false;
                 $ownerAvatar = $owner?->avatar_path ? asset($owner->avatar_path) : asset('assets/img/listings/real-estate/single/avatar.jpg');
               @endphp
               <div class="d-flex align-items-center position-relative mb-4">
@@ -408,32 +431,49 @@
                 <div class="ps-4">
                   <h5 class="mb-1">
                     <a class="hover-effect-underline stretched-link" href="#">{{ $ownerName }}</a>
+                    @if ($ownerVerified)
+                      <i class="fi-shield text-info fs-sm ms-1" title="Verified agent"></i>
+                    @endif
                   </h5>
                   <p class="fs-sm mb-0">{{ $ownerRole }}</p>
+                  @if ($ownerCompany)
+                    <p class="fs-xs text-body-secondary mb-0">{{ $ownerCompany }}</p>
+                  @endif
                 </div>
               </div>
               <ul class="nav flex-column gap-2 mb-4">
-                @if ($ownerEmail)
-                  <li class="nav-item d-flex align-items-center position-relative">
-                    <i class="fi-mail me-2"></i>
-                    <a class="nav-link hover-effect-underline stretched-link fw-normal text-body p-0" href="mailto:{{ $ownerEmail }}">{{ $ownerEmail }}</a>
+                @auth
+                  @if ($ownerEmail)
+                    <li class="nav-item d-flex align-items-center position-relative">
+                      <i class="fi-mail me-2"></i>
+                      <a class="nav-link hover-effect-underline stretched-link fw-normal text-body p-0" href="mailto:{{ $ownerEmail }}">{{ $ownerEmail }}</a>
+                    </li>
+                  @endif
+                  @if ($ownerPhone)
+                    <li class="nav-item d-flex align-items-center position-relative">
+                      <i class="fi-phone me-2"></i>
+                      <a class="nav-link hover-effect-underline stretched-link fw-normal text-body p-0" href="tel:{{ $ownerPhone }}">{{ $ownerPhone }}</a>
+                    </li>
+                  @endif
+                @else
+                  <li class="nav-item text-body-secondary fs-sm">
+                    <i class="fi-lock me-1"></i>Sign in to view contact details
                   </li>
-                @endif
-                @if ($ownerPhone)
-                  <li class="nav-item d-flex align-items-center position-relative">
-                    <i class="fi-phone me-2"></i>
-                    <a class="nav-link hover-effect-underline stretched-link fw-normal text-body p-0" href="tel:{{ $ownerPhone }}">{{ $ownerPhone }}</a>
-                  </li>
-                @endif
+                @endauth
               </ul>
-              <button type="button" class="btn btn-lg btn-primary w-100" data-bs-toggle="modal" data-bs-target="#tourBooking">Schedule a tour</button>
-              <div class="fs-xs text-center pt-1 pb-2 my-2">It's free, cancel anytime</div>
-              <div class="d-flex align-items-center mb-3">
-                <hr class="w-100 m-0">
-                <div class="mt-n1 px-3">or</div>
-                <hr class="w-100 m-0">
-              </div>
-              <button type="button" class="btn btn-lg btn-outline-dark w-100" data-bs-toggle="modal" data-bs-target="#contactForm">Send message</button>
+              @auth
+                <button type="button" class="btn btn-lg btn-primary w-100" data-bs-toggle="modal" data-bs-target="#tourBooking">Schedule a tour</button>
+                <div class="fs-xs text-center pt-1 pb-2 my-2">It's free, cancel anytime</div>
+                <div class="d-flex align-items-center mb-3">
+                  <hr class="w-100 m-0">
+                  <div class="mt-n1 px-3">or</div>
+                  <hr class="w-100 m-0">
+                </div>
+                <button type="button" class="btn btn-lg btn-outline-dark w-100" data-bs-toggle="modal" data-bs-target="#contactForm">Send message</button>
+              @else
+                <a href="{{ route('login') }}" class="btn btn-lg btn-primary w-100">Sign in to contact agent</a>
+                <p class="fs-xs text-center text-body-secondary pt-2 mb-0">Don't have an account? <a href="{{ route('register') }}">Register</a></p>
+              @endauth
             </div>
           </div>
         </div>
@@ -446,4 +486,13 @@
 <script src="{{ asset('assets/vendor/glightbox/glightbox.min.js') }}"></script>
 <script src="{{ asset('assets/vendor/flatpickr/flatpickr.min.js') }}"></script>
 <script src="{{ asset('assets/vendor/cleave.js/cleave.min.js') }}"></script>
+<script>
+  function selectTourType(btn) {
+    btn.closest('.nav').querySelectorAll('.nav-link').forEach(function(el) {
+      el.classList.remove('active');
+    });
+    btn.classList.add('active');
+    btn.closest('form').querySelector('input[name="tour_type"]').value = btn.dataset.tourType;
+  }
+</script>
 @endpush
