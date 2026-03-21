@@ -1,23 +1,15 @@
-<header
-    class="navbar navbar-expand-lg fixed-top z-fixed px-0 propsgh-nav"
->
+<header class="navbar navbar-expand-lg fixed-top z-fixed px-0 propsgh-nav">
     <div class="container-fluid">
         {{-- Brand / Logo --}}
-<a
-    class="navbar-brand d-flex align-items-center p-0 me-3 me-lg-4"
-    href="{{ route('home') }}"
->
-    <span
-        class="d-inline-flex align-items-center justify-content-center rounded-circle overflow-hidden"
-        style="width: 44px; height: 44px;"
-    >
-        <img
-            src="{{ asset('assets/img/francee.jpeg') }}"
-            alt="Propsgh"
-            style="width: 100%; height: 100%; object-fit: cover; display: block;"
-        >
-    </span>
-</a>
+        <a class="navbar-brand pg-brand" href="{{ route('home') }}">
+            <span class="pg-brand-mark" aria-hidden="true">
+                <svg viewBox="0 0 28 32" fill="none" xmlns="http://www.w3.org/2000/svg" class="pg-brand-svg">
+                    <path d="M4.5 2C2.5 2 1 3.8 1 6v8c0 2.2 1.5 4 3.5 4h3c2 0 3.5-1.8 3.5-4V6c0-2.2-1.5-4-3.5-4h-3Z" fill="currentColor"/>
+                    <path d="M16.5 8c-2 0-3.5 1.8-3.5 4v12c0 2.2 1.5 4 3.5 4h3c2 0 3.5-1.8 3.5-4V12c0-2.2-1.5-4-3.5-4h-3Z" fill="currentColor" opacity=".72"/>
+                </svg>
+            </span>
+            <span class="pg-brand-text">Props<span class="pg-brand-accent">gh</span></span>
+        </a>
 
         {{-- Mobile toggler --}}
         <button
@@ -32,51 +24,30 @@
         </button>
 
         {{-- Main navigation / offcanvas --}}
-        <nav
-            class="offcanvas offcanvas-start"
-            id="navbarNav"
-            tabindex="-1"
-            aria-labelledby="navbarNavLabel"
-        >
+        <nav class="offcanvas offcanvas-start" id="navbarNav" tabindex="-1" aria-labelledby="navbarNavLabel">
             <div class="offcanvas-header py-3">
                 <h5 class="offcanvas-title" id="navbarNavLabel">Menu</h5>
-                <button
-                    type="button"
-                    class="btn-close"
-                    data-bs-dismiss="offcanvas"
-                    aria-label="Close"
-                ></button>
+                <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
             </div>
 
             <div class="offcanvas-body pt-2 pb-4 py-lg-0 mx-lg-auto">
-                <ul class="navbar-nav position-relative pg-nav-links">
+                <ul class="navbar-nav position-relative pg-nav-pills">
                     <li class="nav-item">
-                        <a
-                            class="nav-link pg-nav-link {{ request()->routeIs('home') ? 'active' : '' }}"
-                            href="{{ route('home') }}"
-                        >
-                            <i class="fi-home pg-nav-icon"></i>
-                            <span class="pg-nav-label">Home</span>
+                        <a class="nav-link pg-pill {{ request()->routeIs('home') ? 'active' : '' }}" href="{{ route('home') }}">
+                            <i class="fi-home pg-pill-icon"></i>
+                            <span>Home</span>
                         </a>
                     </li>
-
                     <li class="nav-item">
-                        <a
-                            class="nav-link pg-nav-link {{ request()->routeIs('properties.index') ? 'active' : '' }}"
-                            href="{{ route('properties.index') }}"
-                        >
-                            <i class="fi-key pg-nav-icon"></i>
-                            <span class="pg-nav-label">Properties</span>
+                        <a class="nav-link pg-pill {{ request()->routeIs('properties.*') ? 'active' : '' }}" href="{{ route('properties.index') }}">
+                            <i class="fi-key pg-pill-icon"></i>
+                            <span>Properties</span>
                         </a>
                     </li>
-
                     <li class="nav-item">
-                        <a
-                            class="nav-link pg-nav-link {{ request()->routeIs('contact') ? 'active' : '' }}"
-                            href="{{ route('contact') }}"
-                        >
-                            <i class="fi-send pg-nav-icon"></i>
-                            <span class="pg-nav-label">Contact</span>
+                        <a class="nav-link pg-pill {{ request()->routeIs('contact') ? 'active' : '' }}" href="{{ route('contact') }}">
+                            <i class="fi-send pg-pill-icon"></i>
+                            <span>Contact</span>
                         </a>
                     </li>
                 </ul>
@@ -84,12 +55,12 @@
         </nav>
 
         {{-- Right controls --}}
-        <div class="d-flex align-items-center gap-2">
+        <div class="pg-nav-actions">
             {{-- Theme switcher --}}
             <div class="dropdown">
                 <button
                     type="button"
-                    class="theme-switcher pg-icon-btn"
+                    class="theme-switcher pg-action-btn"
                     data-bs-toggle="dropdown"
                     data-bs-display="dynamic"
                     aria-expanded="false"
@@ -127,10 +98,10 @@
             {{-- User / Login --}}
             @auth
                 <div class="dropdown">
-                    <button class="pg-icon-btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Account menu">
+                    <button class="pg-action-btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Account menu">
                         <i class="fi-user"></i>
                     </button>
-                    <ul class="dropdown-menu dropdown-menu-end" style="min-width: 200px;">
+                    <ul class="dropdown-menu dropdown-menu-end" style="min-width: 210px;">
                         <li class="px-3 py-2 border-bottom">
                             <div class="fw-semibold text-truncate">{{ Auth::user()->name }}</div>
                             <div class="text-body-secondary fs-xs text-truncate">{{ Auth::user()->email }}</div>
@@ -160,7 +131,7 @@
                     </ul>
                 </div>
             @else
-                <a class="pg-icon-btn" href="{{ route('login') }}" aria-label="Login">
+                <a class="pg-action-btn" href="{{ route('login') }}" aria-label="Login">
                     <i class="fi-user"></i>
                 </a>
             @endauth

@@ -23,14 +23,13 @@
       <div class="ft-brand-col">
         <a href="{{ route('home') }}" class="ft-brand-link">
           <span class="ft-logo-wrap">
-            <img
-              src="{{ asset('assets/img/francee.jpeg') }}"
-              alt="Propsgh"
-              class="ft-logo"
-            >
+            <svg viewBox="0 0 28 32" fill="none" xmlns="http://www.w3.org/2000/svg" class="ft-logo-svg">
+              <path d="M4.5 2C2.5 2 1 3.8 1 6v8c0 2.2 1.5 4 3.5 4h3c2 0 3.5-1.8 3.5-4V6c0-2.2-1.5-4-3.5-4h-3Z" fill="currentColor"/>
+              <path d="M16.5 8c-2 0-3.5 1.8-3.5 4v12c0 2.2 1.5 4 3.5 4h3c2 0 3.5-1.8 3.5-4V12c0-2.2-1.5-4-3.5-4h-3Z" fill="currentColor" opacity=".72"/>
+            </svg>
           </span>
           <span class="ft-brand-text">
-            <span class="ft-brand-name">Propsgh</span>
+            <span class="ft-brand-name">Props<span class="ft-brand-accent">gh</span></span>
             <span class="ft-brand-tag">Discover &middot; Book &middot; Host</span>
           </span>
         </a>
