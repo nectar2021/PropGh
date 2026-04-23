@@ -5,9 +5,11 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Property;
 use App\Models\User;
+use App\Support\PropertyCatalog;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class PropertyController extends Controller
@@ -82,7 +84,8 @@ class PropertyController extends Controller
         $data['slug'] = $this->uniqueSlug($data['slug'] ?? $data['title']);
         $data['owner_id'] = $data['owner_id'] ?? $request->user()?->id;
         $data['listing_type'] = strtolower($data['listing_type']);
-        $data['property_type'] = strtolower($data['property_type']);
+        $data['property_type'] = PropertyCatalog::normalizePropertyType($data['property_type']);
+        $data['currency'] = strtoupper($data['currency']);
         $data['price_period'] = strtolower($data['price_period']);
         $data['is_featured'] = $request->boolean('is_featured');
         $data['is_verified'] = $request->boolean('is_verified');
@@ -126,7 +129,8 @@ class PropertyController extends Controller
         $data['slug'] = $this->uniqueSlug($data['slug'] ?? $data['title'], $property->id);
         $data['owner_id'] = $data['owner_id'] ?? $request->user()?->id;
         $data['listing_type'] = strtolower($data['listing_type']);
-        $data['property_type'] = strtolower($data['property_type']);
+        $data['property_type'] = PropertyCatalog::normalizePropertyType($data['property_type']);
+        $data['currency'] = strtoupper($data['currency']);
         $data['price_period'] = strtolower($data['price_period']);
         $data['is_featured'] = $request->boolean('is_featured');
         $data['is_verified'] = $request->boolean('is_verified');
@@ -165,16 +169,17 @@ class PropertyController extends Controller
             'title' => ['required', 'string', 'max:255'],
             'slug' => ['nullable', 'string', 'max:255'],
             'description' => ['required', 'string'],
-            'listing_type' => ['required', 'string', 'max:50'],
-            'property_type' => ['required', 'string', 'max:50'],
+            'listing_type' => ['required', Rule::in(array_keys(PropertyCatalog::listingTypes()))],
+            'property_type' => ['required', Rule::in(array_keys(PropertyCatalog::propertyTypes()))],
             'price' => ['required', 'numeric', 'min:0'],
-            'price_period' => ['required', 'string', 'max:20'],
+            'currency' => ['required', Rule::in(array_keys(PropertyCatalog::currencyOptions()))],
+            'price_period' => ['required', Rule::in(array_keys(PropertyCatalog::pricePeriods()))],
             'deposit' => ['nullable', 'numeric', 'min:0'],
             'bedrooms' => ['nullable', 'integer', 'min:0'],
             'bathrooms' => ['nullable', 'integer', 'min:0'],
             'garage_spaces' => ['nullable', 'integer', 'min:0'],
             'area' => ['nullable', 'numeric', 'min:0'],
-            'year_built' => ['nullable', 'integer', 'min:1800', 'max:' . $yearMax],
+            'year_built' => ['nullable', 'integer', 'min:1800', 'max:'.$yearMax],
             'floor' => ['nullable', 'integer', 'min:0'],
             'total_rooms' => ['nullable', 'integer', 'min:0'],
             'address' => ['nullable', 'string', 'max:255'],
@@ -189,8 +194,8 @@ class PropertyController extends Controller
             'amenities.*' => ['string', 'max:50'],
             'pets_allowed' => ['nullable', 'array'],
             'pets_allowed.*' => ['string', 'max:50'],
-            'status' => ['required', 'string', 'in:' . implode(',', array_keys($this->statusOptions()))],
-            'visibility' => ['required', 'string', 'in:' . implode(',', array_keys($this->visibilityOptions()))],
+            'status' => ['required', 'string', 'in:'.implode(',', array_keys($this->statusOptions()))],
+            'visibility' => ['required', 'string', 'in:'.implode(',', array_keys($this->visibilityOptions()))],
             'published_at' => ['nullable', 'date'],
             'images' => ['nullable', 'string'],
         ]);
@@ -203,7 +208,7 @@ class PropertyController extends Controller
         $counter = 1;
 
         while ($this->slugExists($slug, $ignoreId)) {
-            $slug = $base . '-' . $counter;
+            $slug = $base.'-'.$counter;
             $counter++;
         }
 
@@ -224,7 +229,7 @@ class PropertyController extends Controller
     private function syncImages(Property $property, ?string $imagesText): void
     {
         $paths = collect(preg_split('/\r\n|\r|\n/', (string) $imagesText))
-            ->map(fn($path) => trim($path))
+            ->map(fn ($path) => trim($path))
             ->filter()
             ->values();
 
@@ -249,25 +254,10 @@ class PropertyController extends Controller
     private function formOptions(): array
     {
         return [
-            'listingTypes' => [
-                'rent' => 'For rent',
-                'sale' => 'For sale',
-                'shortlet' => 'Shortlet',
-            ],
-            'propertyTypes' => [
-                'apartment' => 'Apartment',
-                'house' => 'House',
-                'studio' => 'Studio',
-                'condo' => 'Condo',
-                'townhouse' => 'Townhouse',
-                'shortlet' => 'Shortlet',
-            ],
-            'pricePeriods' => [
-                'day' => 'Daily',
-                'week' => 'Weekly',
-                'month' => 'Monthly',
-                'year' => 'Yearly',
-            ],
+            'listingTypes' => PropertyCatalog::listingTypes(),
+            'propertyTypes' => PropertyCatalog::propertyTypes(),
+            'currencyOptions' => PropertyCatalog::currencyOptions(),
+            'pricePeriods' => PropertyCatalog::pricePeriods(),
             'amenityOptions' => [
                 'WiFi',
                 'Dishwasher',

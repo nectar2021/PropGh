@@ -19,6 +19,7 @@
     $selectedPets = old('pets_allowed', $property->pets_allowed ?? []);
     $currentListingType = old('listing_type', $property->listing_type);
     $currentPropertyType = old('property_type', $property->property_type);
+    $currentCurrency = strtoupper((string) old('currency', $property->currency ?: \App\Models\Property::defaultCurrency()));
 @endphp
 
 <div class="col-lg-8">
@@ -130,6 +131,14 @@
             <div class="mb-3">
                 <label class="form-label">Price</label>
                 <input type="number" class="form-control" name="price" min="0" value="{{ old('price', $property->price) }}" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Currency</label>
+                <select class="form-select" name="currency" required>
+                    @foreach ($currencyOptions as $value => $currency)
+                        <option value="{{ $value }}" @selected($currentCurrency === $value)>{{ $value }} — {{ $currency['label'] }}</option>
+                    @endforeach
+                </select>
             </div>
             <div class="mb-3">
                 <label class="form-label">Price period</label>

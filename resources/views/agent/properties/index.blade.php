@@ -54,7 +54,7 @@
                         <div class="card-body">
                             <h6 class="card-title mb-1">{{ Str::limit($property->title, 40) }}</h6>
                             <p class="text-body-secondary fs-sm mb-2">{{ $property->city ? $property->city . ', ' : '' }}{{ $property->region }}</p>
-                            <div class="fw-semibold text-primary">${{ number_format($property->price) }}
+                            <div class="fw-semibold text-primary">{{ $property->formatted_price }}
                                 @if ($property->price_period)
                                     <span class="fw-normal text-body-secondary fs-xs">/ {{ $property->price_period }}</span>
                                 @endif

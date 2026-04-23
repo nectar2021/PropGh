@@ -25,42 +25,58 @@ class HomeController extends Controller
             ->whereNotNull('property_type')
             ->selectRaw('LOWER(property_type) as type, COUNT(*) as total')
             ->groupBy('type')
-            ->pluck('total', 'type');
+            ->get()
+            ->reduce(function (array $carry, $row): array {
+                $key = $this->normalizePropertyType((string) $row->type);
 
-        $listingCounts = (clone $baseQuery)
-            ->whereNotNull('listing_type')
-            ->selectRaw('LOWER(listing_type) as type, COUNT(*) as total')
-            ->groupBy('type')
-            ->pluck('total', 'type');
+                if ($key === '') {
+                    return $carry;
+                }
 
-        $newBuildingsCount = (clone $baseQuery)
-            ->whereNotNull('year_built')
-            ->where('year_built', '>=', now()->year - 2)
-            ->count();
+                $carry[$key] = ($carry[$key] ?? 0) + (int) $row->total;
 
-        $categoryStats = [
-            ['label' => 'Houses', 'key' => 'house', 'count' => (int) ($typeCounts['house'] ?? 0)],
-            ['label' => 'Apartments', 'key' => 'apartment', 'count' => (int) ($typeCounts['apartment'] ?? 0)],
-            ['label' => 'Commercial', 'key' => 'commercial', 'count' => (int) ($typeCounts['commercial'] ?? 0)],
-            ['label' => 'Shortlet', 'key' => 'shortlet', 'count' => (int) ($listingCounts['shortlet'] ?? $typeCounts['shortlet'] ?? 0)],
-            ['label' => 'New buildings', 'key' => 'new-buildings', 'count' => $newBuildingsCount],
+                return $carry;
+            }, []);
+
+        $countTypes = static function (array $counts, string ...$keys): int {
+            $total = 0;
+
+            foreach ($keys as $key) {
+                $total += (int) ($counts[$key] ?? 0);
+            }
+
+            return $total;
+        };
+
+        $listingTypeOptions = [
+            '' => 'Select listing type',
+            'sale' => 'For Sale',
+            'rent' => 'For Rent',
+            'shortlet' => 'Shortlet',
         ];
 
-        $propertyTypes = (clone $baseQuery)
-            ->whereNotNull('property_type')
-            ->selectRaw('LOWER(property_type) as type')
-            ->distinct()
-            ->orderBy('type')
-            ->pluck('type')
-            ->filter()
-            ->values();
+        $propertyTypeOptions = [
+            '' => 'Any Property',
+            'land' => 'Land',
+            'house' => 'House',
+            'apartment' => 'Apartment',
+            'townhouse' => 'Townhouse',
+            'vacation-home' => 'Vacation Home',
+            'office' => 'Office',
+            'warehouse' => 'Warehouse',
+            'retail-space' => 'Retail Space',
+        ];
 
-        if ($propertyTypes->isEmpty()) {
-            $propertyTypes = collect(['house', 'apartment', 'commercial', 'shortlet', 'studio', 'condo', 'townhouse']);
-        }
+        $categoryStats = [
+            ['label' => 'Lands', 'key' => 'land', 'count' => $countTypes($typeCounts, 'land', 'lands')],
+            ['label' => 'Houses', 'key' => 'house', 'count' => $countTypes($typeCounts, 'house')],
+            ['label' => 'Apartments', 'key' => 'apartment', 'count' => $countTypes($typeCounts, 'apartment')],
+            ['label' => 'Townhouses', 'key' => 'townhouse', 'count' => $countTypes($typeCounts, 'townhouse')],
+        ];
 
-        $primaryTypes = collect(['house', 'apartment', 'commercial', 'shortlet']);
-        $extraPropertyTypes = $propertyTypes->diff($primaryTypes)->values();
+        $extraPropertyTypes = collect($propertyTypeOptions)
+            ->except(['', 'land', 'house', 'apartment', 'townhouse'])
+            ->all();
 
         $cityStats = (clone $baseQuery)
             ->whereNotNull('city')
@@ -97,11 +113,10 @@ class HomeController extends Controller
             ]);
         }
 
-        $listingTypeOptions = [
-            'rent' => 'For rent',
-            'sale' => 'For sale',
-            'shortlet' => 'Shortlet',
-        ];
+        $maxBudget = max(
+            4000,
+            (int) ceil((((clone $baseQuery)->max('price')) ?: 0) / 500) * 500,
+        );
 
         $cityImages = [
             'assets/img/home/real-estate/cities/01.jpg',
@@ -115,12 +130,25 @@ class HomeController extends Controller
         return response()->view('home', [
             'topOffers' => $topOffers,
             'categoryStats' => $categoryStats,
-            'propertyTypes' => $propertyTypes,
             'extraPropertyTypes' => $extraPropertyTypes,
             'cityStats' => $cityStats,
             'cityImages' => $cityImages,
             'cityOptions' => $cityOptions,
             'listingTypeOptions' => $listingTypeOptions,
+            'propertyTypeOptions' => $propertyTypeOptions,
+            'budgetRange' => [
+                'min' => 500,
+                'max' => $maxBudget,
+            ],
         ]);
+    }
+
+    private function normalizePropertyType(?string $type): string
+    {
+        if ($type === null) {
+            return '';
+        }
+
+        return str_replace([' ', '_'], '-', strtolower(trim($type)));
     }
 }

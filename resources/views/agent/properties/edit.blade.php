@@ -308,6 +308,7 @@
             $selectedPets = old('pets_allowed', $property->pets_allowed ?? []);
             $currentListingType = old('listing_type', $property->listing_type);
             $currentPropertyType = old('property_type', $property->property_type);
+            $currentCurrency = strtoupper((string) old('currency', $property->currency ?: \App\Models\Property::defaultCurrency()));
 
             $petEmojis = ['Cats' => '🐱', 'Dogs' => '🐶', 'Small pets' => '🐹'];
             $amenityIcons = [
@@ -507,11 +508,19 @@
                         </div>
                     </div>
                     <div class="row g-3">
-                        <div class="col-sm-5">
+                        <div class="col-sm-3">
                             <label class="form-label">Price</label>
                             <input type="number" class="form-control" name="price" min="0" value="{{ old('price', $property->price) }}" required>
                         </div>
-                        <div class="col-sm-4">
+                        <div class="col-sm-3">
+                            <label class="form-label">Currency</label>
+                            <select class="form-select" name="currency" required>
+                                @foreach ($currencyOptions as $value => $currency)
+                                    <option value="{{ $value }}" @selected($currentCurrency === $value)>{{ $value }} — {{ $currency['label'] }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-sm-3">
                             <label class="form-label">Period</label>
                             <select class="form-select" name="price_period" required>
                                 @foreach ($pricePeriods as $value => $label)
@@ -647,7 +656,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const errorFields = @json($errors->keys());
         const step1 = ['title','listing_type','property_type','bedrooms','bathrooms','garage_spaces','total_rooms','floor','year_built','area','description'];
         const step2 = ['address','city','region','postal_code','country','latitude','longitude','map_embed_url'];
-        const step3 = ['price','price_period','deposit','amenities','pets_allowed'];
+        const step3 = ['price','currency','price_period','deposit','amenities','pets_allowed'];
 
         if (errorFields.some(f => step2.includes(f))) goToStep(2);
         else if (errorFields.some(f => step3.includes(f))) goToStep(3);

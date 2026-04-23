@@ -30,6 +30,24 @@
 
 @section('content')
 
+  @php
+    $selectedListingType = request()->string('listing_type')->trim()->lower()->toString();
+    $selectedPropertyType = request()->string('property_type')->trim()->lower()->toString();
+    $selectedLocation = request()->string('location')->trim()->toString();
+    $selectedMaxPrice = (int) request('max_price', $budgetRange['max']);
+    $defaultCurrencySymbol = \App\Models\Property::defaultCurrencySymbol();
+
+    if (! array_key_exists($selectedListingType, $listingTypeOptions)) {
+      $selectedListingType = '';
+    }
+
+    if (! array_key_exists($selectedPropertyType, $propertyTypeOptions)) {
+      $selectedPropertyType = '';
+    }
+
+    $selectedMaxPrice = max($budgetRange['min'], min($budgetRange['max'], $selectedMaxPrice));
+  @endphp
+
   <!-- Hero with search form -->
   <section class="position-relative mt-md-5">
     <div class="container position-relative z-1 pt-5 pt-md-4 pt-xl-5">
@@ -46,68 +64,61 @@
       <!-- Search form -->
       <div class="row pb-5 pb-md-0">
         <div class="col-xl-10 col-xxl-9">
-          <form class="bg-body border rounded-4 p-2">
-            <div class="row g-0 p-1">
-              <div class="col-lg-7">
-                <div class="row g-0">
-                  <div class="col-6 col-md-4 d-flex">
-                    <div class="w-100">
-                      <select class="form-select form-select-lg border-0 ps-3" aria-label="Rent or sale select" required>
-                        @foreach ($listingTypeOptions as $value => $label)
-                          <option value="{{ $value }}">{{ $label }}</option>
-                        @endforeach
-                      </select>
-                    </div>
-                    <hr class="vr m-0">
+          <form action="{{ route('properties.index') }}" method="GET" class="bg-body border rounded-4 shadow-sm p-2 p-md-3">
+            <div class="row g-2 align-items-end">
+              <div class="col-lg-8">
+                <div class="row g-2">
+                  <div class="col-md-4">
+                    <label class="form-label fs-xs text-uppercase fw-semibold text-body-secondary mb-2">Looking for</label>
+                    <select name="listing_type" class="form-select form-select-lg" aria-label="Looking for">
+                      @foreach ($listingTypeOptions as $value => $label)
+                        <option value="{{ $value }}" @selected($selectedListingType === $value)>{{ $label }}</option>
+                      @endforeach
+                    </select>
                   </div>
-                  <div class="col-6 col-md-4 d-flex">
-                    <div class="w-100">
-                      <select class="form-select form-select-lg border-0" aria-label="Location select" required>
-                        <option value="">Location</option>
-                        @foreach ($cityOptions as $city)
-                          <option value="{{ $city }}">{{ $city }}</option>
-                        @endforeach
-                      </select>
-                    </div>
-                    <hr class="vr d-none d-md-block m-0">
+                  <div class="col-md-4">
+                    <label class="form-label fs-xs text-uppercase fw-semibold text-body-secondary mb-2">Property type</label>
+                    <select name="property_type" class="form-select form-select-lg" aria-label="Property type">
+                      @foreach ($propertyTypeOptions as $value => $label)
+                        <option value="{{ $value }}" @selected($selectedPropertyType === $value)>{{ $label }}</option>
+                      @endforeach
+                    </select>
                   </div>
-                  <div class="col-md-4 d-flex">
-                    <div class="w-100">
-                      <hr class="d-md-none my-2">
-                      <select class="form-select form-select-lg border-0 ps-3" aria-label="Property type select" required>
-                        <option value="">Property type</option>
-                        @foreach ($propertyTypes as $type)
-                          <option value="{{ $type }}">{{ \Illuminate\Support\Str::headline($type) }}</option>
-                        @endforeach
-                      </select>
-                    </div>
-                    <hr class="vr d-none d-lg-block m-0">
+                  <div class="col-md-4">
+                    <label class="form-label fs-xs text-uppercase fw-semibold text-body-secondary mb-2">Location</label>
+                    <select name="location" class="form-select form-select-lg" aria-label="Location">
+                      <option value="">Any city / area</option>
+                      @foreach ($cityOptions as $city)
+                        <option value="{{ $city }}" @selected($selectedLocation === $city)>{{ $city }}</option>
+                      @endforeach
+                    </select>
                   </div>
                 </div>
               </div>
-              <hr class="d-lg-none mt-2 mb-0">
-              <div class="col-lg-5 d-flex flex-column flex-sm-row align-items-sm-center gap-2 gap-sm-3 pt-3 pt-lg-0 ps-lg-3">
-                <div class="d-flex flex-column w-100 gap-1 ps-2 ps-lg-0" data-price-block>
-                  <div class="d-flex align-items-center justify-content-between">
-                    <span class="fw-medium fs-sm text-body-secondary">Price</span>
-                    <span class="fw-semibold fs-sm" data-price-output>$2700</span>
+              <div class="col-lg-4">
+                <div class="d-flex flex-column flex-sm-row align-items-sm-end gap-3">
+                  <div class="d-flex flex-column w-100 gap-1" data-price-block data-currency-symbol="{{ $defaultCurrencySymbol }}">
+                    <div class="d-flex align-items-center justify-content-between">
+                      <span class="form-label fs-xs text-uppercase fw-semibold text-body-secondary mb-0">Budget</span>
+                      <span class="fw-semibold fs-sm" data-price-output>{{ $defaultCurrencySymbol }} {{ number_format($selectedMaxPrice) }}</span>
+                    </div>
+                    <div
+                      class="range-slider w-100 price-slider"
+                      data-price-slider
+                      data-price-min="{{ $budgetRange['min'] }}"
+                      data-price-max="{{ $budgetRange['max'] }}"
+                      data-price-step="100"
+                      data-price-start="{{ $selectedMaxPrice }}"
+                    >
+                      <div class="range-slider-ui"></div>
+                      <input type="hidden" name="max_price" value="{{ $selectedMaxPrice }}" data-price-input>
+                    </div>
                   </div>
-                  <div
-                    class="range-slider w-100 price-slider"
-                    data-price-slider
-                    data-price-min="500"
-                    data-price-max="4000"
-                    data-price-step="100"
-                    data-price-start="2700"
-                  >
-                    <div class="range-slider-ui"></div>
-                    <input type="hidden" name="price" value="2700" data-price-input>
-                  </div>
+                  <button type="submit" class="btn btn-lg btn-primary px-4">
+                    Search
+                    <i class="fi-search fs-lg ms-2 me-n1"></i>
+                  </button>
                 </div>
-                <button type="submit" class="btn btn-lg btn-primary">
-                  Search
-                  <i class="fi-search fs-lg ms-2 me-n1"></i>
-                </button>
               </div>
             </div>
           </form>
@@ -174,7 +185,7 @@
             <div class="col d-flex position-relative py-2">
               <div class="vstack align-items-center text-center py-2 px-3">
                 <h3 class="h5 mb-2">
-                  <a class="hover-effect-underline stretched-link" href="{{ route('properties.index') }}">{{ $category['label'] }}</a>
+                  <a class="hover-effect-underline stretched-link" href="{{ route('properties.index', ['property_type' => $category['key']]) }}">{{ $category['label'] }}</a>
                 </h3>
                 <div class="d-flex align-items-center gap-1 fs-sm">
                   <i class="fi-bookmark fs-base"></i>
@@ -185,22 +196,28 @@
             </div>
           @endforeach
           <div class="col d-flex position-relative py-2">
-            <div class="vstack dropdown align-items-center text-center py-2 px-3" data-bs-toggle="dropdown" data-bs-display="static">
-              <h3 class="h5 mb-2">
-                <a class="hover-effect-underline stretched-link" href="#">More</a>
-              </h3>
-              <div class="d-flex align-items-center fs-sm text-body-emphasis">
-                <i class="fi-chevron-down fs-xl"></i>
-              </div>
+            <div class="vstack dropdown align-items-center text-center py-2 px-3">
+              <button
+                type="button"
+                class="btn btn-link d-inline-flex flex-column align-items-center gap-0 p-0 text-decoration-none text-body border-0"
+                data-bs-toggle="dropdown"
+                data-bs-display="static"
+                aria-expanded="false"
+                data-more-toggle
+              >
+                <span class="h5 mb-2 hover-effect-underline">More</span>
+                <span class="d-flex align-items-center fs-sm text-body-emphasis">
+                  <i class="fi-chevron-down fs-xl"></i>
+                </span>
+              </button>
               <ul class="dropdown-menu top-100 start-50 translate-middle-x" style="--fn-dropdown-min-width: 11rem">
-                @forelse ($extraPropertyTypes as $type)
-                  <li><a class="dropdown-item" href="{{ route('properties.index') }}">{{ \Illuminate\Support\Str::headline($type) }}</a></li>
+                @forelse ($extraPropertyTypes as $value => $label)
+                  <li><a class="dropdown-item" href="{{ route('properties.index', ['property_type' => $value]) }}">{{ $label }}</a></li>
                 @empty
-                  <li><a class="dropdown-item" href="{{ route('properties.index') }}">Offices</a></li>
-                  <li><a class="dropdown-item" href="{{ route('properties.index') }}">Warehouses</a></li>
-                  <li><a class="dropdown-item" href="{{ route('properties.index') }}">Retail spaces</a></li>
-                  <li><a class="dropdown-item" href="{{ route('properties.index') }}">Townhouses</a></li>
-                  <li><a class="dropdown-item" href="{{ route('properties.index') }}">Vacation homes</a></li>
+                  <li><a class="dropdown-item" href="{{ route('properties.index', ['property_type' => 'office']) }}">Office</a></li>
+                  <li><a class="dropdown-item" href="{{ route('properties.index', ['property_type' => 'warehouse']) }}">Warehouse</a></li>
+                  <li><a class="dropdown-item" href="{{ route('properties.index', ['property_type' => 'retail-space']) }}">Retail Space</a></li>
+                  <li><a class="dropdown-item" href="{{ route('properties.index', ['property_type' => 'vacation-home']) }}">Vacation Home</a></li>
                 @endforelse
               </ul>
             </div>
@@ -354,7 +371,7 @@
                 <div class="pb-1 mb-2">
                   <span class="badge text-body-emphasis bg-body-secondary">{{ $listingLabel }}</span>
                 </div>
-                <div class="h5 mb-2">${{ number_format($property->price) }}</div>
+                <div class="h5 mb-2">{{ $property->formatted_price }}</div>
                 <h3 class="fs-sm fw-normal text-body mb-2">
                   <a class="stretched-link text-body" href="{{ $detailsUrl }}">{{ $property->title }}</a>
                 </h3>
@@ -413,7 +430,7 @@
               </div>
               <div class="card-body text-center p-3">
                 <h3 class="h5 mb-0">
-                  <a class="hover-effect-underline stretched-link" href="{{ route('properties.index') }}">{{ $city->city }}</a>
+                  <a class="hover-effect-underline stretched-link" href="{{ route('properties.index', ['location' => $city->city]) }}">{{ $city->city }}</a>
                 </h3>
               </div>
               <div class="card-footer d-flex bg-transparent border-0 pt-0 pb-3 px-3 mt-n1">
@@ -476,6 +493,7 @@
     const slider = priceBlock.querySelector('.range-slider-ui');
     const output = priceBlock.querySelector('[data-price-output]');
     const input = priceBlock.querySelector('[data-price-input]');
+    const currencySymbol = priceBlock.dataset.currencySymbol || '$';
 
     if (!slider || !sliderWrap || slider.noUiSlider) {
       return;
@@ -496,7 +514,7 @@
     const updateOutput = (value) => {
       const amount = Math.round(Number(value));
       if (output) {
-        output.textContent = `$${amount}`;
+        output.textContent = `${currencySymbol} ${amount.toLocaleString()}`;
       }
       if (input) {
         input.value = amount;

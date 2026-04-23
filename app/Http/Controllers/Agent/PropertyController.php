@@ -3,10 +3,15 @@
 namespace App\Http\Controllers\Agent;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Agent\StorePropertyRequest;
 use App\Models\Property;
+use App\Support\PropertyCatalog;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class PropertyController extends Controller
@@ -29,32 +34,26 @@ class PropertyController extends Controller
 
         return view('agent.properties.create', [
             'property' => new Property,
-            'imagesText' => '',
             ...$this->formOptions(),
         ]);
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(StorePropertyRequest $request): RedirectResponse
     {
         $this->authorizeAgent($request);
 
-        $data = $this->validatedData($request);
+        $data = $this->normalizedStoreData($request->validated());
 
         $data['owner_id'] = $request->user()->id;
         $data['slug'] = $this->uniqueSlug($data['title']);
-        $data['listing_type'] = strtolower($data['listing_type']);
-        $data['property_type'] = strtolower($data['property_type']);
-        $data['price_period'] = strtolower($data['price_period']);
         $data['status'] = 'review';
         $data['visibility'] = 'public';
         $data['is_featured'] = false;
         $data['is_verified'] = false;
-        $data['amenities'] = array_values(array_filter($data['amenities'] ?? []));
-        $data['pets_allowed'] = array_values(array_filter($data['pets_allowed'] ?? []));
 
         $property = Property::create($data);
 
-        $this->syncImages($property, $request->input('images'));
+        $this->storeUploadedImages($property, $request->file('images', []));
 
         return redirect()
             ->route('agent.properties.index')
@@ -94,7 +93,8 @@ class PropertyController extends Controller
         $data = $this->validatedData($request);
 
         $data['listing_type'] = strtolower($data['listing_type']);
-        $data['property_type'] = strtolower($data['property_type']);
+        $data['property_type'] = PropertyCatalog::normalizePropertyType($data['property_type']);
+        $data['currency'] = strtoupper($data['currency']);
         $data['price_period'] = strtolower($data['price_period']);
         $data['amenities'] = array_values(array_filter($data['amenities'] ?? []));
         $data['pets_allowed'] = array_values(array_filter($data['pets_allowed'] ?? []));
@@ -116,6 +116,7 @@ class PropertyController extends Controller
             abort(403);
         }
 
+        $this->deleteManagedImages($property);
         $property->images()->delete();
         $property->delete();
 
@@ -136,16 +137,17 @@ class PropertyController extends Controller
         return $request->validate([
             'title' => ['required', 'string', 'max:255'],
             'description' => ['required', 'string'],
-            'listing_type' => ['required', 'string', 'max:50'],
-            'property_type' => ['required', 'string', 'max:50'],
+            'listing_type' => ['required', Rule::in(array_keys(PropertyCatalog::listingTypes()))],
+            'property_type' => ['required', Rule::in(array_keys(PropertyCatalog::propertyTypes()))],
             'price' => ['required', 'numeric', 'min:0'],
-            'price_period' => ['required', 'string', 'max:20'],
+            'currency' => ['required', Rule::in(array_keys(PropertyCatalog::currencyOptions()))],
+            'price_period' => ['required', Rule::in(array_keys(PropertyCatalog::pricePeriods()))],
             'deposit' => ['nullable', 'numeric', 'min:0'],
             'bedrooms' => ['nullable', 'integer', 'min:0'],
             'bathrooms' => ['nullable', 'integer', 'min:0'],
             'garage_spaces' => ['nullable', 'integer', 'min:0'],
             'area' => ['nullable', 'numeric', 'min:0'],
-            'year_built' => ['nullable', 'integer', 'min:1800', 'max:' . (now()->year + 1)],
+            'year_built' => ['nullable', 'integer', 'min:1800', 'max:'.(now()->year + 1)],
             'floor' => ['nullable', 'integer', 'min:0'],
             'total_rooms' => ['nullable', 'integer', 'min:0'],
             'address' => ['nullable', 'string', 'max:255'],
@@ -167,37 +169,18 @@ class PropertyController extends Controller
     private function formOptions(): array
     {
         return [
-            'listingTypes' => [
-                'rent' => 'For rent',
-                'sale' => 'For sale',
-                'shortlet' => 'Shortlet',
-            ],
-            'propertyTypes' => [
-                'apartment' => 'Apartment',
-                'house' => 'House',
-                'studio' => 'Studio',
-                'condo' => 'Condo',
-                'townhouse' => 'Townhouse',
-                'shortlet' => 'Shortlet',
-            ],
-            'pricePeriods' => [
-                'day' => 'Daily',
-                'week' => 'Weekly',
-                'month' => 'Monthly',
-                'year' => 'Yearly',
-            ],
-            'amenityOptions' => [
-                'WiFi',
-                'Dishwasher',
-                'Air conditioning',
-                'Parking',
-                'Laundry',
-                'Security cameras',
-                'Pool',
-                'Gym',
-                'Balcony',
-            ],
-            'petOptions' => ['Cats', 'Dogs', 'Small pets'],
+            'listingTypes' => PropertyCatalog::listingTypes(),
+            'propertyTypes' => PropertyCatalog::propertyTypes(),
+            'propertyTypeGroups' => PropertyCatalog::propertyTypeGroups(),
+            'propertyTypeGroupMap' => PropertyCatalog::propertyTypeGroupMap(),
+            'currencyOptions' => PropertyCatalog::currencyOptions(),
+            'pricePeriods' => PropertyCatalog::pricePeriods(),
+            'amenityOptionSets' => PropertyCatalog::amenityOptionSets(),
+            'amenityIcons' => PropertyCatalog::amenityIcons(),
+            'amenityOptions' => PropertyCatalog::flatAmenityLabels(),
+            'petChoices' => PropertyCatalog::petOptions(),
+            'petEmojis' => PropertyCatalog::petEmojis(),
+            'petOptions' => PropertyCatalog::petLabels(),
         ];
     }
 
@@ -208,16 +191,60 @@ class PropertyController extends Controller
         $counter = 1;
 
         while (Property::where('slug', $slug)->exists()) {
-            $slug = $original . '-' . $counter++;
+            $slug = $original.'-'.$counter++;
         }
 
         return $slug;
     }
 
+    /**
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
+     */
+    private function normalizedStoreData(array $data): array
+    {
+        $propertyType = PropertyCatalog::normalizePropertyType($data['property_type'] ?? '');
+
+        $normalizedData = [
+            ...$data,
+            'listing_type' => strtolower((string) $data['listing_type']),
+            'property_type' => $propertyType,
+            'currency' => strtoupper((string) ($data['currency'] ?? PropertyCatalog::defaultCurrency())),
+            'price_period' => strtolower((string) $data['price_period']),
+            'bedrooms' => (int) ($data['bedrooms'] ?? 0),
+            'bathrooms' => (int) ($data['bathrooms'] ?? 0),
+            'garage_spaces' => (int) ($data['garage_spaces'] ?? 0),
+            'floor' => $data['floor'] ?? null,
+            'total_rooms' => $data['total_rooms'] ?? null,
+            'year_built' => $data['year_built'] ?? null,
+            'amenities' => array_values(array_filter($data['amenities'] ?? [])),
+            'pets_allowed' => array_values(array_filter($data['pets_allowed'] ?? [])),
+        ];
+
+        if (PropertyCatalog::isLand($propertyType)) {
+            $normalizedData['bedrooms'] = 0;
+            $normalizedData['bathrooms'] = 0;
+            $normalizedData['garage_spaces'] = 0;
+            $normalizedData['floor'] = null;
+            $normalizedData['total_rooms'] = null;
+            $normalizedData['year_built'] = null;
+            $normalizedData['pets_allowed'] = [];
+        }
+
+        if (PropertyCatalog::isCommercial($propertyType)) {
+            $normalizedData['bedrooms'] = 0;
+            $normalizedData['bathrooms'] = 0;
+            $normalizedData['total_rooms'] = null;
+            $normalizedData['pets_allowed'] = [];
+        }
+
+        return $normalizedData;
+    }
+
     private function syncImages(Property $property, ?string $imagesText): void
     {
         $paths = collect(preg_split('/\r\n|\r|\n/', (string) $imagesText))
-            ->map(fn($path) => trim($path))
+            ->map(fn ($path) => trim($path))
             ->filter()
             ->values();
 
@@ -229,6 +256,35 @@ class PropertyController extends Controller
                 'is_cover' => $index === 0,
                 'sort_order' => $index,
             ]);
+        }
+    }
+
+    /**
+     * @param  array<int, UploadedFile>  $uploadedImages
+     */
+    private function storeUploadedImages(Property $property, array $uploadedImages): void
+    {
+        foreach ($uploadedImages as $index => $uploadedImage) {
+            $storedPath = $uploadedImage->store('properties/'.$property->id, 'public');
+
+            $property->images()->create([
+                'path' => 'storage/'.$storedPath,
+                'is_cover' => $index === 0,
+                'sort_order' => $index,
+            ]);
+        }
+    }
+
+    private function deleteManagedImages(Property $property): void
+    {
+        $property->loadMissing('images');
+
+        foreach ($property->images as $image) {
+            if (! str_starts_with($image->path, 'storage/properties/')) {
+                continue;
+            }
+
+            Storage::disk('public')->delete(Str::after($image->path, 'storage/'));
         }
     }
 }

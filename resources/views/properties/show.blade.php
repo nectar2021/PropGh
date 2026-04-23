@@ -167,7 +167,7 @@
               $property->region,
               $property->postal_code,
           ])->filter()->implode(', ');
-          $priceLabel = '$' . number_format((float) $property->price);
+          $priceLabel = $property->formatted_price;
           $periodLabel = $property->price_period ? 'per ' . $property->price_period : null;
         @endphp
         <div class="d-flex align-items-center justify-content-between gap-4 mb-3">

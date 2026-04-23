@@ -4,1000 +4,1442 @@
 
 @push('styles')
 <style>
-    /* ── Property form shell ── */
-    .pf-shell {
-        --pf-dark: #0c1220;
-        --pf-slate: #1e293b;
-        --pf-muted: #64748b;
-        --pf-sky: #0ea5e9;
-        --pf-sky-glow: rgba(14, 165, 233, 0.15);
-        --pf-emerald: #10b981;
-        --pf-amber: #f59e0b;
-        --pf-surface: #ffffff;
-        --pf-border: rgba(226, 232, 240, 0.7);
-        --pf-radius: 1.1rem;
-        --pf-ease: cubic-bezier(0.16, 1, 0.3, 1);
+    .pw-shell {
+        --pw-ink: #0f172a;
+        --pw-slate: #334155;
+        --pw-muted: #64748b;
+        --pw-line: rgba(148, 163, 184, 0.22);
+        --pw-surface: rgba(255, 255, 255, 0.92);
+        --pw-surface-strong: #ffffff;
+        --pw-teal: #0f766e;
+        --pw-cyan: #0891b2;
+        --pw-amber: #d97706;
+        --pw-glow: rgba(8, 145, 178, 0.12);
         min-height: 100vh;
-        padding-top: 6rem;
-        padding-bottom: 4rem;
+        padding: 6rem 0 4rem;
         background:
-            radial-gradient(ellipse at 10% 0%, rgba(16, 185, 129, 0.04) 0%, transparent 50%),
-            radial-gradient(ellipse at 90% 100%, rgba(14, 165, 233, 0.04) 0%, transparent 50%),
-            #f8fafc;
+            radial-gradient(circle at top left, rgba(15, 118, 110, 0.08), transparent 36%),
+            radial-gradient(circle at bottom right, rgba(8, 145, 178, 0.08), transparent 32%),
+            linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
     }
 
-    /* ── Header area ── */
-    .pf-header {
-        margin-bottom: 2rem;
+    .pw-container {
+        max-width: 1080px;
     }
-    .pf-breadcrumb {
-        display: flex;
-        align-items: center;
-        gap: 0.4rem;
-        font-size: 0.78rem;
-        color: var(--pf-muted);
-        margin-bottom: 1rem;
-    }
-    .pf-breadcrumb a {
-        color: var(--pf-muted);
-        text-decoration: none;
-        transition: color 0.2s;
-    }
-    .pf-breadcrumb a:hover {
-        color: var(--pf-sky);
-    }
-    .pf-breadcrumb .pf-bc-sep {
-        font-size: 0.65rem;
-        opacity: 0.5;
-    }
-    .pf-breadcrumb .pf-bc-current {
-        color: var(--pf-slate);
-        font-weight: 600;
-    }
-    .pf-title-row {
+
+    .pw-header {
         display: flex;
         align-items: flex-start;
         justify-content: space-between;
-        gap: 1rem;
-        flex-wrap: wrap;
+        gap: 1.5rem;
+        margin-bottom: 1.75rem;
     }
-    .pf-title-row h1 {
-        font-size: 1.55rem;
-        font-weight: 700;
-        color: var(--pf-dark);
-        letter-spacing: -0.03em;
-        margin-bottom: 0.2rem;
-    }
-    .pf-title-row p {
-        font-size: 0.86rem;
-        color: var(--pf-muted);
-        margin: 0;
-    }
-    .pf-review-tag {
+
+    .pw-breadcrumb {
         display: inline-flex;
         align-items: center;
-        gap: 0.4rem;
-        background: linear-gradient(135deg, rgba(16, 185, 129, 0.08), rgba(14, 165, 233, 0.06));
-        border: 1px solid rgba(16, 185, 129, 0.18);
+        gap: 0.45rem;
+        margin-bottom: 0.95rem;
+        font-size: 0.78rem;
+        color: var(--pw-muted);
+    }
+
+    .pw-breadcrumb a {
+        color: inherit;
+        text-decoration: none;
+    }
+
+    .pw-breadcrumb a:hover {
+        color: var(--pw-cyan);
+    }
+
+    .pw-header h1 {
+        margin: 0 0 0.35rem;
+        color: var(--pw-ink);
+        font-size: clamp(1.7rem, 2.3vw, 2.4rem);
+        font-weight: 700;
+        letter-spacing: -0.04em;
+    }
+
+    .pw-header p {
+        margin: 0;
+        max-width: 42rem;
+        color: var(--pw-muted);
+        font-size: 0.96rem;
+    }
+
+    .pw-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.55rem;
+        padding: 0.55rem 0.95rem;
         border-radius: 999px;
-        padding: 0.32rem 0.85rem;
-        font-size: 0.7rem;
-        font-weight: 600;
-        text-transform: uppercase;
+        border: 1px solid rgba(15, 118, 110, 0.16);
+        background: linear-gradient(135deg, rgba(15, 118, 110, 0.1), rgba(8, 145, 178, 0.08));
+        color: var(--pw-teal);
+        font-size: 0.74rem;
+        font-weight: 700;
         letter-spacing: 0.08em;
-        color: var(--pf-emerald);
+        text-transform: uppercase;
         white-space: nowrap;
     }
-    .pf-review-dot {
-        width: 6px;
-        height: 6px;
+
+    .pw-badge-dot {
+        width: 0.5rem;
+        height: 0.5rem;
         border-radius: 50%;
-        background: var(--pf-emerald);
-        animation: pfPulse 2s ease-in-out infinite;
+        background: currentColor;
+        animation: pwPulse 1.9s ease-in-out infinite;
     }
 
-    /* ── Step indicator ── */
-    .pf-steps {
+    .pw-alert {
         display: flex;
-        gap: 0;
-        margin-bottom: 2rem;
-        background: var(--pf-surface);
-        border: 1px solid var(--pf-border);
-        border-radius: var(--pf-radius);
-        overflow: hidden;
-        box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
-    }
-    .pf-step-btn {
-        flex: 1;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.55rem;
-        padding: 0.85rem 1rem;
-        border: none;
-        background: transparent;
-        font-size: 0.82rem;
-        font-weight: 500;
-        color: var(--pf-muted);
-        cursor: pointer;
-        transition: all 0.3s var(--pf-ease);
-        position: relative;
-    }
-    .pf-step-btn:not(:last-child)::after {
-        content: '';
-        position: absolute;
-        right: 0;
-        top: 20%;
-        height: 60%;
-        width: 1px;
-        background: var(--pf-border);
-    }
-    .pf-step-btn .pf-step-num {
-        width: 24px;
-        height: 24px;
-        border-radius: 50%;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 0.7rem;
-        font-weight: 700;
-        background: rgba(148, 163, 184, 0.15);
-        color: var(--pf-muted);
-        transition: all 0.3s var(--pf-ease);
-    }
-    .pf-step-btn.active {
-        color: var(--pf-dark);
-        font-weight: 600;
-        background: rgba(16, 185, 129, 0.04);
-    }
-    .pf-step-btn.active .pf-step-num {
-        background: linear-gradient(135deg, var(--pf-emerald), var(--pf-sky));
-        color: #fff;
-        box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
-    }
-    .pf-step-btn.completed .pf-step-num {
-        background: var(--pf-emerald);
-        color: #fff;
-    }
-    .pf-step-btn:hover:not(.active) {
-        color: var(--pf-slate);
-        background: rgba(148, 163, 184, 0.05);
-    }
-    .pf-step-label {
-        display: none;
-    }
-    @media (min-width: 576px) {
-        .pf-step-label { display: inline; }
-    }
-
-    /* ── Form card ── */
-    .pf-card {
-        background: var(--pf-surface);
-        border: 1px solid var(--pf-border);
-        border-radius: var(--pf-radius);
-        padding: 2rem;
-        box-shadow:
-            0 1px 2px rgba(15, 23, 42, 0.03),
-            0 8px 24px rgba(15, 23, 42, 0.05);
-        position: relative;
-        overflow: hidden;
+        align-items: flex-start;
+        gap: 0.8rem;
+        padding: 1rem 1.15rem;
         margin-bottom: 1.25rem;
-    }
-    .pf-card::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 3px;
-        background: linear-gradient(90deg, var(--pf-emerald), var(--pf-sky));
-        border-radius: var(--pf-radius) var(--pf-radius) 0 0;
+        border-radius: 1rem;
+        border: 1px solid rgba(148, 163, 184, 0.16);
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(12px);
     }
 
-    /* Section headings */
-    .pf-section-head {
-        display: flex;
-        align-items: center;
-        gap: 0.65rem;
+    .pw-alert i {
+        margin-top: 0.15rem;
+        font-size: 1rem;
+    }
+
+    .pw-alert-success {
+        border-color: rgba(15, 118, 110, 0.16);
+        color: var(--pw-teal);
+    }
+
+    .pw-alert-error {
+        border-color: rgba(220, 38, 38, 0.18);
+        background: rgba(254, 242, 242, 0.9);
+        color: #b91c1c;
+    }
+
+    .pw-alert-error strong {
+        display: block;
+        margin-bottom: 0.3rem;
+        font-size: 0.9rem;
+    }
+
+    .pw-alert-error ul {
+        margin: 0;
+        padding-left: 1.1rem;
+        font-size: 0.84rem;
+    }
+
+    .pw-steps {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 0.75rem;
         margin-bottom: 1.5rem;
     }
-    .pf-section-icon {
-        width: 40px;
-        height: 40px;
-        border-radius: 0.75rem;
-        background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(14, 165, 233, 0.08));
+
+    .pw-step {
+        display: flex;
+        align-items: center;
+        gap: 0.7rem;
+        padding: 0.9rem 1rem;
+        border: 1px solid var(--pw-line);
+        border-radius: 1rem;
+        background: var(--pw-surface);
+        color: var(--pw-muted);
+        cursor: pointer;
+        transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+        backdrop-filter: blur(14px);
+    }
+
+    .pw-step:hover {
+        transform: translateY(-1px);
+        border-color: rgba(8, 145, 178, 0.2);
+        box-shadow: 0 10px 24px rgba(15, 23, 42, 0.04);
+    }
+
+    .pw-step.is-active {
+        border-color: rgba(8, 145, 178, 0.26);
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(240, 249, 255, 0.92));
+        color: var(--pw-ink);
+        box-shadow: 0 14px 34px rgba(8, 145, 178, 0.08);
+    }
+
+    .pw-step.is-complete .pw-step-index,
+    .pw-step.is-active .pw-step-index {
+        color: #fff;
+        background: linear-gradient(135deg, var(--pw-teal), var(--pw-cyan));
+    }
+
+    .pw-step-index {
+        width: 2rem;
+        height: 2rem;
+        flex-shrink: 0;
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        font-size: 1rem;
-        color: var(--pf-emerald);
-        flex-shrink: 0;
-    }
-    .pf-section-head h2 {
-        font-size: 1.05rem;
-        font-weight: 700;
-        color: var(--pf-dark);
-        letter-spacing: -0.02em;
-        margin: 0 0 0.1rem;
-    }
-    .pf-section-head p {
-        font-size: 0.76rem;
-        color: var(--pf-muted);
-        margin: 0;
-    }
-
-    /* Input styling */
-    .pf-shell .form-label {
+        border-radius: 50%;
+        background: rgba(148, 163, 184, 0.14);
         font-size: 0.78rem;
-        font-weight: 600;
-        color: var(--pf-slate);
-        letter-spacing: 0.015em;
-        margin-bottom: 0.35rem;
-    }
-    .pf-shell .form-control,
-    .pf-shell .form-select {
-        border-radius: 0.75rem;
-        border: 1.5px solid rgba(148, 163, 184, 0.35);
-        background: #f8fafc;
-        padding: 0.65rem 0.9rem;
-        font-size: 0.88rem;
-        color: var(--pf-dark);
-        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    .pf-shell .form-control::placeholder {
-        color: rgba(100, 116, 139, 0.45);
-    }
-    .pf-shell .form-control:hover,
-    .pf-shell .form-select:hover {
-        border-color: rgba(148, 163, 184, 0.6);
-        background: #fafbfe;
-    }
-    .pf-shell .form-control:focus,
-    .pf-shell .form-select:focus {
-        border-color: var(--pf-sky);
-        background: #ffffff;
-        box-shadow: 0 0 0 3.5px var(--pf-sky-glow);
-    }
-
-    /* Number input group */
-    .pf-num-card {
-        background: #f8fafc;
-        border: 1.5px solid rgba(148, 163, 184, 0.25);
-        border-radius: 0.75rem;
-        padding: 0.75rem;
-        text-align: center;
-        transition: all 0.25s ease;
-    }
-    .pf-num-card:focus-within {
-        border-color: var(--pf-sky);
-        background: #fff;
-        box-shadow: 0 0 0 3px var(--pf-sky-glow);
-    }
-    .pf-num-card .pf-num-icon {
-        font-size: 1.15rem;
-        color: var(--pf-muted);
-        margin-bottom: 0.35rem;
-        display: block;
-    }
-    .pf-num-card label {
-        font-size: 0.68rem;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.06em;
-        color: var(--pf-muted);
-        display: block;
-        margin-bottom: 0.35rem;
-    }
-    .pf-num-card input {
-        width: 100%;
-        border: none;
-        background: transparent;
-        text-align: center;
-        font-size: 1.15rem;
         font-weight: 700;
-        color: var(--pf-dark);
-        padding: 0;
-        outline: none;
-    }
-    .pf-num-card input::-webkit-inner-spin-button {
-        opacity: 1;
+        transition: inherit;
     }
 
-    /* Amenity chips */
-    .pf-chip-grid {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.5rem;
+    .pw-step span:last-child {
+        display: block;
+        font-size: 0.8rem;
+        font-weight: 600;
+        line-height: 1.2;
     }
-    .pf-chip {
+
+    .pw-panel {
+        display: none;
+    }
+
+    .pw-panel.is-active {
+        display: block;
+        animation: pwFadeIn 0.3s ease;
+    }
+
+    .pw-grid {
+        display: grid;
+        gap: 1.25rem;
+    }
+
+    .pw-card {
         position: relative;
+        padding: 1.55rem;
+        border: 1px solid var(--pw-line);
+        border-radius: 1.35rem;
+        background: var(--pw-surface);
+        box-shadow: 0 16px 40px rgba(15, 23, 42, 0.05);
+        backdrop-filter: blur(14px);
+        overflow: hidden;
     }
-    .pf-chip input[type="checkbox"] {
+
+    .pw-card::before {
+        content: "";
         position: absolute;
-        opacity: 0;
-        pointer-events: none;
+        inset: 0 auto auto 0;
+        width: 100%;
+        height: 3px;
+        background: linear-gradient(90deg, var(--pw-teal), var(--pw-cyan));
     }
-    .pf-chip-label {
+
+    .pw-card-head {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.9rem;
+        margin-bottom: 1.35rem;
+    }
+
+    .pw-card-icon {
+        width: 2.6rem;
+        height: 2.6rem;
+        flex-shrink: 0;
         display: inline-flex;
         align-items: center;
-        gap: 0.4rem;
-        padding: 0.45rem 0.95rem;
-        border-radius: 999px;
-        border: 1.5px solid rgba(148, 163, 184, 0.3);
-        background: #f8fafc;
-        font-size: 0.8rem;
-        font-weight: 500;
-        color: var(--pf-muted);
-        cursor: pointer;
-        transition: all 0.25s var(--pf-ease);
-        user-select: none;
-    }
-    .pf-chip-label i {
-        font-size: 0.85rem;
-    }
-    .pf-chip input:checked + .pf-chip-label {
-        background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(14, 165, 233, 0.08));
-        border-color: var(--pf-emerald);
-        color: var(--pf-emerald);
-        font-weight: 600;
-    }
-    .pf-chip-label:hover {
-        border-color: rgba(148, 163, 184, 0.55);
-        background: #f1f5f9;
+        justify-content: center;
+        border-radius: 0.95rem;
+        background: linear-gradient(135deg, rgba(15, 118, 110, 0.1), rgba(8, 145, 178, 0.08));
+        color: var(--pw-teal);
+        font-size: 1rem;
     }
 
-    /* Pet toggle cards */
-    .pf-pet-grid {
-        display: flex;
-        gap: 0.65rem;
-        flex-wrap: wrap;
+    .pw-card-head h2 {
+        margin: 0 0 0.15rem;
+        font-size: 1.04rem;
+        font-weight: 700;
+        color: var(--pw-ink);
+        letter-spacing: -0.02em;
     }
-    .pf-pet {
+
+    .pw-card-head p {
+        margin: 0;
+        color: var(--pw-muted);
+        font-size: 0.82rem;
+    }
+
+    .pw-section-stack {
+        display: grid;
+        gap: 1rem;
+    }
+
+    .pw-helper {
+        padding: 1rem 1.1rem;
+        border: 1px solid rgba(15, 118, 110, 0.12);
+        border-radius: 1rem;
+        background: linear-gradient(135deg, rgba(15, 118, 110, 0.06), rgba(8, 145, 178, 0.05));
+    }
+
+    .pw-helper strong {
+        display: block;
+        margin-bottom: 0.2rem;
+        font-size: 0.88rem;
+        color: var(--pw-ink);
+    }
+
+    .pw-helper p {
+        margin: 0;
+        color: var(--pw-muted);
+        font-size: 0.82rem;
+    }
+
+    .pw-shell .form-label {
+        margin-bottom: 0.38rem;
+        color: var(--pw-slate);
+        font-size: 0.8rem;
+        font-weight: 700;
+        letter-spacing: 0.01em;
+    }
+
+    .pw-shell .form-control,
+    .pw-shell .form-select,
+    .pw-shell .form-control[type="file"] {
+        min-height: 3rem;
+        border: 1.5px solid rgba(148, 163, 184, 0.24);
+        border-radius: 0.95rem;
+        background: rgba(248, 250, 252, 0.84);
+        color: var(--pw-ink);
+        font-size: 0.9rem;
+        padding: 0.78rem 0.95rem;
+        transition: border-color 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+    }
+
+    .pw-shell textarea.form-control {
+        min-height: 9rem;
+        resize: vertical;
+    }
+
+    .pw-shell .form-control:focus,
+    .pw-shell .form-select:focus,
+    .pw-shell .form-control[type="file"]:focus {
+        border-color: rgba(8, 145, 178, 0.34);
+        background: var(--pw-surface-strong);
+        box-shadow: 0 0 0 0.3rem var(--pw-glow);
+    }
+
+    .pw-stat-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 0.85rem;
+    }
+
+    .pw-stat-card {
+        padding: 0.95rem;
+        border: 1px solid rgba(148, 163, 184, 0.18);
+        border-radius: 1rem;
+        background: linear-gradient(180deg, rgba(248, 250, 252, 0.96), rgba(255, 255, 255, 0.92));
+    }
+
+    .pw-stat-card i {
+        display: inline-flex;
+        margin-bottom: 0.45rem;
+        color: var(--pw-cyan);
+        font-size: 0.95rem;
+    }
+
+    .pw-stat-card label {
+        display: block;
+        margin-bottom: 0.35rem;
+        color: var(--pw-muted);
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+    }
+
+    .pw-stat-card input {
+        width: 100%;
+        border: 0;
+        background: transparent;
+        padding: 0;
+        color: var(--pw-ink);
+        font-size: 1.05rem;
+        font-weight: 700;
+        outline: none;
+    }
+
+    .pw-dimension-card {
+        display: grid;
+        gap: 0.75rem;
+        padding: 1rem;
+        border: 1px solid rgba(148, 163, 184, 0.18);
+        border-radius: 1rem;
+        background: rgba(248, 250, 252, 0.86);
+    }
+
+    .pw-dimension-card small {
+        color: var(--pw-muted);
+        font-size: 0.78rem;
+    }
+
+    .pw-chip-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.65rem;
+    }
+
+    .pw-chip,
+    .pw-pet {
         position: relative;
     }
-    .pf-pet input[type="checkbox"] {
+
+    .pw-chip input,
+    .pw-pet input {
         position: absolute;
         opacity: 0;
         pointer-events: none;
     }
-    .pf-pet-label {
+
+    .pw-chip-label {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.68rem 0.95rem;
+        border: 1.5px solid rgba(148, 163, 184, 0.24);
+        border-radius: 999px;
+        background: rgba(248, 250, 252, 0.92);
+        color: var(--pw-slate);
+        font-size: 0.83rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: border-color 0.22s ease, background 0.22s ease, color 0.22s ease, transform 0.22s ease;
+    }
+
+    .pw-chip-label i {
+        color: var(--pw-cyan);
+        font-size: 0.86rem;
+    }
+
+    .pw-chip input:checked + .pw-chip-label {
+        border-color: rgba(15, 118, 110, 0.32);
+        background: linear-gradient(135deg, rgba(15, 118, 110, 0.12), rgba(8, 145, 178, 0.08));
+        color: var(--pw-teal);
+        transform: translateY(-1px);
+    }
+
+    .pw-pet-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.8rem;
+    }
+
+    .pw-pet-label {
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 0.3rem;
-        padding: 0.75rem 1.2rem;
-        border-radius: 0.85rem;
-        border: 1.5px solid rgba(148, 163, 184, 0.3);
-        background: #f8fafc;
-        font-size: 0.78rem;
-        font-weight: 500;
-        color: var(--pf-muted);
+        gap: 0.35rem;
+        min-width: 7rem;
+        padding: 0.95rem 1rem;
+        border: 1.5px solid rgba(148, 163, 184, 0.24);
+        border-radius: 1rem;
+        background: rgba(248, 250, 252, 0.92);
         cursor: pointer;
-        transition: all 0.25s var(--pf-ease);
-        min-width: 85px;
-        text-align: center;
+        transition: border-color 0.22s ease, background 0.22s ease, color 0.22s ease, transform 0.22s ease;
     }
-    .pf-pet-label .pf-pet-emoji {
-        font-size: 1.4rem;
+
+    .pw-pet-icon {
+        font-size: 1.35rem;
         line-height: 1;
     }
-    .pf-pet input:checked + .pf-pet-label {
-        background: linear-gradient(135deg, rgba(245, 158, 11, 0.08), rgba(245, 158, 11, 0.04));
-        border-color: var(--pf-amber);
-        color: var(--pf-amber);
+
+    .pw-pet-label span:last-child {
+        color: var(--pw-slate);
+        font-size: 0.8rem;
         font-weight: 600;
     }
 
-    /* Image area */
-    .pf-image-area {
-        border: 2px dashed rgba(148, 163, 184, 0.35);
-        border-radius: 0.85rem;
-        padding: 1.5rem;
-        background: rgba(248, 250, 252, 0.6);
-        transition: all 0.25s ease;
+    .pw-pet input:checked + .pw-pet-label {
+        border-color: rgba(217, 119, 6, 0.25);
+        background: linear-gradient(135deg, rgba(251, 191, 36, 0.14), rgba(245, 158, 11, 0.08));
+        transform: translateY(-1px);
     }
-    .pf-image-area:focus-within {
-        border-color: var(--pf-sky);
-        background: rgba(14, 165, 233, 0.02);
+
+    .pw-upload {
+        display: grid;
+        gap: 1rem;
+        padding: 1.1rem;
+        border: 1.5px dashed rgba(8, 145, 178, 0.24);
+        border-radius: 1.2rem;
+        background: linear-gradient(135deg, rgba(240, 249, 255, 0.88), rgba(255, 255, 255, 0.94));
     }
-    .pf-image-hint {
+
+    .pw-upload-meta {
         display: flex;
         align-items: center;
-        gap: 0.75rem;
-        margin-bottom: 1rem;
+        gap: 0.9rem;
     }
-    .pf-image-hint-icon {
-        width: 44px;
-        height: 44px;
-        border-radius: 0.75rem;
-        background: linear-gradient(135deg, rgba(14, 165, 233, 0.1), rgba(16, 185, 129, 0.08));
-        display: flex;
+
+    .pw-upload-icon {
+        width: 3rem;
+        height: 3rem;
+        display: inline-flex;
         align-items: center;
         justify-content: center;
+        border-radius: 1rem;
+        background: linear-gradient(135deg, rgba(15, 118, 110, 0.12), rgba(8, 145, 178, 0.1));
+        color: var(--pw-cyan);
         font-size: 1.15rem;
-        color: var(--pf-sky);
-        flex-shrink: 0;
-    }
-    .pf-image-hint h6 {
-        font-size: 0.82rem;
-        font-weight: 600;
-        color: var(--pf-dark);
-        margin: 0 0 0.1rem;
-    }
-    .pf-image-hint p {
-        font-size: 0.72rem;
-        color: var(--pf-muted);
-        margin: 0;
-    }
-    .pf-image-area textarea {
-        border: none !important;
-        background: transparent !important;
-        box-shadow: none !important;
-        padding: 0 !important;
-        resize: vertical;
-        font-size: 0.82rem;
-        font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, monospace;
-        color: var(--pf-slate);
     }
 
-    /* Step panels */
-    .pf-panel {
-        display: none;
-    }
-    .pf-panel.active {
+    .pw-upload-meta strong {
         display: block;
-        animation: pfSlideIn 0.35s var(--pf-ease);
+        margin-bottom: 0.2rem;
+        color: var(--pw-ink);
+        font-size: 0.92rem;
     }
 
-    /* Navigation bar */
-    .pf-nav-bar {
+    .pw-upload-meta p {
+        margin: 0;
+        color: var(--pw-muted);
+        font-size: 0.8rem;
+    }
+
+    .pw-media-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 0.85rem;
+    }
+
+    .pw-media-card {
+        position: relative;
+        overflow: hidden;
+        border: 1px solid rgba(148, 163, 184, 0.16);
+        border-radius: 1rem;
+        background: rgba(255, 255, 255, 0.94);
+    }
+
+    .pw-media-preview {
+        aspect-ratio: 1 / 0.78;
+        background-size: cover;
+        background-position: center;
+        background-color: #e2e8f0;
+    }
+
+    .pw-media-body {
+        display: grid;
+        gap: 0.2rem;
+        padding: 0.75rem;
+    }
+
+    .pw-media-body strong {
+        color: var(--pw-ink);
+        font-size: 0.78rem;
+        font-weight: 700;
+        line-height: 1.3;
+        word-break: break-word;
+    }
+
+    .pw-media-body small {
+        color: var(--pw-muted);
+        font-size: 0.72rem;
+    }
+
+    .pw-cover-badge {
+        position: absolute;
+        top: 0.7rem;
+        left: 0.7rem;
+        padding: 0.35rem 0.5rem;
+        border-radius: 999px;
+        background: rgba(15, 23, 42, 0.82);
+        color: #fff;
+        font-size: 0.68rem;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+    }
+
+    .pw-nav {
         display: flex;
         align-items: center;
         justify-content: space-between;
         gap: 1rem;
-        margin-top: 0.5rem;
-    }
-    .pf-btn-secondary {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.4rem;
-        padding: 0.7rem 1.4rem;
-        border: 1.5px solid var(--pf-border);
-        border-radius: 0.75rem;
-        background: var(--pf-surface);
-        font-size: 0.85rem;
-        font-weight: 600;
-        color: var(--pf-slate);
-        cursor: pointer;
-        text-decoration: none;
-        transition: all 0.25s ease;
-    }
-    .pf-btn-secondary:hover {
-        border-color: rgba(148, 163, 184, 0.6);
-        background: #f1f5f9;
-        color: var(--pf-dark);
-    }
-    .pf-btn-primary {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.45rem;
-        padding: 0.7rem 1.6rem;
-        border: none;
-        border-radius: 0.75rem;
-        font-size: 0.85rem;
-        font-weight: 600;
-        color: #fff;
-        background: linear-gradient(135deg, var(--pf-dark), var(--pf-slate));
-        cursor: pointer;
-        transition: all 0.3s var(--pf-ease);
-        position: relative;
-        overflow: hidden;
-    }
-    .pf-btn-primary::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: -100%;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
-        transition: left 0.5s ease;
-    }
-    .pf-btn-primary:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 8px 24px rgba(12, 18, 32, 0.22);
-        color: #fff;
-    }
-    .pf-btn-primary:hover::before {
-        left: 100%;
-    }
-    .pf-btn-submit {
-        background: linear-gradient(135deg, var(--pf-emerald), var(--pf-sky));
-    }
-    .pf-btn-submit:hover {
-        box-shadow: 0 8px 24px rgba(16, 185, 129, 0.3);
+        margin-top: 0.35rem;
     }
 
-    /* Alerts */
-    .pf-alert-error {
-        background: rgba(239, 68, 68, 0.06);
-        border: 1px solid rgba(239, 68, 68, 0.2);
-        border-radius: var(--pf-radius);
-        padding: 1rem 1.25rem;
-        margin-bottom: 1.5rem;
-    }
-    .pf-alert-error .pf-alert-title {
-        font-size: 0.82rem;
+    .pw-btn-secondary,
+    .pw-btn-primary {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        min-height: 3rem;
+        padding: 0.78rem 1.35rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
         font-weight: 700;
-        color: #dc2626;
-        margin-bottom: 0.4rem;
-    }
-    .pf-alert-error ul {
-        margin: 0;
-        padding-left: 1.1rem;
-        font-size: 0.8rem;
-        color: #b91c1c;
-    }
-    .pf-alert-success {
-        background: linear-gradient(135deg, rgba(16, 185, 129, 0.06), rgba(14, 165, 233, 0.04));
-        border: 1px solid rgba(16, 185, 129, 0.2);
-        border-radius: var(--pf-radius);
-        padding: 1rem 1.25rem;
-        margin-bottom: 1.5rem;
-        display: flex;
-        align-items: center;
-        gap: 0.6rem;
-        font-size: 0.85rem;
-        font-weight: 500;
-        color: var(--pf-emerald);
+        text-decoration: none;
+        transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease, background 0.22s ease;
     }
 
-    /* ── Animations ── */
-    @keyframes pfPulse {
-        0%, 100% { opacity: 1; }
-        50% { opacity: 0.4; }
-    }
-    @keyframes pfSlideIn {
-        from { opacity: 0; transform: translateX(12px); }
-        to { opacity: 1; transform: translateX(0); }
-    }
-    @media (prefers-reduced-motion: reduce) {
-        .pf-panel.active { animation: none; }
-        .pf-review-dot { animation: none; }
+    .pw-btn-secondary {
+        border: 1px solid rgba(148, 163, 184, 0.24);
+        background: rgba(255, 255, 255, 0.9);
+        color: var(--pw-slate);
     }
 
-    /* ── Responsive ── */
+    .pw-btn-primary {
+        border: 0;
+        background: linear-gradient(135deg, var(--pw-ink), #1e293b);
+        color: #fff;
+        box-shadow: 0 14px 34px rgba(15, 23, 42, 0.14);
+    }
+
+    .pw-btn-primary[data-submit],
+    .pw-btn-primary.pw-submit {
+        background: linear-gradient(135deg, var(--pw-teal), var(--pw-cyan));
+        box-shadow: 0 14px 34px rgba(8, 145, 178, 0.18);
+    }
+
+    .pw-btn-secondary:hover,
+    .pw-btn-primary:hover {
+        transform: translateY(-1px);
+    }
+
+    [data-conditional-section][hidden] {
+        display: none !important;
+    }
+
+    .pw-field-note {
+        margin-top: 0.35rem;
+        color: var(--pw-muted);
+        font-size: 0.75rem;
+    }
+
+    @keyframes pwPulse {
+        0%, 100% {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        50% {
+            opacity: 0.45;
+            transform: scale(0.9);
+        }
+    }
+
+    @keyframes pwFadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(8px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @media (max-width: 991.98px) {
+        .pw-steps {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .pw-stat-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+
     @media (max-width: 767.98px) {
-        .pf-card { padding: 1.35rem; }
-        .pf-title-row h1 { font-size: 1.3rem; }
-        .pf-step-btn { padding: 0.7rem 0.5rem; font-size: 0.75rem; }
+        .pw-shell {
+            padding-top: 5rem;
+        }
+
+        .pw-header {
+            flex-direction: column;
+        }
+
+        .pw-card {
+            padding: 1.2rem;
+        }
+
+        .pw-steps {
+            grid-template-columns: 1fr;
+        }
+
+        .pw-nav {
+            flex-direction: column-reverse;
+            align-items: stretch;
+        }
+
+        .pw-btn-secondary,
+        .pw-btn-primary {
+            justify-content: center;
+            width: 100%;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .pw-badge-dot,
+        .pw-panel.is-active {
+            animation: none;
+        }
     }
 </style>
 @endpush
 
 @section('content')
-<div class="pf-shell">
-    <div class="container" style="max-width: 820px;">
+    @php
+        $selectedAmenities = old('amenities', $property->amenities ?? []);
+        $selectedPets = old('pets_allowed', $property->pets_allowed ?? []);
+        $currentListingType = \Illuminate\Support\Str::lower((string) old('listing_type', $property->listing_type));
+        $currentPropertyType = \Illuminate\Support\Str::lower((string) old('property_type', $property->property_type ?: 'house'));
+        $currentCurrency = strtoupper((string) old('currency', $property->currency ?: \App\Models\Property::defaultCurrency()));
+        $currentPropertyType = str_replace('_', '-', $currentPropertyType);
+        $currentPropertyGroup = $propertyTypeGroupMap[$currentPropertyType] ?? 'residential';
+    @endphp
 
-        {{-- Header --}}
-        <div class="pf-header">
-            <div class="pf-breadcrumb">
-                <a href="{{ route('agent.properties.index') }}">My Properties</a>
-                <span class="pf-bc-sep"><i class="fi-chevron-right"></i></span>
-                <span class="pf-bc-current">New listing</span>
-            </div>
-            <div class="pf-title-row">
+    <div class="pw-shell">
+        <div class="container pw-container">
+            <div class="pw-header">
                 <div>
-                    <h1>Create a new listing</h1>
-                    <p>Fill in the details below — your property will be reviewed before going live.</p>
+                    <div class="pw-breadcrumb">
+                        <a href="{{ route('agent.properties.index') }}">My Properties</a>
+                        <i class="fi-chevron-right fs-xs"></i>
+                        <span>New listing</span>
+                    </div>
+                    <h1>Add a new property listing</h1>
+                    <p>
+                        Create a polished listing with type-aware fields, structured amenities, and real media uploads.
+                        Residential, land, and commercial properties now follow different rules automatically.
+                    </p>
                 </div>
-                <span class="pf-review-tag">
-                    <span class="pf-review-dot"></span>
-                    Requires review
-                </span>
+                <div class="pw-badge">
+                    <span class="pw-badge-dot"></span>
+                    Review Required
+                </div>
             </div>
+
+            @if (session('status'))
+                <div class="pw-alert pw-alert-success">
+                    <i class="fi-check-circle"></i>
+                    <div>{{ session('status') }}</div>
+                </div>
+            @endif
+
+            @if ($errors->any())
+                <div class="pw-alert pw-alert-error">
+                    <i class="fi-alert-circle"></i>
+                    <div>
+                        <strong>Please fix the following before submitting.</strong>
+                        <ul>
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                </div>
+            @endif
+
+            <div class="pw-steps" id="wizardSteps">
+                <button type="button" class="pw-step is-active" data-step="1">
+                    <span class="pw-step-index">1</span>
+                    <span>Core Details</span>
+                </button>
+                <button type="button" class="pw-step" data-step="2">
+                    <span class="pw-step-index">2</span>
+                    <span>Type-Specific Details</span>
+                </button>
+                <button type="button" class="pw-step" data-step="3">
+                    <span class="pw-step-index">3</span>
+                    <span>Location</span>
+                </button>
+                <button type="button" class="pw-step" data-step="4">
+                    <span class="pw-step-index">4</span>
+                    <span>Pricing &amp; Amenities</span>
+                </button>
+                <button type="button" class="pw-step" data-step="5">
+                    <span class="pw-step-index">5</span>
+                    <span>Media</span>
+                </button>
+            </div>
+
+            <form
+                id="propertyWizard"
+                method="POST"
+                action="{{ route('agent.properties.store') }}"
+                enctype="multipart/form-data"
+            >
+                @csrf
+
+                <section class="pw-panel is-active" data-panel="1">
+                    <div class="pw-grid">
+                        <div class="pw-card">
+                            <div class="pw-card-head">
+                                <div class="pw-card-icon"><i class="fi-home"></i></div>
+                                <div>
+                                    <h2>Listing foundation</h2>
+                                    <p>Choose the listing and property type first. The rest of the wizard adapts from here.</p>
+                                </div>
+                            </div>
+
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label" for="listing_type">Listing type</label>
+                                    <select class="form-select" id="listing_type" name="listing_type" required>
+                                        @foreach ($listingTypes as $value => $label)
+                                            <option value="{{ $value }}" @selected($currentListingType === $value)>{{ $label }}</option>
+                                        @endforeach
+                                    </select>
+                                    <div class="pw-field-note">Shortlet is handled as a listing type, not a property type.</div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label" for="property_type">Property type</label>
+                                    <select class="form-select" id="property_type" name="property_type" required>
+                                        @foreach ($propertyTypes as $value => $label)
+                                            <option value="{{ $value }}" @selected($currentPropertyType === $value)>{{ $label }}</option>
+                                        @endforeach
+                                    </select>
+                                    <div class="pw-field-note" id="propertyTypeHint">
+                                        Residential properties show room details. Land and commercial listings stay leaner.
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label" for="title">Property title</label>
+                                    <input
+                                        class="form-control"
+                                        id="title"
+                                        name="title"
+                                        type="text"
+                                        value="{{ old('title', $property->title) }}"
+                                        placeholder="Modern 3-bedroom townhouse in East Legon"
+                                        required
+                                    >
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label" for="description">Description</label>
+                                    <textarea
+                                        class="form-control"
+                                        id="description"
+                                        name="description"
+                                        placeholder="Highlight the condition, standout features, nearby landmarks, buyer or tenant fit, and what makes this listing worth booking a viewing."
+                                        required
+                                    >{{ old('description', $property->description) }}</textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pw-nav">
+                        <a class="pw-btn-secondary" href="{{ route('agent.properties.index') }}">
+                            <i class="fi-arrow-left"></i>
+                            Cancel
+                        </a>
+                        <button type="button" class="pw-btn-primary" data-next="2">
+                            Type-Specific Details
+                            <i class="fi-arrow-right"></i>
+                        </button>
+                    </div>
+                </section>
+
+                <section class="pw-panel" data-panel="2">
+                    <div class="pw-grid">
+                        <div class="pw-card">
+                            <div class="pw-card-head">
+                                <div class="pw-card-icon"><i class="fi-grid"></i></div>
+                                <div>
+                                    <h2>Type-aware property details</h2>
+                                    <p>Land skips room-style inputs, residential captures living details, and commercial stays business-focused.</p>
+                                </div>
+                            </div>
+
+                            <div class="pw-section-stack">
+                                <div class="pw-dimension-card">
+                                    <div>
+                                        <label class="form-label" for="area" id="areaLabel">Property size (sq.m)</label>
+                                        <input
+                                            class="form-control"
+                                            id="area"
+                                            name="area"
+                                            type="number"
+                                            min="0"
+                                            step="0.01"
+                                            value="{{ old('area', $property->area) }}"
+                                            placeholder="650"
+                                            required
+                                        >
+                                    </div>
+                                    <small id="areaHelp">Use the total internal or usable size for the listing.</small>
+                                </div>
+
+                                <div
+                                    class="pw-helper"
+                                    data-conditional-section
+                                    data-property-groups="land"
+                                >
+                                    <strong>Land listing mode</strong>
+                                    <p>Room-related fields are intentionally removed. Focus on plot size, title status, access, servicing, and accurate location data.</p>
+                                </div>
+
+                                <div
+                                    class="pw-section-stack"
+                                    data-conditional-section
+                                    data-property-groups="residential"
+                                >
+                                    <div class="pw-helper">
+                                        <strong>Residential listing mode</strong>
+                                        <p>Capture the room count and practical living details buyers or renters care about first.</p>
+                                    </div>
+
+                                    <div class="pw-stat-grid">
+                                        <div class="pw-stat-card">
+                                            <i class="fi-bed-single"></i>
+                                            <label for="bedrooms">Bedrooms</label>
+                                            <input id="bedrooms" name="bedrooms" type="number" min="0" value="{{ old('bedrooms', $property->bedrooms) }}">
+                                        </div>
+                                        <div class="pw-stat-card">
+                                            <i class="fi-shower"></i>
+                                            <label for="bathrooms">Bathrooms</label>
+                                            <input id="bathrooms" name="bathrooms" type="number" min="0" value="{{ old('bathrooms', $property->bathrooms) }}">
+                                        </div>
+                                        <div class="pw-stat-card">
+                                            <i class="fi-car"></i>
+                                            <label for="garage_spaces">Parking</label>
+                                            <input id="garage_spaces" name="garage_spaces" type="number" min="0" value="{{ old('garage_spaces', $property->garage_spaces) }}">
+                                        </div>
+                                        <div class="pw-stat-card">
+                                            <i class="fi-layers"></i>
+                                            <label for="total_rooms">Total rooms</label>
+                                            <input id="total_rooms" name="total_rooms" type="number" min="0" value="{{ old('total_rooms', $property->total_rooms) }}">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div
+                                    class="row g-3"
+                                    data-conditional-section
+                                    data-property-groups="residential,commercial"
+                                >
+                                    <div class="col-md-6">
+                                        <label class="form-label" for="floor">Floor</label>
+                                        <input
+                                            class="form-control"
+                                            id="floor"
+                                            name="floor"
+                                            type="number"
+                                            min="0"
+                                            value="{{ old('floor', $property->floor) }}"
+                                            placeholder="3"
+                                        >
+                                        <div class="pw-field-note">Leave blank if the property is on ground level or the floor is not relevant.</div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label" for="year_built">Year built</label>
+                                        <input
+                                            class="form-control"
+                                            id="year_built"
+                                            name="year_built"
+                                            type="number"
+                                            min="1800"
+                                            value="{{ old('year_built', $property->year_built) }}"
+                                            placeholder="2021"
+                                        >
+                                        <div class="pw-field-note">Useful for both premium homes and business-ready commercial inventory.</div>
+                                    </div>
+                                </div>
+
+                                <div
+                                    class="pw-helper"
+                                    data-conditional-section
+                                    data-property-groups="commercial"
+                                >
+                                    <strong>Commercial listing mode</strong>
+                                    <p>Bedrooms and pet settings are removed. Focus on usable area, parking, floor access, and commercial infrastructure.</p>
+                                </div>
+
+                                <div
+                                    class="row g-3"
+                                    data-conditional-section
+                                    data-property-groups="commercial"
+                                >
+                                    <div class="col-md-6">
+                                        <label class="form-label" for="commercial_garage_spaces">Parking / garage spaces</label>
+                                        <input
+                                            class="form-control"
+                                            id="commercial_garage_spaces"
+                                            name="garage_spaces"
+                                            type="number"
+                                            min="0"
+                                            value="{{ old('garage_spaces', $property->garage_spaces) }}"
+                                            placeholder="12"
+                                        >
+                                        <div class="pw-field-note">Use this for parking bays, dedicated slots, or loading-adjacent vehicle space.</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pw-nav">
+                        <button type="button" class="pw-btn-secondary" data-prev="1">
+                            <i class="fi-arrow-left"></i>
+                            Core Details
+                        </button>
+                        <button type="button" class="pw-btn-primary" data-next="3">
+                            Location
+                            <i class="fi-arrow-right"></i>
+                        </button>
+                    </div>
+                </section>
+
+                <section class="pw-panel" data-panel="3">
+                    <div class="pw-grid">
+                        <div class="pw-card">
+                            <div class="pw-card-head">
+                                <div class="pw-card-icon"><i class="fi-map-pin"></i></div>
+                                <div>
+                                    <h2>Address and location</h2>
+                                    <p>Use a precise location so the listing displays properly in search, detail pages, and maps.</p>
+                                </div>
+                            </div>
+
+                            <div class="row g-3">
+                                <div class="col-12">
+                                    <label class="form-label" for="address">Street address</label>
+                                    <input
+                                        class="form-control"
+                                        id="address"
+                                        name="address"
+                                        type="text"
+                                        value="{{ old('address', $property->address) }}"
+                                        placeholder="No. 12 Liberation Road"
+                                        required
+                                    >
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label" for="city">City</label>
+                                    <input class="form-control" id="city" name="city" type="text" value="{{ old('city', $property->city) }}" placeholder="Accra" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label" for="region">Region / State</label>
+                                    <input class="form-control" id="region" name="region" type="text" value="{{ old('region', $property->region) }}" placeholder="Greater Accra" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label" for="postal_code">Postal code</label>
+                                    <input class="form-control" id="postal_code" name="postal_code" type="text" value="{{ old('postal_code', $property->postal_code) }}" placeholder="GA-123-4567">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label" for="country">Country</label>
+                                    <input class="form-control" id="country" name="country" type="text" value="{{ old('country', $property->country ?: 'Ghana') }}" placeholder="Ghana" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="pw-card">
+                            <div class="pw-card-head">
+                                <div class="pw-card-icon"><i class="fi-map"></i></div>
+                                <div>
+                                    <h2>Coordinates and embed map</h2>
+                                    <p>Coordinates are optional, but if you add one, add both. They improve map previews and listing accuracy.</p>
+                                </div>
+                            </div>
+
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label" for="latitude">Latitude</label>
+                                    <input class="form-control" id="latitude" name="latitude" type="number" step="0.000001" value="{{ old('latitude', $property->latitude) }}" placeholder="5.603717">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label" for="longitude">Longitude</label>
+                                    <input class="form-control" id="longitude" name="longitude" type="number" step="0.000001" value="{{ old('longitude', $property->longitude) }}" placeholder="-0.186964">
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label" for="map_embed_url">Map embed URL</label>
+                                    <input
+                                        class="form-control"
+                                        id="map_embed_url"
+                                        name="map_embed_url"
+                                        type="url"
+                                        value="{{ old('map_embed_url', $property->map_embed_url) }}"
+                                        placeholder="https://www.google.com/maps/embed?..."
+                                    >
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pw-nav">
+                        <button type="button" class="pw-btn-secondary" data-prev="2">
+                            <i class="fi-arrow-left"></i>
+                            Type-Specific Details
+                        </button>
+                        <button type="button" class="pw-btn-primary" data-next="4">
+                            Pricing &amp; Amenities
+                            <i class="fi-arrow-right"></i>
+                        </button>
+                    </div>
+                </section>
+
+                <section class="pw-panel" data-panel="4">
+                    <div class="pw-grid">
+                        <div class="pw-card">
+                            <div class="pw-card-head">
+                                <div class="pw-card-icon"><i class="fi-dollar-sign"></i></div>
+                                <div>
+                                    <h2>Pricing setup</h2>
+                                    <p>Capture the headline price, billing period, and any deposit expectations before publishing.</p>
+                                </div>
+                            </div>
+
+                            <div class="row g-3">
+                                <div class="col-md-3">
+                                    <label class="form-label" for="price">Price</label>
+                                    <input class="form-control" id="price" name="price" type="number" min="0" value="{{ old('price', $property->price) }}" placeholder="150000" required>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label" for="currency">Currency</label>
+                                    <select class="form-select" id="currency" name="currency" required>
+                                        @foreach ($currencyOptions as $value => $currency)
+                                            <option value="{{ $value }}" @selected($currentCurrency === $value)>{{ $value }} — {{ $currency['label'] }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label" for="price_period">Price period</label>
+                                    <select class="form-select" id="price_period" name="price_period" required>
+                                        @foreach ($pricePeriods as $value => $label)
+                                            <option value="{{ $value }}" @selected(old('price_period', $property->price_period) === $value)>{{ $label }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label" for="deposit">Deposit</label>
+                                    <input class="form-control" id="deposit" name="deposit" type="number" min="0" value="{{ old('deposit', $property->deposit) }}" placeholder="0">
+                                    <div class="pw-field-note">Optional. Leave blank if no deposit is required.</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="pw-card">
+                            <div class="pw-card-head">
+                                <div class="pw-card-icon"><i class="fi-star"></i></div>
+                                <div>
+                                    <h2>Type-specific amenities</h2>
+                                    <p>Only relevant amenity options are enabled and submitted for the chosen property type.</p>
+                                </div>
+                            </div>
+
+                            <div class="pw-section-stack">
+                                @foreach ($amenityOptionSets as $scope => $set)
+                                    <div
+                                        class="pw-section-stack"
+                                        data-conditional-section
+                                        data-property-types="{{ implode(',', $set['property_types']) }}"
+                                    >
+                                        <div class="pw-helper">
+                                            <strong>{{ $set['title'] }}</strong>
+                                            <p>{{ $set['description'] }}</p>
+                                        </div>
+
+                                        <div class="pw-chip-grid">
+                                            @foreach ($set['options'] as $optionKey => $optionLabel)
+                                                <div class="pw-chip">
+                                                    <input
+                                                        id="amenity-{{ $scope }}-{{ $optionKey }}"
+                                                        name="amenities[]"
+                                                        type="checkbox"
+                                                        value="{{ $optionLabel }}"
+                                                        @checked(in_array($optionLabel, $selectedAmenities, true))
+                                                    >
+                                                    <label class="pw-chip-label" for="amenity-{{ $scope }}-{{ $optionKey }}">
+                                                        <i class="{{ $amenityIcons[$optionKey] ?? 'fi-check-circle' }}"></i>
+                                                        {{ $optionLabel }}
+                                                    </label>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+
+                        <div
+                            class="pw-card"
+                            data-conditional-section
+                            data-property-groups="residential"
+                        >
+                            <div class="pw-card-head">
+                                <div class="pw-card-icon"><i class="fi-heart"></i></div>
+                                <div>
+                                    <h2>Pet policy</h2>
+                                    <p>Residential listings can show which pets are welcome. This section is hidden for land and commercial inventory.</p>
+                                </div>
+                            </div>
+
+                            <div class="pw-pet-grid">
+                                @foreach ($petChoices as $petKey => $petLabel)
+                                    <div class="pw-pet">
+                                        <input
+                                            id="pet-{{ $petKey }}"
+                                            name="pets_allowed[]"
+                                            type="checkbox"
+                                            value="{{ $petLabel }}"
+                                            @checked(in_array($petLabel, $selectedPets, true))
+                                        >
+                                        <label class="pw-pet-label" for="pet-{{ $petKey }}">
+                                            <span class="pw-pet-icon">{{ $petEmojis[$petKey] ?? '🐾' }}</span>
+                                            <span>{{ $petLabel }}</span>
+                                        </label>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pw-nav">
+                        <button type="button" class="pw-btn-secondary" data-prev="3">
+                            <i class="fi-arrow-left"></i>
+                            Location
+                        </button>
+                        <button type="button" class="pw-btn-primary" data-next="5">
+                            Media
+                            <i class="fi-arrow-right"></i>
+                        </button>
+                    </div>
+                </section>
+
+                <section class="pw-panel" data-panel="5">
+                    <div class="pw-grid">
+                        <div class="pw-card">
+                            <div class="pw-card-head">
+                                <div class="pw-card-icon"><i class="fi-image"></i></div>
+                                <div>
+                                    <h2>Upload property media</h2>
+                                    <p>Upload real image files. The first image becomes the cover image across the platform.</p>
+                                </div>
+                            </div>
+
+                            <div class="pw-upload">
+                                <div class="pw-upload-meta">
+                                    <div class="pw-upload-icon"><i class="fi-camera"></i></div>
+                                    <div>
+                                        <strong>Multiple image upload</strong>
+                                        <p>Accepted formats: JPG, PNG, WEBP, GIF. Upload up to 10 images, 8MB each.</p>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="form-label" for="images">Property images</label>
+                                    <input class="form-control" id="images" name="images[]" type="file" multiple accept="image/*" required>
+                                    <div class="pw-field-note">The first selected image is treated as the cover image after upload.</div>
+                                </div>
+
+                                <div class="pw-media-grid" id="imagePreviewGrid">
+                                    <div class="pw-helper" id="imagePreviewEmpty">
+                                        <strong>No files selected yet</strong>
+                                        <p>Select one or more images to preview the upload order before submission.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pw-nav">
+                        <button type="button" class="pw-btn-secondary" data-prev="4">
+                            <i class="fi-arrow-left"></i>
+                            Pricing &amp; Amenities
+                        </button>
+                        <button type="submit" class="pw-btn-primary pw-submit" data-submit>
+                            <i class="fi-check"></i>
+                            Submit for Review
+                        </button>
+                    </div>
+                </section>
+            </form>
         </div>
-
-        {{-- Alerts --}}
-        @if (session('status'))
-            <div class="pf-alert-success">
-                <i class="fi-check-circle"></i>{{ session('status') }}
-            </div>
-        @endif
-        @if ($errors->any())
-            <div class="pf-alert-error">
-                <div class="pf-alert-title"><i class="fi-alert-circle me-1"></i>Please fix the following:</div>
-                <ul>
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
-
-        {{-- Steps --}}
-        <div class="pf-steps">
-            <button type="button" class="pf-step-btn active" data-step="1">
-                <span class="pf-step-num">1</span>
-                <span class="pf-step-label">Details</span>
-            </button>
-            <button type="button" class="pf-step-btn" data-step="2">
-                <span class="pf-step-num">2</span>
-                <span class="pf-step-label">Location</span>
-            </button>
-            <button type="button" class="pf-step-btn" data-step="3">
-                <span class="pf-step-num">3</span>
-                <span class="pf-step-label">Pricing</span>
-            </button>
-            <button type="button" class="pf-step-btn" data-step="4">
-                <span class="pf-step-num">4</span>
-                <span class="pf-step-label">Media</span>
-            </button>
-        </div>
-
-        @php
-            $selectedAmenities = old('amenities', $property->amenities ?? []);
-            $selectedPets = old('pets_allowed', $property->pets_allowed ?? []);
-            $currentListingType = old('listing_type', $property->listing_type);
-            $currentPropertyType = old('property_type', $property->property_type);
-
-            $petEmojis = ['Cats' => '🐱', 'Dogs' => '🐶', 'Small pets' => '🐹'];
-            $amenityIcons = [
-                'WiFi' => 'fi-wifi',
-                'Dishwasher' => 'fi-dish',
-                'Air conditioning' => 'fi-wind',
-                'Parking' => 'fi-car',
-                'Laundry' => 'fi-droplet',
-                'Security cameras' => 'fi-lock',
-                'Pool' => 'fi-droplet',
-                'Gym' => 'fi-zap',
-                'Balcony' => 'fi-sun',
-            ];
-        @endphp
-
-        <form method="POST" action="{{ route('agent.properties.store') }}" id="propertyForm">
-            @csrf
-
-            {{-- Step 1: Details --}}
-            <div class="pf-panel active" data-panel="1">
-                <div class="pf-card">
-                    <div class="pf-section-head">
-                        <div class="pf-section-icon"><i class="fi-home"></i></div>
-                        <div>
-                            <h2>Property details</h2>
-                            <p>Tell us about the property — type, size, and key features.</p>
-                        </div>
-                    </div>
-
-                    <div class="row g-3">
-                        <div class="col-sm-6">
-                            <label class="form-label">Listing type</label>
-                            <select class="form-select" name="listing_type" required>
-                                @foreach ($listingTypes as $value => $label)
-                                    <option value="{{ $value }}" @selected(\Illuminate\Support\Str::lower((string) $currentListingType) === $value)>{{ $label }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="col-sm-6">
-                            <label class="form-label">Property type</label>
-                            <select class="form-select" name="property_type" required>
-                                @foreach ($propertyTypes as $value => $label)
-                                    <option value="{{ $value }}" @selected(\Illuminate\Support\Str::lower((string) $currentPropertyType) === $value)>{{ $label }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="col-12">
-                            <label class="form-label">Property title</label>
-                            <input type="text" class="form-control" name="title" value="{{ old('title', $property->title) }}" placeholder="Modern 2-bedroom apartment in East Legon" required>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="pf-card">
-                    <div class="pf-section-head">
-                        <div class="pf-section-icon"><i class="fi-grid"></i></div>
-                        <div>
-                            <h2>Rooms &amp; dimensions</h2>
-                            <p>How many rooms and what size is the property?</p>
-                        </div>
-                    </div>
-                    <div class="row g-3">
-                        <div class="col-6 col-sm-3">
-                            <div class="pf-num-card">
-                                <span class="pf-num-icon"><i class="fi-bed-single"></i></span>
-                                <label>Beds</label>
-                                <input type="number" name="bedrooms" min="0" value="{{ old('bedrooms', $property->bedrooms) }}">
-                            </div>
-                        </div>
-                        <div class="col-6 col-sm-3">
-                            <div class="pf-num-card">
-                                <span class="pf-num-icon"><i class="fi-shower"></i></span>
-                                <label>Baths</label>
-                                <input type="number" name="bathrooms" min="0" value="{{ old('bathrooms', $property->bathrooms) }}">
-                            </div>
-                        </div>
-                        <div class="col-6 col-sm-3">
-                            <div class="pf-num-card">
-                                <span class="pf-num-icon"><i class="fi-car"></i></span>
-                                <label>Garage</label>
-                                <input type="number" name="garage_spaces" min="0" value="{{ old('garage_spaces', $property->garage_spaces) }}">
-                            </div>
-                        </div>
-                        <div class="col-6 col-sm-3">
-                            <div class="pf-num-card">
-                                <span class="pf-num-icon"><i class="fi-layers"></i></span>
-                                <label>Rooms</label>
-                                <input type="number" name="total_rooms" min="0" value="{{ old('total_rooms', $property->total_rooms) }}">
-                            </div>
-                        </div>
-                        <div class="col-sm-4">
-                            <label class="form-label">Floor</label>
-                            <input type="number" class="form-control" name="floor" min="0" value="{{ old('floor', $property->floor) }}" placeholder="3">
-                        </div>
-                        <div class="col-sm-4">
-                            <label class="form-label">Year built</label>
-                            <input type="number" class="form-control" name="year_built" min="1800" value="{{ old('year_built', $property->year_built) }}" placeholder="2023">
-                        </div>
-                        <div class="col-sm-4">
-                            <label class="form-label">Size (sq.m)</label>
-                            <input type="number" class="form-control" name="area" min="0" step="0.1" value="{{ old('area', $property->area) }}" placeholder="65">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="pf-card">
-                    <div class="pf-section-head">
-                        <div class="pf-section-icon"><i class="fi-file-text"></i></div>
-                        <div>
-                            <h2>Description</h2>
-                            <p>Highlight what makes this property special.</p>
-                        </div>
-                    </div>
-                    <textarea class="form-control" rows="5" name="description" placeholder="Describe key amenities, nearby landmarks, unique features, and what renters or buyers will love about this space." required>{{ old('description', $property->description) }}</textarea>
-                </div>
-
-                <div class="pf-nav-bar">
-                    <a href="{{ route('agent.properties.index') }}" class="pf-btn-secondary">
-                        <i class="fi-arrow-left fs-sm"></i> Cancel
-                    </a>
-                    <button type="button" class="pf-btn-primary" data-next="2">
-                        Location <i class="fi-arrow-right fs-sm"></i>
-                    </button>
-                </div>
-            </div>
-
-            {{-- Step 2: Location --}}
-            <div class="pf-panel" data-panel="2">
-                <div class="pf-card">
-                    <div class="pf-section-head">
-                        <div class="pf-section-icon"><i class="fi-map-pin"></i></div>
-                        <div>
-                            <h2>Location</h2>
-                            <p>Where is the property located?</p>
-                        </div>
-                    </div>
-                    <div class="row g-3">
-                        <div class="col-12">
-                            <label class="form-label">Street address</label>
-                            <input type="text" class="form-control" name="address" value="{{ old('address', $property->address) }}" placeholder="No. 12, Liberation Road">
-                        </div>
-                        <div class="col-sm-6">
-                            <label class="form-label">City</label>
-                            <input type="text" class="form-control" name="city" value="{{ old('city', $property->city) }}" placeholder="Accra">
-                        </div>
-                        <div class="col-sm-6">
-                            <label class="form-label">Region</label>
-                            <input type="text" class="form-control" name="region" value="{{ old('region', $property->region) }}" placeholder="Greater Accra">
-                        </div>
-                        <div class="col-sm-6">
-                            <label class="form-label">Postal code</label>
-                            <input type="text" class="form-control" name="postal_code" value="{{ old('postal_code', $property->postal_code) }}" placeholder="00233">
-                        </div>
-                        <div class="col-sm-6">
-                            <label class="form-label">Country</label>
-                            <input type="text" class="form-control" name="country" value="{{ old('country', $property->country) }}" placeholder="Ghana">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="pf-card">
-                    <div class="pf-section-head">
-                        <div class="pf-section-icon"><i class="fi-map"></i></div>
-                        <div>
-                            <h2>Map coordinates</h2>
-                            <p>Optional — helps display the property on maps.</p>
-                        </div>
-                    </div>
-                    <div class="row g-3">
-                        <div class="col-sm-6">
-                            <label class="form-label">Latitude</label>
-                            <input type="number" class="form-control" name="latitude" step="0.000001" value="{{ old('latitude', $property->latitude) }}" placeholder="5.6037">
-                        </div>
-                        <div class="col-sm-6">
-                            <label class="form-label">Longitude</label>
-                            <input type="number" class="form-control" name="longitude" step="0.000001" value="{{ old('longitude', $property->longitude) }}" placeholder="-0.1870">
-                        </div>
-                        <div class="col-12">
-                            <label class="form-label">Map embed URL</label>
-                            <input type="url" class="form-control" name="map_embed_url" value="{{ old('map_embed_url', $property->map_embed_url) }}" placeholder="https://www.google.com/maps/embed?...">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="pf-nav-bar">
-                    <button type="button" class="pf-btn-secondary" data-prev="1">
-                        <i class="fi-arrow-left fs-sm"></i> Details
-                    </button>
-                    <button type="button" class="pf-btn-primary" data-next="3">
-                        Pricing <i class="fi-arrow-right fs-sm"></i>
-                    </button>
-                </div>
-            </div>
-
-            {{-- Step 3: Pricing & Amenities --}}
-            <div class="pf-panel" data-panel="3">
-                <div class="pf-card">
-                    <div class="pf-section-head">
-                        <div class="pf-section-icon"><i class="fi-dollar-sign"></i></div>
-                        <div>
-                            <h2>Pricing</h2>
-                            <p>Set the price and billing frequency.</p>
-                        </div>
-                    </div>
-                    <div class="row g-3">
-                        <div class="col-sm-5">
-                            <label class="form-label">Price</label>
-                            <input type="number" class="form-control" name="price" min="0" value="{{ old('price', $property->price) }}" placeholder="1500" required>
-                        </div>
-                        <div class="col-sm-4">
-                            <label class="form-label">Period</label>
-                            <select class="form-select" name="price_period" required>
-                                @foreach ($pricePeriods as $value => $label)
-                                    <option value="{{ $value }}" @selected(old('price_period', $property->price_period) === $value)>{{ $label }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="col-sm-3">
-                            <label class="form-label">Deposit</label>
-                            <input type="number" class="form-control" name="deposit" min="0" value="{{ old('deposit', $property->deposit) }}" placeholder="3000">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="pf-card">
-                    <div class="pf-section-head">
-                        <div class="pf-section-icon"><i class="fi-star"></i></div>
-                        <div>
-                            <h2>Amenities</h2>
-                            <p>Select what's available at this property.</p>
-                        </div>
-                    </div>
-                    <div class="pf-chip-grid">
-                        @foreach ($amenityOptions as $amenity)
-                            <div class="pf-chip">
-                                <input type="checkbox" name="amenities[]" id="amenity-{{ \Illuminate\Support\Str::slug($amenity) }}" value="{{ $amenity }}" @checked(in_array($amenity, $selectedAmenities, true))>
-                                <label class="pf-chip-label" for="amenity-{{ \Illuminate\Support\Str::slug($amenity) }}">
-                                    <i class="{{ $amenityIcons[$amenity] ?? 'fi-check' }}"></i>
-                                    {{ $amenity }}
-                                </label>
-                            </div>
-                        @endforeach
-                    </div>
-                </div>
-
-                <div class="pf-card">
-                    <div class="pf-section-head">
-                        <div class="pf-section-icon"><i class="fi-heart"></i></div>
-                        <div>
-                            <h2>Pets allowed</h2>
-                            <p>Which pets are welcome?</p>
-                        </div>
-                    </div>
-                    <div class="pf-pet-grid">
-                        @foreach ($petOptions as $pet)
-                            <div class="pf-pet">
-                                <input type="checkbox" name="pets_allowed[]" id="pet-{{ \Illuminate\Support\Str::slug($pet) }}" value="{{ $pet }}" @checked(in_array($pet, $selectedPets, true))>
-                                <label class="pf-pet-label" for="pet-{{ \Illuminate\Support\Str::slug($pet) }}">
-                                    <span class="pf-pet-emoji">{{ $petEmojis[$pet] ?? '🐾' }}</span>
-                                    {{ $pet }}
-                                </label>
-                            </div>
-                        @endforeach
-                    </div>
-                </div>
-
-                <div class="pf-nav-bar">
-                    <button type="button" class="pf-btn-secondary" data-prev="2">
-                        <i class="fi-arrow-left fs-sm"></i> Location
-                    </button>
-                    <button type="button" class="pf-btn-primary" data-next="4">
-                        Media <i class="fi-arrow-right fs-sm"></i>
-                    </button>
-                </div>
-            </div>
-
-            {{-- Step 4: Media --}}
-            <div class="pf-panel" data-panel="4">
-                <div class="pf-card">
-                    <div class="pf-section-head">
-                        <div class="pf-section-icon"><i class="fi-image"></i></div>
-                        <div>
-                            <h2>Property images</h2>
-                            <p>Add image paths — one per line. The first image becomes the cover.</p>
-                        </div>
-                    </div>
-                    <div class="pf-image-area">
-                        <div class="pf-image-hint">
-                            <div class="pf-image-hint-icon"><i class="fi-camera"></i></div>
-                            <div>
-                                <h6>Add image paths</h6>
-                                <p>Enter one path per line, e.g. <code style="font-size: 0.72rem; color: var(--pf-sky);">assets/img/listings/real-estate/01.jpg</code></p>
-                            </div>
-                        </div>
-                        <textarea class="form-control" rows="6" name="images" placeholder="assets/img/listings/real-estate/01.jpg&#10;assets/img/listings/real-estate/02.jpg&#10;assets/img/listings/real-estate/03.jpg">{{ old('images', $imagesText) }}</textarea>
-                    </div>
-                </div>
-
-                <div class="pf-nav-bar">
-                    <button type="button" class="pf-btn-secondary" data-prev="3">
-                        <i class="fi-arrow-left fs-sm"></i> Pricing
-                    </button>
-                    <button type="submit" class="pf-btn-primary pf-btn-submit">
-                        <i class="fi-check fs-sm"></i> Submit for review
-                    </button>
-                </div>
-            </div>
-        </form>
     </div>
-</div>
 @endsection
 
 @push('scripts')
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const stepBtns = document.querySelectorAll('.pf-step-btn');
-    const panels = document.querySelectorAll('.pf-panel');
+    document.addEventListener('DOMContentLoaded', () => {
+        const wizard = document.getElementById('propertyWizard');
+        const stepButtons = Array.from(document.querySelectorAll('.pw-step'));
+        const panels = Array.from(document.querySelectorAll('.pw-panel'));
+        const propertyTypeSelect = document.getElementById('property_type');
+        const propertyTypeHint = document.getElementById('propertyTypeHint');
+        const areaLabel = document.getElementById('areaLabel');
+        const areaHelp = document.getElementById('areaHelp');
+        const conditionalSections = Array.from(document.querySelectorAll('[data-conditional-section]'));
+        const imageInput = document.getElementById('images');
+        const imagePreviewGrid = document.getElementById('imagePreviewGrid');
 
-    function goToStep(num) {
-        // Update step buttons
-        stepBtns.forEach(btn => {
-            const s = parseInt(btn.dataset.step);
-            btn.classList.remove('active', 'completed');
-            if (s === num) btn.classList.add('active');
-            else if (s < num) btn.classList.add('completed');
+        const propertyTypeGroupMap = @json($propertyTypeGroupMap);
+        const fieldStepMap = {
+            1: ['listing_type', 'property_type', 'title', 'description'],
+            2: ['area', 'bedrooms', 'bathrooms', 'garage_spaces', 'total_rooms', 'floor', 'year_built'],
+            3: ['address', 'city', 'region', 'postal_code', 'country', 'latitude', 'longitude', 'map_embed_url'],
+            4: ['price', 'currency', 'price_period', 'deposit', 'amenities', 'pets_allowed'],
+            5: ['images'],
+        };
+
+        let activeStep = 1;
+        let previewUrls = [];
+
+        const getPropertyType = () => (propertyTypeSelect?.value || 'house').toLowerCase().replaceAll('_', '-');
+        const getPropertyGroup = () => propertyTypeGroupMap[getPropertyType()] || 'residential';
+
+        const setStep = (step) => {
+            activeStep = step;
+
+            stepButtons.forEach((button) => {
+                const buttonStep = Number(button.dataset.step);
+                button.classList.toggle('is-active', buttonStep === step);
+                button.classList.toggle('is-complete', buttonStep < step);
+            });
+
+            panels.forEach((panel) => {
+                panel.classList.toggle('is-active', Number(panel.dataset.panel) === step);
+            });
+
+            document.getElementById('wizardSteps')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        };
+
+        const matchesSection = (section, propertyType, propertyGroup) => {
+            const allowedGroups = (section.dataset.propertyGroups || '')
+                .split(',')
+                .map((value) => value.trim())
+                .filter(Boolean);
+            const allowedTypes = (section.dataset.propertyTypes || '')
+                .split(',')
+                .map((value) => value.trim())
+                .filter(Boolean);
+
+            if (allowedGroups.length > 0 && allowedGroups.includes(propertyGroup)) {
+                return true;
+            }
+
+            if (allowedTypes.length > 0 && allowedTypes.includes(propertyType)) {
+                return true;
+            }
+
+            return allowedGroups.length === 0 && allowedTypes.length === 0;
+        };
+
+        const toggleSectionInputs = (section, enabled) => {
+            section.querySelectorAll('input, select, textarea, button').forEach((field) => {
+                if (field === propertyTypeSelect || field.type === 'submit' || field.dataset.nav !== undefined) {
+                    return;
+                }
+
+                field.disabled = !enabled;
+
+                if (!enabled && (field.type === 'checkbox' || field.type === 'radio')) {
+                    field.checked = false;
+                }
+            });
+        };
+
+        const refreshConditionalSections = () => {
+            const propertyType = getPropertyType();
+            const propertyGroup = getPropertyGroup();
+
+            conditionalSections.forEach((section) => {
+                const isVisible = matchesSection(section, propertyType, propertyGroup);
+                section.hidden = !isVisible;
+                section.setAttribute('aria-hidden', String(!isVisible));
+                toggleSectionInputs(section, isVisible);
+            });
+
+            if (propertyGroup === 'land') {
+                areaLabel.textContent = 'Plot size (sq.m)';
+                areaHelp.textContent = 'Use the total plot or parcel size for the land listing.';
+                propertyTypeHint.textContent = 'Land listings stay focused on plot size, title quality, access, and map accuracy.';
+            } else if (propertyGroup === 'commercial') {
+                areaLabel.textContent = 'Usable area (sq.m)';
+                areaHelp.textContent = 'Use lettable or operational area for the commercial unit.';
+                propertyTypeHint.textContent = 'Commercial listings show business-relevant fields and remove residential-only inputs.';
+            } else {
+                areaLabel.textContent = 'Property size (sq.m)';
+                areaHelp.textContent = 'Use the total internal or usable size for the listing.';
+                propertyTypeHint.textContent = 'Residential listings show room counts, pets, and home-oriented amenities.';
+            }
+        };
+
+        const clearPreviewUrls = () => {
+            previewUrls.forEach((url) => URL.revokeObjectURL(url));
+            previewUrls = [];
+        };
+
+        const renderImagePreview = () => {
+            clearPreviewUrls();
+
+            const files = Array.from(imageInput?.files || []);
+            imagePreviewGrid.innerHTML = '';
+
+            if (files.length === 0) {
+                imagePreviewGrid.innerHTML = `
+                    <div class="pw-helper" id="imagePreviewEmpty">
+                        <strong>No files selected yet</strong>
+                        <p>Select one or more images to preview the upload order before submission.</p>
+                    </div>
+                `;
+
+                return;
+            }
+
+            files.forEach((file, index) => {
+                const previewUrl = URL.createObjectURL(file);
+                previewUrls.push(previewUrl);
+
+                const card = document.createElement('div');
+                card.className = 'pw-media-card';
+                card.innerHTML = `
+                    ${index === 0 ? '<span class="pw-cover-badge">Cover</span>' : ''}
+                    <div class="pw-media-preview" style="background-image: url('${previewUrl}')"></div>
+                    <div class="pw-media-body">
+                        <strong>${file.name}</strong>
+                        <small>${(file.size / 1024 / 1024).toFixed(2)} MB</small>
+                    </div>
+                `;
+
+                imagePreviewGrid.appendChild(card);
+            });
+        };
+
+        const resolveStepFromErrors = () => {
+            const errorKeys = @json($errors->keys());
+
+            if (errorKeys.length === 0) {
+                return 1;
+            }
+
+            for (const [step, fields] of Object.entries(fieldStepMap)) {
+                const matchesStep = errorKeys.some((errorKey) => fields.some((field) => errorKey === field || errorKey.startsWith(`${field}.`)));
+
+                if (matchesStep) {
+                    return Number(step);
+                }
+            }
+
+            return 1;
+        };
+
+        propertyTypeSelect?.addEventListener('change', refreshConditionalSections);
+        imageInput?.addEventListener('change', renderImagePreview);
+
+        stepButtons.forEach((button) => {
+            button.addEventListener('click', () => {
+                setStep(Number(button.dataset.step));
+            });
         });
-        // Update panels
-        panels.forEach(p => {
-            p.classList.toggle('active', parseInt(p.dataset.panel) === num);
+
+        wizard?.querySelectorAll('[data-next]').forEach((button) => {
+            button.addEventListener('click', () => {
+                setStep(Number(button.dataset.next));
+            });
         });
-        // Scroll to top of form area
-        document.querySelector('.pf-steps').scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
 
-    // Step button clicks
-    stepBtns.forEach(btn => {
-        btn.addEventListener('click', () => goToStep(parseInt(btn.dataset.step)));
+        wizard?.querySelectorAll('[data-prev]').forEach((button) => {
+            button.addEventListener('click', () => {
+                setStep(Number(button.dataset.prev));
+            });
+        });
+
+        refreshConditionalSections();
+        renderImagePreview();
+        setStep(resolveStepFromErrors());
     });
-
-    // Next/Prev buttons
-    document.querySelectorAll('[data-next]').forEach(btn => {
-        btn.addEventListener('click', () => goToStep(parseInt(btn.dataset.next)));
-    });
-    document.querySelectorAll('[data-prev]').forEach(btn => {
-        btn.addEventListener('click', () => goToStep(parseInt(btn.dataset.prev)));
-    });
-
-    // If there are validation errors, jump to relevant step
-    @if ($errors->any())
-        const errorFields = @json($errors->keys());
-        const step1 = ['title','listing_type','property_type','bedrooms','bathrooms','garage_spaces','total_rooms','floor','year_built','area','description'];
-        const step2 = ['address','city','region','postal_code','country','latitude','longitude','map_embed_url'];
-        const step3 = ['price','price_period','deposit','amenities','pets_allowed'];
-
-        if (errorFields.some(f => step2.includes(f))) goToStep(2);
-        else if (errorFields.some(f => step3.includes(f))) goToStep(3);
-        else if (errorFields.some(f => f === 'images')) goToStep(4);
-    @endif
-});
 </script>
 @endpush

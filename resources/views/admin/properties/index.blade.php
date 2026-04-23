@@ -81,7 +81,7 @@
                                 </div>
                             </td>
                             <td class="text-body-secondary">{{ $location ?: '—' }}</td>
-                            <td class="fw-semibold">${{ number_format($property->price) }}{{ $pricePeriod }}</td>
+                            <td class="fw-semibold">{{ $property->formatted_price }}{{ $pricePeriod }}</td>
                             <td>
                                 <span class="badge {{ $statusClasses[$property->status] ?? 'text-bg-secondary' }}">
                                     {{ ucfirst($property->status) }}
