@@ -14,7 +14,7 @@ class HomeController extends Controller
             ->where('visibility', 'public');
 
         $topOffers = (clone $baseQuery)
-            ->with(['images' => fn ($query) => $query->orderBy('sort_order')])
+            ->with(['images' => fn($query) => $query->orderBy('sort_order')])
             ->orderByDesc('is_featured')
             ->orderByDesc('published_at')
             ->orderByDesc('created_at')
