@@ -163,7 +163,7 @@ class PropertyController extends Controller
         $counter = 1;
 
         while ($this->slugExists($slug, $ignoreId)) {
-            $slug = $base.'-'.$counter;
+            $slug = $base . '-' . $counter;
             $counter++;
         }
 

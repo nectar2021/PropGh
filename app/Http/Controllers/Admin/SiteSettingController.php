@@ -140,7 +140,7 @@ class SiteSettingController extends Controller
     {
         return array_merge(
             array_map(
-                static fn (array $config): string => $config['key'],
+                static fn(array $config): string => $config['key'],
                 self::IMAGE_SETTING_INPUTS,
             ),
             self::TEXT_SETTING_KEYS,
@@ -149,6 +149,6 @@ class SiteSettingController extends Controller
 
     private function removeInputName(string $inputName): string
     {
-        return 'remove_'.$inputName;
+        return 'remove_' . $inputName;
     }
 }

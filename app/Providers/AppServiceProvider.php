@@ -31,7 +31,7 @@ class AppServiceProvider extends ServiceProvider
                     $headerLogoPath = SiteSetting::get('header_logo_path');
 
                     if ($headerLogoPath) {
-                        $headerLogoUrl = asset('storage/'.$headerLogoPath);
+                        $headerLogoUrl = asset('storage/' . $headerLogoPath);
                     }
                 }
             } catch (\Throwable) {
