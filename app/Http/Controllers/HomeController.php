@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Property;
+use App\Support\HomePageSettings;
+use App\Support\PropertyCatalog;
 use Illuminate\Http\Response;
 
 class HomeController extends Controller
@@ -14,7 +16,7 @@ class HomeController extends Controller
             ->where('visibility', 'public');
 
         $topOffers = (clone $baseQuery)
-            ->with(['images' => fn($query) => $query->orderBy('sort_order')])
+            ->with(['images' => fn ($query) => $query->orderBy('sort_order')])
             ->orderByDesc('is_featured')
             ->orderByDesc('published_at')
             ->orderByDesc('created_at')
@@ -27,7 +29,7 @@ class HomeController extends Controller
             ->groupBy('type')
             ->get()
             ->reduce(function (array $carry, $row): array {
-                $key = $this->normalizePropertyType((string) $row->type);
+                $key = PropertyCatalog::normalizePropertyType((string) $row->type);
 
                 if ($key === '') {
                     return $carry;
@@ -37,6 +39,9 @@ class HomeController extends Controller
 
                 return $carry;
             }, []);
+
+        $homePage = HomePageSettings::resolved();
+        $categoryLabels = $homePage['categories']['labels'];
 
         $countTypes = static function (array $counts, string ...$keys): int {
             $total = 0;
@@ -48,34 +53,19 @@ class HomeController extends Controller
             return $total;
         };
 
-        $listingTypeOptions = [
-            '' => 'Select listing type',
-            'sale' => 'For Sale',
-            'rent' => 'For Rent',
-            'shortlet' => 'Shortlet',
-        ];
-
-        $propertyTypeOptions = [
-            '' => 'Any Property',
-            'land' => 'Land',
-            'house' => 'House',
-            'apartment' => 'Apartment',
-            'townhouse' => 'Townhouse',
-            'vacation-home' => 'Vacation Home',
-            'office' => 'Office',
-            'warehouse' => 'Warehouse',
-            'retail-space' => 'Retail Space',
-        ];
+        $listingTypeOptions = ['' => 'Select listing type'] + PropertyCatalog::listingTypes();
+        $propertyTypeOptions = ['' => 'Any Property'] + PropertyCatalog::propertyTypes();
 
         $categoryStats = [
-            ['label' => 'Lands', 'key' => 'land', 'count' => $countTypes($typeCounts, 'land', 'lands')],
-            ['label' => 'Houses', 'key' => 'house', 'count' => $countTypes($typeCounts, 'house')],
-            ['label' => 'Apartments', 'key' => 'apartment', 'count' => $countTypes($typeCounts, 'apartment')],
-            ['label' => 'Townhouses', 'key' => 'townhouse', 'count' => $countTypes($typeCounts, 'townhouse')],
+            ['label' => $categoryLabels['land'], 'key' => 'land', 'count' => $countTypes($typeCounts, 'land', 'lands')],
+            ['label' => $categoryLabels['house'], 'key' => 'house', 'count' => $countTypes($typeCounts, 'house')],
+            ['label' => $categoryLabels['apartment'], 'key' => 'apartment', 'count' => $countTypes($typeCounts, 'apartment')],
+            ['label' => $categoryLabels['townhouse'], 'key' => 'townhouse', 'count' => $countTypes($typeCounts, 'townhouse')],
+            ['label' => $categoryLabels['office'], 'key' => 'office', 'count' => $countTypes($typeCounts, 'office')],
         ];
 
         $extraPropertyTypes = collect($propertyTypeOptions)
-            ->except(['', 'land', 'house', 'apartment', 'townhouse'])
+            ->except(['', 'land', 'house', 'apartment', 'townhouse', 'office'])
             ->all();
 
         $cityStats = (clone $baseQuery)
@@ -118,21 +108,12 @@ class HomeController extends Controller
             (int) ceil((((clone $baseQuery)->max('price')) ?: 0) / 500) * 500,
         );
 
-        $cityImages = [
-            'assets/img/home/real-estate/cities/01.jpg',
-            'assets/img/home/real-estate/cities/02.jpg',
-            'assets/img/home/real-estate/cities/03.jpg',
-            'assets/img/home/real-estate/cities/04.jpg',
-            'assets/img/home/real-estate/cities/05.jpg',
-            'assets/img/home/real-estate/cities/06.jpg',
-        ];
-
         return response()->view('home', [
             'topOffers' => $topOffers,
             'categoryStats' => $categoryStats,
             'extraPropertyTypes' => $extraPropertyTypes,
+            'homePage' => $homePage,
             'cityStats' => $cityStats,
-            'cityImages' => $cityImages,
             'cityOptions' => $cityOptions,
             'listingTypeOptions' => $listingTypeOptions,
             'propertyTypeOptions' => $propertyTypeOptions,
@@ -141,14 +122,5 @@ class HomeController extends Controller
                 'max' => $maxBudget,
             ],
         ]);
-    }
-
-    private function normalizePropertyType(?string $type): string
-    {
-        if ($type === null) {
-            return '';
-        }
-
-        return str_replace([' ', '_'], '-', strtolower(trim($type)));
     }
 }

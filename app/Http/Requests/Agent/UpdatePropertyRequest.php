@@ -5,15 +5,19 @@ namespace App\Http\Requests\Agent;
 use App\Http\Requests\Concerns\ValidatesPropertyListing;
 use Illuminate\Foundation\Http\FormRequest;
 
-class StorePropertyRequest extends FormRequest
+class UpdatePropertyRequest extends FormRequest
 {
     use ValidatesPropertyListing;
 
     public function authorize(): bool
     {
         $user = $this->user();
+        $property = $this->route('property');
 
-        return $user !== null && ($user->isAgent() || $user->isAdmin());
+        return $user !== null
+            && ($user->isAgent() || $user->isAdmin())
+            && $property !== null
+            && (int) $property->owner_id === (int) $user->id;
     }
 
     /**
@@ -21,7 +25,7 @@ class StorePropertyRequest extends FormRequest
      */
     public function rules(): array
     {
-        return $this->propertyRules(requiresImages: true);
+        return $this->propertyRules(requiresImages: false);
     }
 
     protected function prepareForValidation(): void

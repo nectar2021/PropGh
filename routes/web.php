@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\AuthenticatedSessionController as AdminAuthentica
 use App\Http\Controllers\Admin\ClientController as AdminClientController;
 use App\Http\Controllers\Admin\ContactMessageController as AdminContactMessageController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Admin\HomePageController as AdminHomePageController;
 use App\Http\Controllers\Admin\LegalPageController as AdminLegalPageController;
 use App\Http\Controllers\Admin\ProfileController as AdminProfileController;
 use App\Http\Controllers\Admin\PropertyController as AdminPropertyController;
@@ -23,7 +24,7 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::redirect('/home', '/');
 Route::get('/properties', [PropertyController::class, 'index'])->name('properties.index');
-Route::get('/properties/map', [PropertyController::class, 'map'])->name('properties.map');
+Route::get('/properties/map.json', [PropertyController::class, 'map'])->name('properties.map');
 Route::get('/properties/{property}', [PropertyController::class, 'show'])->name('properties.show');
 Route::post('/properties/{property}/tour', [PropertyInquiryController::class, 'storeTour'])->name('properties.tour');
 Route::post('/properties/{property}/message', [PropertyInquiryController::class, 'storeMessage'])->name('properties.message');
@@ -80,6 +81,8 @@ Route::middleware('admin.auth')->prefix('admin')->name('admin.')->group(function
     Route::get('/profile', [AdminProfileController::class, 'edit'])->name('profile');
     Route::put('/profile', [AdminProfileController::class, 'update'])->name('profile.update');
     Route::put('/profile/password', [AdminProfileController::class, 'updatePassword'])->name('profile.password');
+    Route::get('/homepage', [AdminHomePageController::class, 'edit'])->name('homepage.edit');
+    Route::put('/homepage', [AdminHomePageController::class, 'update'])->name('homepage.update');
     Route::get('/settings', [AdminSiteSettingController::class, 'edit'])->name('settings.edit');
     Route::put('/settings', [AdminSiteSettingController::class, 'update'])->name('settings.update');
     Route::get('/subscribers', [AdminSubscriberController::class, 'index'])->name('subscribers.index');

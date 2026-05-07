@@ -684,9 +684,8 @@
         $selectedAmenities = old('amenities', $property->amenities ?? []);
         $selectedPets = old('pets_allowed', $property->pets_allowed ?? []);
         $currentListingType = \Illuminate\Support\Str::lower((string) old('listing_type', $property->listing_type));
-        $currentPropertyType = \Illuminate\Support\Str::lower((string) old('property_type', $property->property_type ?: 'house'));
+        $currentPropertyType = \App\Support\PropertyCatalog::normalizePropertyType(old('property_type', $property->property_type ?: 'house'));
         $currentCurrency = strtoupper((string) old('currency', $property->currency ?: \App\Models\Property::defaultCurrency()));
-        $currentPropertyType = str_replace('_', '-', $currentPropertyType);
         $currentPropertyGroup = $propertyTypeGroupMap[$currentPropertyType] ?? 'residential';
     @endphp
 
@@ -1277,7 +1276,7 @@
         let activeStep = 1;
         let previewUrls = [];
 
-        const getPropertyType = () => (propertyTypeSelect?.value || 'house').toLowerCase().replaceAll('_', '-');
+        const getPropertyType = () => (propertyTypeSelect?.value || 'house').toLowerCase().replaceAll('-', '_');
         const getPropertyGroup = () => propertyTypeGroupMap[getPropertyType()] || 'residential';
 
         const setStep = (step) => {
@@ -1325,9 +1324,6 @@
 
                 field.disabled = !enabled;
 
-                if (!enabled && (field.type === 'checkbox' || field.type === 'radio')) {
-                    field.checked = false;
-                }
             });
         };
 

@@ -92,6 +92,10 @@
                 {{-- Account section --}}
                 <span class="admin-nav-label">Account</span>
                 <nav class="nav flex-column gap-1 px-1">
+                    <a class="nav-link {{ request()->routeIs('admin.homepage.*') ? 'active' : '' }}" href="{{ route('admin.homepage.edit') }}">
+                        <i class="fi-home fs-base"></i>
+                        Homepage content
+                    </a>
                     <a class="nav-link {{ request()->routeIs('admin.legal-pages.*') ? 'active' : '' }}" href="{{ route('admin.legal-pages.index') }}">
                         <i class="fi-file-text fs-base"></i>
                         Legal pages
@@ -103,10 +107,6 @@
                     <a class="nav-link {{ request()->routeIs('admin.profile') ? 'active' : '' }}" href="{{ route('admin.profile') }}">
                         <i class="fi-settings fs-base"></i>
                         My profile
-                    </a>
-                    <a class="nav-link" href="{{ route('properties.index') }}">
-                        <i class="fi-external-link fs-base"></i>
-                        View site
                     </a>
                 </nav>
 
@@ -121,40 +121,45 @@
             </div>
         </aside>
 
-        <div class="flex-grow-1 d-flex flex-column" style="min-width: 0;">
+        <div class="grow d-flex flex-column" style="min-width: 0;">
             <header class="admin-topbar px-3 px-lg-4 py-3">
+                @php
+                    $topbarContext = match (true) {
+                        request()->routeIs('admin.dashboard') => ['kicker' => 'Admin overview', 'title' => 'Dashboard'],
+                        request()->routeIs('admin.properties.create') => ['kicker' => 'Properties', 'title' => 'Create listing'],
+                        request()->routeIs('admin.properties.edit') => ['kicker' => 'Properties', 'title' => 'Edit listing'],
+                        request()->routeIs('admin.properties.*') => ['kicker' => 'Properties', 'title' => 'Listings'],
+                        request()->routeIs('admin.inquiries.*') => ['kicker' => 'Inbox', 'title' => 'Property inquiries'],
+                        request()->routeIs('admin.messages.*') => ['kicker' => 'Inbox', 'title' => 'Contact messages'],
+                        request()->routeIs('admin.subscribers.*') => ['kicker' => 'Audience', 'title' => 'Subscribers'],
+                        request()->routeIs('admin.agents.*') => ['kicker' => 'Users', 'title' => 'Agents'],
+                        request()->routeIs('admin.clients.*') => ['kicker' => 'Users', 'title' => 'Clients'],
+                        request()->routeIs('admin.homepage.*') => ['kicker' => 'Content', 'title' => 'Homepage content'],
+                        request()->routeIs('admin.legal-pages.*') => ['kicker' => 'Content', 'title' => 'Legal pages'],
+                        request()->routeIs('admin.settings.*') => ['kicker' => 'Content', 'title' => 'Site settings'],
+                        request()->routeIs('admin.profile') => ['kicker' => 'Account', 'title' => 'My profile'],
+                        default => ['kicker' => 'Propsgh', 'title' => 'Admin console'],
+                    };
+                    $showTopbarAddProperty = request()->routeIs('admin.dashboard') || request()->routeIs('admin.properties.index');
+                @endphp
                 <div class="d-flex align-items-center justify-content-between gap-3">
                     <div class="d-flex align-items-center gap-2">
                         <button type="button" class="btn btn-icon btn-outline-secondary d-lg-none" data-bs-toggle="offcanvas" data-bs-target="#adminSidebar" aria-controls="adminSidebar" aria-label="Toggle navigation">
                             <i class="fi-menu"></i>
                         </button>
-                        @php
-                            $searchPlaceholder = match (true) {
-                                request()->routeIs('admin.properties.*') => 'Search properties, owners, or cities',
-                                request()->routeIs('admin.messages.*') => 'Search messages, names, or emails',
-                                default => 'Search listings, owners, or agents',
-                            };
-                            $searchAction = request()->routeIs('admin.messages.*')
-                                ? route('admin.messages.index')
-                                : route('admin.properties.index');
-                        @endphp
-                        <form class="admin-search-bar d-none d-md-flex" method="GET" action="{{ $searchAction }}">
-                            <i class="fi-search text-body-secondary"></i>
-                            <input
-                                type="search"
-                                name="search"
-                                placeholder="{{ $searchPlaceholder }}"
-                                value="{{ request('search') }}"
-                                aria-label="Search"
-                            >
-                        </form>
+                        <div>
+                            <div class="text-body-secondary fs-xs text-uppercase fw-semibold" style="letter-spacing: 0.08em;">{{ $topbarContext['kicker'] }}</div>
+                            <div class="fw-semibold">{{ $topbarContext['title'] }}</div>
+                        </div>
                     </div>
 
                     <div class="d-flex align-items-center gap-2 gap-sm-3">
-                        <a href="{{ route('admin.properties.create') }}" class="btn btn-primary btn-sm d-none d-sm-inline-flex align-items-center gap-1">
-                            <i class="fi-plus fs-sm"></i>
-                            <span>Add property</span>
-                        </a>
+                        @if ($showTopbarAddProperty)
+                            <a href="{{ route('admin.properties.create') }}" class="btn btn-primary btn-sm d-none d-sm-inline-flex align-items-center gap-1">
+                                <i class="fi-plus fs-sm"></i>
+                                <span>Add property</span>
+                            </a>
+                        @endif
                         <div class="dropdown">
                             <button type="button" class="btn btn-outline-secondary btn-sm border-0 shadow-none d-flex align-items-center gap-2" data-bs-toggle="dropdown" aria-expanded="false">
                                 <span class="d-inline-flex align-items-center justify-content-center rounded-circle" style="width: 34px; height: 34px; background: rgba(var(--ad-accent), 0.12); color: rgb(var(--ad-accent));">
@@ -171,10 +176,6 @@
                                     <i class="fi-lock fs-sm me-2"></i>Change password
                                 </a>
                                 <div class="dropdown-divider"></div>
-                                <a class="dropdown-item" href="{{ route('properties.index') }}">
-                                    <i class="fi-external-link fs-sm me-2"></i>Open public site
-                                </a>
-                                <div class="dropdown-divider"></div>
                                 <form method="POST" action="{{ route('logout') }}">
                                     @csrf
                                     <button type="submit" class="dropdown-item text-danger">
@@ -187,7 +188,7 @@
                 </div>
             </header>
 
-            <main class="flex-grow-1 p-3 p-lg-4">
+            <main class="grow p-3 p-lg-4">
                 @yield('content')
             </main>
 

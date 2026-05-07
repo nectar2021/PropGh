@@ -2,11 +2,13 @@
 
 namespace App\Models;
 
+use App\Support\PropertyCatalog;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Str;
 
 class Property extends Model
 {
@@ -96,6 +98,14 @@ class Property extends Model
         );
     }
 
+    protected function propertyTypeLabel(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => PropertyCatalog::propertyTypes()[PropertyCatalog::normalizePropertyType($this->property_type)]
+                ?? Str::of((string) $this->property_type)->replace(['-', '_'], ' ')->title()->value(),
+        );
+    }
+
     public function getIsNewAttribute(): bool
     {
         if (! $this->published_at) {
@@ -129,7 +139,7 @@ class Property extends Model
         $currencies = static::currencyOptions();
         $defaultCurrency = static::defaultCurrency();
 
-        return $currencies[(string) $currency]
+        return $currencies[strtoupper((string) $currency)]
             ?? $currencies[$defaultCurrency]
             ?? ['label' => 'Ghana Cedi', 'symbol' => 'GH₵'];
     }

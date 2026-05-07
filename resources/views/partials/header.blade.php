@@ -2,13 +2,17 @@
     <div class="container-fluid">
         {{-- Brand / Logo --}}
         <a class="navbar-brand pg-brand" href="{{ route('home') }}">
-            <span class="pg-brand-mark" aria-hidden="true">
-                <svg viewBox="0 0 28 32" fill="none" xmlns="http://www.w3.org/2000/svg" class="pg-brand-svg">
-                    <path d="M4.5 2C2.5 2 1 3.8 1 6v8c0 2.2 1.5 4 3.5 4h3c2 0 3.5-1.8 3.5-4V6c0-2.2-1.5-4-3.5-4h-3Z" fill="currentColor"/>
-                    <path d="M16.5 8c-2 0-3.5 1.8-3.5 4v12c0 2.2 1.5 4 3.5 4h3c2 0 3.5-1.8 3.5-4V12c0-2.2-1.5-4-3.5-4h-3Z" fill="currentColor" opacity=".72"/>
-                </svg>
-            </span>
-            <span class="pg-brand-text">Props<span class="pg-brand-accent">gh</span></span>
+            @if(!empty($headerLogoUrl))
+                <img class="pg-brand-image" src="{{ $headerLogoUrl }}" alt="Propsgh">
+            @else
+                <span class="pg-brand-mark" aria-hidden="true">
+                    <svg viewBox="0 0 28 32" fill="none" xmlns="http://www.w3.org/2000/svg" class="pg-brand-svg">
+                        <path d="M4.5 2C2.5 2 1 3.8 1 6v8c0 2.2 1.5 4 3.5 4h3c2 0 3.5-1.8 3.5-4V6c0-2.2-1.5-4-3.5-4h-3Z" fill="currentColor"/>
+                        <path d="M16.5 8c-2 0-3.5 1.8-3.5 4v12c0 2.2 1.5 4 3.5 4h3c2 0 3.5-1.8 3.5-4V12c0-2.2-1.5-4-3.5-4h-3Z" fill="currentColor" opacity=".72"/>
+                    </svg>
+                </span>
+                <span class="pg-brand-text">Props<span class="pg-brand-accent">gh</span></span>
+            @endif
         </a>
 
         {{-- Mobile toggler --}}

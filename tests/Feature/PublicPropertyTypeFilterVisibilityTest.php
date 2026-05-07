@@ -9,21 +9,23 @@ class PublicPropertyTypeFilterVisibilityTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_home_page_does_not_show_commercial_property_filter_or_category_card(): void
+    public function test_home_page_uses_supported_commercial_property_type_values(): void
     {
         $response = $this->get(route('home'));
 
         $response->assertStatus(200);
-        $response->assertDontSee('Commercial Property');
+        $response->assertSee('Commercial');
+        $response->assertSee('property_type=commercial', false);
         $response->assertDontSee('property_type=commercial-property', false);
     }
 
-    public function test_properties_page_does_not_show_commercial_property_filter_option(): void
+    public function test_properties_page_shows_canonical_commercial_property_filter_option(): void
     {
         $response = $this->get(route('properties.index', ['property_type' => 'commercial-property']));
 
         $response->assertStatus(200);
-        $response->assertDontSee('Commercial Property');
+        $response->assertSee('Commercial');
+        $response->assertSee('value="commercial"', false);
         $response->assertDontSee('value="commercial-property"', false);
     }
 
@@ -42,8 +44,9 @@ class PublicPropertyTypeFilterVisibilityTest extends TestCase
         $response->assertStatus(200);
         $response->assertSee('data-more-toggle', false);
         $response->assertSee(route('properties.index', ['property_type' => 'warehouse']), false);
-        $response->assertSee(route('properties.index', ['property_type' => 'retail-space']), false);
-        $response->assertSee(route('properties.index', ['property_type' => 'vacation-home']), false);
+        $response->assertSee(route('properties.index', ['property_type' => 'retail_space']), false);
+        $response->assertSee(route('properties.index', ['property_type' => 'vacation_home']), false);
+        $response->assertSee(route('properties.index', ['property_type' => 'commercial']), false);
         $response->assertDontSee('<a class="hover-effect-underline stretched-link" href="#">More</a>', false);
     }
 }

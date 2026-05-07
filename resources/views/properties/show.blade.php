@@ -250,7 +250,7 @@
               <tbody>
                 <tr>
                   <th scope="row" class="py-2 ps-0 pe-3">Property type</th>
-                  <td class="text-body py-2">{{ $property->property_type ? \Illuminate\Support\Str::title($property->property_type) : '—' }}</td>
+                  <td class="text-body py-2">{{ $property->property_type_label ?: '—' }}</td>
                 </tr>
                 <tr>
                   <th scope="row" class="py-2 ps-0 pe-3">Listing type</th>

@@ -5,6 +5,9 @@ namespace Tests\Feature\Admin;
 use App\Models\Property;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Tests\TestCase;
 
 class ManagePropertyCurrencyTest extends TestCase
@@ -13,6 +16,8 @@ class ManagePropertyCurrencyTest extends TestCase
 
     public function test_admin_can_store_property_with_selected_currency(): void
     {
+        Storage::fake('public');
+
         $admin = User::factory()->create([
             'role' => 'admin',
         ]);
@@ -27,13 +32,10 @@ class ManagePropertyCurrencyTest extends TestCase
             'currency' => 'EUR',
             'price_period' => 'month',
             'deposit' => 90000,
-            'bedrooms' => 0,
-            'bathrooms' => 2,
             'garage_spaces' => 8,
             'area' => 620,
             'year_built' => 2021,
             'floor' => 4,
-            'total_rooms' => 12,
             'address' => '24 Liberation Road',
             'city' => 'Accra',
             'region' => 'Greater Accra',
@@ -47,17 +49,26 @@ class ManagePropertyCurrencyTest extends TestCase
             'status' => 'live',
             'visibility' => 'public',
             'published_at' => now()->format('Y-m-d H:i:s'),
-            'images' => "assets/img/listings/real-estate/01.jpg\nassets/img/listings/real-estate/02.jpg",
+            'images' => [
+                UploadedFile::fake()->image('office-cover.jpg'),
+                UploadedFile::fake()->image('office-lobby.jpg'),
+            ],
         ]);
 
-        $property = Property::query()->firstOrFail();
+        $property = Property::query()->with('images')->firstOrFail();
 
         $response->assertRedirect(route('admin.properties.edit', $property));
 
         $this->assertSame('EUR', $property->currency);
         $this->assertSame('€', $property->currency_symbol);
         $this->assertSame('€ 180,000', $property->formatted_price);
+        $this->assertNull($property->bedrooms);
+        $this->assertNull($property->bathrooms);
+        $this->assertSame([], $property->pets_allowed);
         $this->assertSame($admin->id, $property->owner_id);
+        $this->assertCount(2, $property->images);
+        $this->assertTrue((bool) $property->images[0]->is_cover);
+        Storage::disk('public')->assertExists(Str::after($property->images[0]->path, 'storage/'));
         $this->assertDatabaseHas('properties', [
             'id' => $property->id,
             'currency' => 'EUR',

@@ -56,11 +56,11 @@ class PropertyCatalog
             'house' => 'House',
             'apartment' => 'Apartment',
             'townhouse' => 'Townhouse',
-            'vacation-home' => 'Vacation Home',
+            'vacation_home' => 'Vacation Home',
             'office' => 'Office',
             'warehouse' => 'Warehouse',
-            'retail-space' => 'Retail Space',
-            'commercial-property' => 'Commercial',
+            'retail_space' => 'Retail Space',
+            'commercial' => 'Commercial',
         ];
     }
 
@@ -84,8 +84,8 @@ class PropertyCatalog
     {
         return [
             'land' => ['land'],
-            'residential' => ['house', 'apartment', 'townhouse', 'vacation-home'],
-            'commercial' => ['office', 'warehouse', 'retail-space', 'commercial-property'],
+            'residential' => ['house', 'apartment', 'townhouse', 'vacation_home'],
+            'commercial' => ['office', 'warehouse', 'retail_space', 'commercial'],
         ];
     }
 
@@ -110,19 +110,17 @@ class PropertyCatalog
         $normalized = Str::of((string) $propertyType)
             ->trim()
             ->lower()
-            ->replace('_', '-')
+            ->replace('-', '_')
             ->value();
 
         $aliases = [
-            'vacation-home' => 'vacation-home',
-            'vacation home' => 'vacation-home',
-            'vacation_home' => 'vacation-home',
-            'retail-space' => 'retail-space',
-            'retail space' => 'retail-space',
-            'retail_space' => 'retail-space',
-            'commercial' => 'commercial-property',
-            'commercial property' => 'commercial-property',
-            'commercial-property' => 'commercial-property',
+            'vacation_home' => 'vacation_home',
+            'vacation home' => 'vacation_home',
+            'retail_space' => 'retail_space',
+            'retail space' => 'retail_space',
+            'commercial' => 'commercial',
+            'commercial property' => 'commercial',
+            'commercial_property' => 'commercial',
         ];
 
         return $aliases[$normalized] ?? $normalized;
@@ -171,7 +169,7 @@ class PropertyCatalog
             'office' => [
                 'title' => 'Office & commercial amenities',
                 'description' => 'Operational features for offices and general commercial spaces.',
-                'property_types' => ['office', 'commercial-property'],
+                'property_types' => ['office', 'commercial'],
                 'options' => self::officeAmenityOptions(),
             ],
             'warehouse' => [
@@ -180,10 +178,10 @@ class PropertyCatalog
                 'property_types' => ['warehouse'],
                 'options' => self::warehouseAmenityOptions(),
             ],
-            'retail-space' => [
+            'retail_space' => [
                 'title' => 'Retail amenities',
                 'description' => 'Customer-facing and visibility features for storefront listings.',
-                'property_types' => ['retail-space'],
+                'property_types' => ['retail_space'],
                 'options' => self::retailAmenityOptions(),
             ],
         ];
@@ -199,10 +197,86 @@ class PropertyCatalog
         return match ($normalizedType) {
             'land' => self::landAmenityOptions(),
             'warehouse' => self::warehouseAmenityOptions(),
-            'retail-space' => self::retailAmenityOptions(),
-            'office', 'commercial-property' => self::officeAmenityOptions(),
+            'retail_space' => self::retailAmenityOptions(),
+            'office', 'commercial' => self::officeAmenityOptions(),
             default => self::residentialAmenityOptions(),
         };
+    }
+
+    /**
+     * @return list<string>
+     */
+    public static function propertyTypeVariants(?string $propertyType): array
+    {
+        $normalized = self::normalizePropertyType($propertyType);
+        $variants = [
+            $normalized,
+            str_replace('_', '-', $normalized),
+            str_replace('_', ' ', $normalized),
+        ];
+
+        if ($normalized === 'commercial') {
+            $variants[] = 'commercial-property';
+            $variants[] = 'commercial property';
+        }
+
+        if ($normalized === 'land') {
+            $variants[] = 'lands';
+        }
+
+        return array_values(array_unique(array_filter($variants)));
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
+     */
+    public static function normalizeListingData(array $data): array
+    {
+        $propertyType = self::normalizePropertyType($data['property_type'] ?? '');
+        $normalizedData = [
+            ...$data,
+            'listing_type' => Str::of((string) ($data['listing_type'] ?? ''))->trim()->lower()->value(),
+            'property_type' => $propertyType,
+            'currency' => Str::of((string) ($data['currency'] ?? self::defaultCurrency()))->trim()->upper()->value(),
+            'price_period' => Str::of((string) ($data['price_period'] ?? ''))->trim()->lower()->value(),
+            'bedrooms' => self::nullableInteger($data['bedrooms'] ?? null),
+            'bathrooms' => self::nullableInteger($data['bathrooms'] ?? null),
+            'garage_spaces' => self::nullableInteger($data['garage_spaces'] ?? null),
+            'floor' => self::nullableInteger($data['floor'] ?? null),
+            'total_rooms' => self::nullableInteger($data['total_rooms'] ?? null),
+            'year_built' => self::nullableInteger($data['year_built'] ?? null),
+            'amenities' => array_values(array_filter($data['amenities'] ?? [])),
+            'pets_allowed' => array_values(array_filter($data['pets_allowed'] ?? [])),
+        ];
+
+        if (self::isLand($propertyType)) {
+            $normalizedData['bedrooms'] = null;
+            $normalizedData['bathrooms'] = null;
+            $normalizedData['garage_spaces'] = null;
+            $normalizedData['floor'] = null;
+            $normalizedData['total_rooms'] = null;
+            $normalizedData['year_built'] = null;
+            $normalizedData['pets_allowed'] = [];
+        }
+
+        if (self::isCommercial($propertyType)) {
+            $normalizedData['bedrooms'] = null;
+            $normalizedData['bathrooms'] = null;
+            $normalizedData['total_rooms'] = null;
+            $normalizedData['pets_allowed'] = [];
+        }
+
+        return $normalizedData;
+    }
+
+    private static function nullableInteger(mixed $value): ?int
+    {
+        if ($value === null || $value === '') {
+            return null;
+        }
+
+        return (int) $value;
     }
 
     /**

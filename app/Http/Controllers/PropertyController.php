@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Property;
+use App\Support\PropertyCatalog;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -15,16 +16,22 @@ class PropertyController extends Controller
     {
         $filterConfiguration = $this->propertyFilterConfiguration();
         $filters = $this->normalizedFilters($request, $filterConfiguration);
+        $sort = $this->normalizedSort($request);
+        $mapMarkers = $this->mapMarkers($filters, $sort);
 
-        $properties = $this->filteredPropertiesQuery($filters)
-            ->with('images')
-            ->orderByDesc('published_at')
-            ->orderByDesc('created_at')
-            ->get();
+        $properties = $this->applyPropertySorting(
+            $this->filteredPropertiesQuery($filters)->with('images'),
+            $sort,
+        )
+            ->paginate(4)
+            ->withQueryString();
 
         return response()->view('properties.index', [
             'properties' => $properties,
             'filters' => $filters,
+            'mapMarkers' => $mapMarkers,
+            'sort' => $sort,
+            'sortOptions' => $this->sortOptions(),
             'isLandSearch' => $filters['property_type'] === 'land',
             'listingTypeOptions' => $filterConfiguration['listingTypeOptions'],
             'propertyTypeOptions' => $filterConfiguration['propertyTypeOptions'],
@@ -51,11 +58,17 @@ class PropertyController extends Controller
     {
         $filterConfiguration = $this->propertyFilterConfiguration();
         $filters = $this->normalizedFilters($request, $filterConfiguration);
+        $sort = $this->normalizedSort($request);
 
-        $properties = $this->filteredPropertiesQuery($filters, requireCoordinates: true)
-            ->with('images')
-            ->orderByDesc('published_at')
-            ->orderByDesc('created_at')
+        return response()->json($this->mapMarkers($filters, $sort));
+    }
+
+    private function mapMarkers(array $filters, string $sort): array
+    {
+        $properties = $this->applyPropertySorting(
+            $this->filteredPropertiesQuery($filters, requireCoordinates: true)->with('images'),
+            $sort,
+        )
             ->get();
 
         $markers = $properties->values()->map(function (Property $property, int $index): array {
@@ -89,7 +102,7 @@ class PropertyController extends Controller
             ];
         })->values();
 
-        return response()->json($markers);
+        return $markers->all();
     }
 
     private function canPreview(Property $property): bool
@@ -105,57 +118,39 @@ class PropertyController extends Controller
 
     private function propertyTypeVariants(string $propertyType): array
     {
-        $variants = [
-            $propertyType,
-            str_replace('-', ' ', $propertyType),
-            str_replace('-', '_', $propertyType),
-        ];
-
-        if ($propertyType === 'land') {
-            $variants[] = 'lands';
-        }
-
-        return array_values(array_unique(array_filter($variants)));
+        return PropertyCatalog::propertyTypeVariants($propertyType);
     }
 
     private function propertyFilterConfiguration(): array
     {
         return [
-            'allowedListingTypes' => ['sale', 'rent', 'shortlet'],
-            'allowedPropertyTypes' => [
-                'land',
-                'house',
-                'apartment',
-                'townhouse',
-                'vacation-home',
-                'office',
-                'warehouse',
-                'retail-space',
-            ],
-            'listingTypeOptions' => [
-                '' => 'Select listing type',
-                'sale' => 'For Sale',
-                'rent' => 'For Rent',
-                'shortlet' => 'Shortlet',
-            ],
-            'propertyTypeOptions' => [
-                '' => 'Any Property',
-                'land' => 'Land',
-                'house' => 'House',
-                'apartment' => 'Apartment',
-                'townhouse' => 'Townhouse',
-                'vacation-home' => 'Vacation Home',
-                'office' => 'Office',
-                'warehouse' => 'Warehouse',
-                'retail-space' => 'Retail Space',
-            ],
+            'allowedListingTypes' => array_keys(PropertyCatalog::listingTypes()),
+            'allowedPropertyTypes' => array_keys(PropertyCatalog::propertyTypes()),
+            'listingTypeOptions' => ['' => 'Select listing type'] + PropertyCatalog::listingTypes(),
+            'propertyTypeOptions' => ['' => 'Any Property'] + PropertyCatalog::propertyTypes(),
         ];
+    }
+
+    private function sortOptions(): array
+    {
+        return [
+            'updated' => 'Updated',
+            'price_asc' => 'Price Asc',
+            'price_desc' => 'Price Desc',
+        ];
+    }
+
+    private function normalizedSort(Request $request): string
+    {
+        $sort = $request->string('sort', 'updated')->trim()->toString();
+
+        return array_key_exists($sort, $this->sortOptions()) ? $sort : 'updated';
     }
 
     private function normalizedFilters(Request $request, array $filterConfiguration): array
     {
         $listingType = $request->string('listing_type')->trim()->lower()->toString();
-        $propertyType = $request->string('property_type')->trim()->lower()->toString();
+        $propertyType = PropertyCatalog::normalizePropertyType($request->string('property_type')->trim()->lower()->toString());
         $maxPrice = $request->filled('max_price') ? max(0, $request->integer('max_price')) : null;
 
         return [
@@ -179,6 +174,23 @@ class PropertyController extends Controller
         }
 
         return $this->applyPropertyFilters($query, $filters);
+    }
+
+    private function applyPropertySorting(Builder $query, string $sort): Builder
+    {
+        return match ($sort) {
+            'price_asc' => $query
+                ->orderBy('price')
+                ->orderByDesc('published_at')
+                ->orderByDesc('created_at'),
+            'price_desc' => $query
+                ->orderByDesc('price')
+                ->orderByDesc('published_at')
+                ->orderByDesc('created_at'),
+            default => $query
+                ->orderByDesc('published_at')
+                ->orderByDesc('created_at'),
+        };
     }
 
     private function applyPropertyFilters(Builder $query, array $filters): Builder

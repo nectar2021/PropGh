@@ -55,9 +55,9 @@ class StorePropertyListingTest extends TestCase
         $this->assertSame('sale', $property->listing_type);
         $this->assertSame('GHS', $property->currency);
         $this->assertSame('review', $property->status);
-        $this->assertSame(0, $property->bedrooms);
-        $this->assertSame(0, $property->bathrooms);
-        $this->assertSame(0, $property->garage_spaces);
+        $this->assertNull($property->bedrooms);
+        $this->assertNull($property->bathrooms);
+        $this->assertNull($property->garage_spaces);
         $this->assertNull($property->total_rooms);
         $this->assertNull($property->floor);
         $this->assertNull($property->year_built);
@@ -118,7 +118,7 @@ class StorePropertyListingTest extends TestCase
         $this->assertSame('USD', $property->currency);
         $this->assertSame(2, $property->bedrooms);
         $this->assertSame(2, $property->bathrooms);
-        $this->assertSame(0, $property->garage_spaces);
+        $this->assertNull($property->garage_spaces);
         $this->assertNull($property->total_rooms);
         $this->assertNull($property->floor);
         $this->assertNull($property->year_built);

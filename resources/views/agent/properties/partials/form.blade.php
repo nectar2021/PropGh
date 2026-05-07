@@ -186,9 +186,9 @@
     <div class="card border-0 shadow-sm">
         <div class="card-body p-4">
             <h2 class="h5 mb-3">Media</h2>
-            <label class="form-label">Image paths (one per line)</label>
-            <textarea class="form-control" rows="6" name="images" placeholder="assets/img/listings/real-estate/01.jpg">{{ old('images', $imagesText) }}</textarea>
-            <div class="form-text">The first image will be used as the cover.</div>
+            <label class="form-label">Upload property images</label>
+            <input class="form-control" type="file" name="images[]" multiple accept="image/*" @required(! $property->exists)>
+            <div class="form-text">Upload real image files. The first uploaded image will be used as the cover.</div>
         </div>
     </div>
 </div>

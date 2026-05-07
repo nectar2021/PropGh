@@ -4,278 +4,100 @@
 
 @push('styles')
 <style>
-    /* ── Property form shell ── */
     .pf-shell {
         --pf-dark: #0c1220;
         --pf-slate: #1e293b;
         --pf-muted: #64748b;
         --pf-sky: #0ea5e9;
-        --pf-sky-glow: rgba(14, 165, 233, 0.15);
         --pf-emerald: #10b981;
-        --pf-amber: #f59e0b;
         --pf-surface: #ffffff;
-        --pf-border: rgba(226, 232, 240, 0.7);
-        --pf-radius: 1.1rem;
-        --pf-ease: cubic-bezier(0.16, 1, 0.3, 1);
+        --pf-border: rgba(226, 232, 240, 0.78);
         min-height: 100vh;
-        padding-top: 6rem;
-        padding-bottom: 4rem;
+        padding: 6rem 0 4rem;
         background:
-            radial-gradient(ellipse at 10% 0%, rgba(16, 185, 129, 0.04) 0%, transparent 50%),
-            radial-gradient(ellipse at 90% 100%, rgba(14, 165, 233, 0.04) 0%, transparent 50%),
+            radial-gradient(ellipse at 10% 0%, rgba(16, 185, 129, 0.05), transparent 45%),
+            radial-gradient(ellipse at 90% 100%, rgba(14, 165, 233, 0.05), transparent 45%),
             #f8fafc;
     }
 
-    .pf-header { margin-bottom: 2rem; }
-    .pf-breadcrumb {
-        display: flex; align-items: center; gap: 0.4rem;
-        font-size: 0.78rem; color: var(--pf-muted); margin-bottom: 1rem;
-    }
-    .pf-breadcrumb a { color: var(--pf-muted); text-decoration: none; transition: color 0.2s; }
-    .pf-breadcrumb a:hover { color: var(--pf-sky); }
-    .pf-breadcrumb .pf-bc-sep { font-size: 0.65rem; opacity: 0.5; }
-    .pf-breadcrumb .pf-bc-current { color: var(--pf-slate); font-weight: 600; }
-    .pf-title-row {
-        display: flex; align-items: flex-start; justify-content: space-between;
-        gap: 1rem; flex-wrap: wrap;
-    }
-    .pf-title-row h1 {
-        font-size: 1.55rem; font-weight: 700; color: var(--pf-dark);
-        letter-spacing: -0.03em; margin-bottom: 0.2rem;
-    }
-    .pf-title-row p { font-size: 0.86rem; color: var(--pf-muted); margin: 0; }
-    .pf-status-badges { display: flex; gap: 0.4rem; flex-wrap: wrap; }
-    .pf-badge {
-        display: inline-flex; align-items: center; gap: 0.35rem;
-        padding: 0.3rem 0.8rem; border-radius: 999px;
-        font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em;
-    }
-    .pf-badge-live { background: rgba(16, 185, 129, 0.1); color: var(--pf-emerald); border: 1px solid rgba(16, 185, 129, 0.2); }
-    .pf-badge-review { background: rgba(245, 158, 11, 0.1); color: var(--pf-amber); border: 1px solid rgba(245, 158, 11, 0.2); }
-    .pf-badge-draft { background: rgba(148, 163, 184, 0.1); color: var(--pf-muted); border: 1px solid rgba(148, 163, 184, 0.2); }
-    .pf-badge-verified { background: rgba(14, 165, 233, 0.1); color: var(--pf-sky); border: 1px solid rgba(14, 165, 233, 0.2); }
-
-    /* ── Steps ── */
-    .pf-steps {
-        display: flex; gap: 0; margin-bottom: 2rem;
-        background: var(--pf-surface); border: 1px solid var(--pf-border);
-        border-radius: var(--pf-radius); overflow: hidden;
-        box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
-    }
-    .pf-step-btn {
-        flex: 1; display: flex; align-items: center; justify-content: center;
-        gap: 0.55rem; padding: 0.85rem 1rem; border: none; background: transparent;
-        font-size: 0.82rem; font-weight: 500; color: var(--pf-muted);
-        cursor: pointer; transition: all 0.3s var(--pf-ease); position: relative;
-    }
-    .pf-step-btn:not(:last-child)::after {
-        content: ''; position: absolute; right: 0; top: 20%; height: 60%;
-        width: 1px; background: var(--pf-border);
-    }
-    .pf-step-btn .pf-step-num {
-        width: 24px; height: 24px; border-radius: 50%;
-        display: inline-flex; align-items: center; justify-content: center;
-        font-size: 0.7rem; font-weight: 700;
-        background: rgba(148, 163, 184, 0.15); color: var(--pf-muted);
-        transition: all 0.3s var(--pf-ease);
-    }
-    .pf-step-btn.active { color: var(--pf-dark); font-weight: 600; background: rgba(16, 185, 129, 0.04); }
-    .pf-step-btn.active .pf-step-num { background: linear-gradient(135deg, var(--pf-emerald), var(--pf-sky)); color: #fff; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3); }
-    .pf-step-btn.completed .pf-step-num { background: var(--pf-emerald); color: #fff; }
-    .pf-step-btn:hover:not(.active) { color: var(--pf-slate); background: rgba(148, 163, 184, 0.05); }
-    .pf-step-label { display: none; }
-    @media (min-width: 576px) { .pf-step-label { display: inline; } }
-
-    /* ── Cards ── */
-    .pf-card {
-        background: var(--pf-surface); border: 1px solid var(--pf-border);
-        border-radius: var(--pf-radius); padding: 2rem;
-        box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03), 0 8px 24px rgba(15, 23, 42, 0.05);
-        position: relative; overflow: hidden; margin-bottom: 1.25rem;
-    }
-    .pf-card::before {
-        content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
-        background: linear-gradient(90deg, var(--pf-emerald), var(--pf-sky));
-        border-radius: var(--pf-radius) var(--pf-radius) 0 0;
-    }
-    .pf-section-head { display: flex; align-items: center; gap: 0.65rem; margin-bottom: 1.5rem; }
-    .pf-section-icon {
-        width: 40px; height: 40px; border-radius: 0.75rem;
-        background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(14, 165, 233, 0.08));
-        display: inline-flex; align-items: center; justify-content: center;
-        font-size: 1rem; color: var(--pf-emerald); flex-shrink: 0;
-    }
-    .pf-section-head h2 { font-size: 1.05rem; font-weight: 700; color: var(--pf-dark); letter-spacing: -0.02em; margin: 0 0 0.1rem; }
-    .pf-section-head p { font-size: 0.76rem; color: var(--pf-muted); margin: 0; }
-
-    /* ── Inputs ── */
-    .pf-shell .form-label { font-size: 0.78rem; font-weight: 600; color: var(--pf-slate); letter-spacing: 0.015em; margin-bottom: 0.35rem; }
-    .pf-shell .form-control, .pf-shell .form-select {
-        border-radius: 0.75rem; border: 1.5px solid rgba(148, 163, 184, 0.35);
-        background: #f8fafc; padding: 0.65rem 0.9rem; font-size: 0.88rem;
-        color: var(--pf-dark); transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    .pf-shell .form-control::placeholder { color: rgba(100, 116, 139, 0.45); }
-    .pf-shell .form-control:hover, .pf-shell .form-select:hover { border-color: rgba(148, 163, 184, 0.6); background: #fafbfe; }
-    .pf-shell .form-control:focus, .pf-shell .form-select:focus { border-color: var(--pf-sky); background: #ffffff; box-shadow: 0 0 0 3.5px var(--pf-sky-glow); }
-
-    /* Number cards */
-    .pf-num-card {
-        background: #f8fafc; border: 1.5px solid rgba(148, 163, 184, 0.25);
-        border-radius: 0.75rem; padding: 0.75rem; text-align: center; transition: all 0.25s ease;
-    }
-    .pf-num-card:focus-within { border-color: var(--pf-sky); background: #fff; box-shadow: 0 0 0 3px var(--pf-sky-glow); }
-    .pf-num-card .pf-num-icon { font-size: 1.15rem; color: var(--pf-muted); margin-bottom: 0.35rem; display: block; }
-    .pf-num-card label { font-size: 0.68rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--pf-muted); display: block; margin-bottom: 0.35rem; }
-    .pf-num-card input { width: 100%; border: none; background: transparent; text-align: center; font-size: 1.15rem; font-weight: 700; color: var(--pf-dark); padding: 0; outline: none; }
-    .pf-num-card input::-webkit-inner-spin-button { opacity: 1; }
-
-    /* Chips */
-    .pf-chip-grid { display: flex; flex-wrap: wrap; gap: 0.5rem; }
-    .pf-chip { position: relative; }
-    .pf-chip input[type="checkbox"] { position: absolute; opacity: 0; pointer-events: none; }
-    .pf-chip-label {
-        display: inline-flex; align-items: center; gap: 0.4rem;
-        padding: 0.45rem 0.95rem; border-radius: 999px;
-        border: 1.5px solid rgba(148, 163, 184, 0.3); background: #f8fafc;
-        font-size: 0.8rem; font-weight: 500; color: var(--pf-muted);
-        cursor: pointer; transition: all 0.25s var(--pf-ease); user-select: none;
-    }
-    .pf-chip-label i { font-size: 0.85rem; }
-    .pf-chip input:checked + .pf-chip-label {
-        background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(14, 165, 233, 0.08));
-        border-color: var(--pf-emerald); color: var(--pf-emerald); font-weight: 600;
-    }
-    .pf-chip-label:hover { border-color: rgba(148, 163, 184, 0.55); background: #f1f5f9; }
-
-    /* Pets */
-    .pf-pet-grid { display: flex; gap: 0.65rem; flex-wrap: wrap; }
-    .pf-pet { position: relative; }
-    .pf-pet input[type="checkbox"] { position: absolute; opacity: 0; pointer-events: none; }
-    .pf-pet-label {
-        display: flex; flex-direction: column; align-items: center; gap: 0.3rem;
-        padding: 0.75rem 1.2rem; border-radius: 0.85rem;
-        border: 1.5px solid rgba(148, 163, 184, 0.3); background: #f8fafc;
-        font-size: 0.78rem; font-weight: 500; color: var(--pf-muted);
-        cursor: pointer; transition: all 0.25s var(--pf-ease); min-width: 85px; text-align: center;
-    }
-    .pf-pet-label .pf-pet-emoji { font-size: 1.4rem; line-height: 1; }
-    .pf-pet input:checked + .pf-pet-label {
-        background: linear-gradient(135deg, rgba(245, 158, 11, 0.08), rgba(245, 158, 11, 0.04));
-        border-color: var(--pf-amber); color: var(--pf-amber); font-weight: 600;
-    }
-
-    /* Image area */
-    .pf-image-area {
-        border: 2px dashed rgba(148, 163, 184, 0.35); border-radius: 0.85rem;
-        padding: 1.5rem; background: rgba(248, 250, 252, 0.6); transition: all 0.25s ease;
-    }
-    .pf-image-area:focus-within { border-color: var(--pf-sky); background: rgba(14, 165, 233, 0.02); }
-    .pf-image-hint { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem; }
-    .pf-image-hint-icon {
-        width: 44px; height: 44px; border-radius: 0.75rem;
-        background: linear-gradient(135deg, rgba(14, 165, 233, 0.1), rgba(16, 185, 129, 0.08));
-        display: flex; align-items: center; justify-content: center; font-size: 1.15rem; color: var(--pf-sky); flex-shrink: 0;
-    }
-    .pf-image-hint h6 { font-size: 0.82rem; font-weight: 600; color: var(--pf-dark); margin: 0 0 0.1rem; }
-    .pf-image-hint p { font-size: 0.72rem; color: var(--pf-muted); margin: 0; }
-    .pf-image-area textarea {
-        border: none !important; background: transparent !important; box-shadow: none !important;
-        padding: 0 !important; resize: vertical; font-size: 0.82rem;
-        font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, monospace; color: var(--pf-slate);
-    }
-
-    /* Panels */
+    .pf-container { max-width: 920px; }
+    .pf-header { margin-bottom: 1.75rem; }
+    .pf-breadcrumb { display: flex; align-items: center; gap: .45rem; margin-bottom: 1rem; color: var(--pf-muted); font-size: .8rem; }
+    .pf-breadcrumb a { color: inherit; text-decoration: none; }
+    .pf-title-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; flex-wrap: wrap; }
+    .pf-title-row h1 { margin: 0 0 .25rem; color: var(--pf-dark); font-size: 1.65rem; font-weight: 800; letter-spacing: -.035em; }
+    .pf-title-row p { margin: 0; color: var(--pf-muted); font-size: .9rem; }
+    .pf-badge { display: inline-flex; align-items: center; gap: .35rem; border-radius: 999px; padding: .35rem .8rem; font-size: .72rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+    .pf-badge-live { background: rgba(16, 185, 129, .1); color: var(--pf-emerald); }
+    .pf-badge-review { background: rgba(245, 158, 11, .12); color: #d97706; }
+    .pf-badge-draft { background: rgba(100, 116, 139, .12); color: var(--pf-muted); }
+    .pf-steps { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: .35rem; margin-bottom: 1.5rem; }
+    .pf-step { border: 1px solid var(--pf-border); border-radius: .9rem; background: var(--pf-surface); color: var(--pf-muted); padding: .75rem .55rem; font-size: .78rem; font-weight: 700; }
+    .pf-step.active { border-color: rgba(16, 185, 129, .28); background: linear-gradient(135deg, rgba(16, 185, 129, .1), rgba(14, 165, 233, .08)); color: var(--pf-dark); }
+    .pf-card { position: relative; overflow: hidden; margin-bottom: 1rem; border: 1px solid var(--pf-border); border-radius: 1.15rem; background: var(--pf-surface); box-shadow: 0 10px 28px rgba(15, 23, 42, .05); padding: 1.5rem; }
+    .pf-card::before { content: ''; position: absolute; inset: 0 0 auto; height: 3px; background: linear-gradient(90deg, var(--pf-emerald), var(--pf-sky)); }
+    .pf-section-head { display: flex; gap: .75rem; align-items: center; margin-bottom: 1.25rem; }
+    .pf-section-icon { display: inline-flex; width: 42px; height: 42px; align-items: center; justify-content: center; border-radius: .9rem; background: rgba(14, 165, 233, .08); color: var(--pf-sky); }
+    .pf-section-head h2 { margin: 0 0 .1rem; font-size: 1.05rem; font-weight: 800; color: var(--pf-dark); }
+    .pf-section-head p, .pf-note { margin: 0; color: var(--pf-muted); font-size: .78rem; }
     .pf-panel { display: none; }
-    .pf-panel.active { display: block; animation: pfSlideIn 0.35s var(--pf-ease); }
-
-    /* Nav bar */
-    .pf-nav-bar { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-top: 0.5rem; }
-    .pf-btn-secondary {
-        display: inline-flex; align-items: center; gap: 0.4rem;
-        padding: 0.7rem 1.4rem; border: 1.5px solid var(--pf-border);
-        border-radius: 0.75rem; background: var(--pf-surface); font-size: 0.85rem;
-        font-weight: 600; color: var(--pf-slate); cursor: pointer; text-decoration: none; transition: all 0.25s ease;
-    }
-    .pf-btn-secondary:hover { border-color: rgba(148, 163, 184, 0.6); background: #f1f5f9; color: var(--pf-dark); }
-    .pf-btn-primary {
-        display: inline-flex; align-items: center; gap: 0.45rem;
-        padding: 0.7rem 1.6rem; border: none; border-radius: 0.75rem;
-        font-size: 0.85rem; font-weight: 600; color: #fff;
-        background: linear-gradient(135deg, var(--pf-dark), var(--pf-slate));
-        cursor: pointer; transition: all 0.3s var(--pf-ease); position: relative; overflow: hidden;
-    }
-    .pf-btn-primary::before {
-        content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
-        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent); transition: left 0.5s ease;
-    }
-    .pf-btn-primary:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(12, 18, 32, 0.22); color: #fff; }
-    .pf-btn-primary:hover::before { left: 100%; }
-    .pf-btn-submit { background: linear-gradient(135deg, var(--pf-emerald), var(--pf-sky)); }
-    .pf-btn-submit:hover { box-shadow: 0 8px 24px rgba(16, 185, 129, 0.3); }
-
-    /* Alerts */
-    .pf-alert-error { background: rgba(239, 68, 68, 0.06); border: 1px solid rgba(239, 68, 68, 0.2); border-radius: var(--pf-radius); padding: 1rem 1.25rem; margin-bottom: 1.5rem; }
-    .pf-alert-error .pf-alert-title { font-size: 0.82rem; font-weight: 700; color: #dc2626; margin-bottom: 0.4rem; }
-    .pf-alert-error ul { margin: 0; padding-left: 1.1rem; font-size: 0.8rem; color: #b91c1c; }
-    .pf-alert-success {
-        background: linear-gradient(135deg, rgba(16, 185, 129, 0.06), rgba(14, 165, 233, 0.04));
-        border: 1px solid rgba(16, 185, 129, 0.2); border-radius: var(--pf-radius);
-        padding: 1rem 1.25rem; margin-bottom: 1.5rem;
-        display: flex; align-items: center; gap: 0.6rem; font-size: 0.85rem; font-weight: 500; color: var(--pf-emerald);
-    }
-
-    @keyframes pfSlideIn { from { opacity: 0; transform: translateX(12px); } to { opacity: 1; transform: translateX(0); } }
-    @media (prefers-reduced-motion: reduce) { .pf-panel.active { animation: none; } }
-    @media (max-width: 767.98px) {
-        .pf-card { padding: 1.35rem; }
-        .pf-title-row h1 { font-size: 1.3rem; }
-        .pf-step-btn { padding: 0.7rem 0.5rem; font-size: 0.75rem; }
-    }
+    .pf-panel.active { display: block; }
+    .pf-shell .form-label { color: var(--pf-slate); font-size: .8rem; font-weight: 700; }
+    .pf-shell .form-control, .pf-shell .form-select { border-radius: .8rem; border-color: rgba(148, 163, 184, .38); background: #f8fafc; min-height: 2.9rem; }
+    .pf-helper { border-radius: .9rem; background: rgba(14, 165, 233, .07); color: var(--pf-slate); padding: .85rem 1rem; font-size: .82rem; }
+    .pf-chip-grid, .pf-pet-grid { display: flex; flex-wrap: wrap; gap: .6rem; }
+    .pf-chip, .pf-pet { position: relative; }
+    .pf-chip input, .pf-pet input { position: absolute; opacity: 0; pointer-events: none; }
+    .pf-chip-label, .pf-pet-label { display: inline-flex; align-items: center; gap: .45rem; border: 1.5px solid rgba(148, 163, 184, .32); border-radius: 999px; background: #f8fafc; color: var(--pf-slate); cursor: pointer; font-size: .82rem; font-weight: 700; padding: .55rem .9rem; }
+    .pf-chip input:checked + .pf-chip-label, .pf-pet input:checked + .pf-pet-label { border-color: rgba(16, 185, 129, .55); background: rgba(16, 185, 129, .1); color: #047857; }
+    .pf-upload { border: 2px dashed rgba(148, 163, 184, .38); border-radius: 1rem; background: rgba(248, 250, 252, .72); padding: 1.25rem; }
+    .pf-media-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: .75rem; margin-top: 1rem; }
+    .pf-media-card { position: relative; overflow: hidden; aspect-ratio: 4 / 3; border-radius: .9rem; background: #e2e8f0; }
+    .pf-media-card img { width: 100%; height: 100%; object-fit: cover; }
+    .pf-cover-badge { position: absolute; top: .45rem; left: .45rem; z-index: 1; border-radius: 999px; background: rgba(12, 18, 32, .84); color: #fff; font-size: .65rem; font-weight: 800; padding: .16rem .45rem; }
+    .pf-nav { display: flex; justify-content: space-between; gap: .75rem; margin-top: .75rem; }
+    [data-conditional-section][hidden] { display: none !important; }
+    @media (max-width: 767.98px) { .pf-steps { grid-template-columns: repeat(2, minmax(0, 1fr)); } .pf-card { padding: 1.2rem; } }
 </style>
 @endpush
 
 @section('content')
-<div class="pf-shell">
-    <div class="container" style="max-width: 820px;">
+@php
+    $selectedAmenities = old('amenities', $property->amenities ?? []);
+    $selectedPets = old('pets_allowed', $property->pets_allowed ?? []);
+    $currentListingType = \Illuminate\Support\Str::lower((string) old('listing_type', $property->listing_type));
+    $currentPropertyType = \App\Support\PropertyCatalog::normalizePropertyType(old('property_type', $property->property_type ?: 'house'));
+    $currentCurrency = strtoupper((string) old('currency', $property->currency ?: \App\Models\Property::defaultCurrency()));
+    $existingImages = $property->images->sortBy('sort_order');
+@endphp
 
-        {{-- Header --}}
+<div class="pf-shell">
+    <div class="container pf-container">
         <div class="pf-header">
             <div class="pf-breadcrumb">
                 <a href="{{ route('agent.properties.index') }}">My Properties</a>
-                <span class="pf-bc-sep"><i class="fi-chevron-right"></i></span>
-                <span class="pf-bc-current">Edit listing</span>
+                <i class="fi-chevron-right fs-xs"></i>
+                <span>Edit listing</span>
             </div>
             <div class="pf-title-row">
                 <div>
                     <h1>Edit property</h1>
-                    <p>Update your listing details below.</p>
+                    <p>Update the listing with the same type-aware rules used when creating a property.</p>
                 </div>
-                <div class="pf-status-badges">
-                    @if ($property->status === 'live')
-                        <span class="pf-badge pf-badge-live"><i class="fi-check-circle"></i> Live</span>
-                    @elseif ($property->status === 'review')
-                        <span class="pf-badge pf-badge-review"><i class="fi-clock"></i> Under review</span>
-                    @else
-                        <span class="pf-badge pf-badge-draft"><i class="fi-edit"></i> Draft</span>
-                    @endif
-                    @if ($property->is_verified)
-                        <span class="pf-badge pf-badge-verified"><i class="fi-shield"></i> Verified</span>
-                    @endif
-                </div>
+                <span class="pf-badge pf-badge-{{ $property->status === 'live' ? 'live' : ($property->status === 'review' ? 'review' : 'draft') }}">
+                    {{ $property->status === 'review' ? 'Under review' : ucfirst($property->status) }}
+                </span>
             </div>
         </div>
 
-        {{-- Alerts --}}
         @if (session('status'))
-            <div class="pf-alert-success">
-                <i class="fi-check-circle"></i>{{ session('status') }}
-            </div>
+            <div class="alert alert-success">{{ session('status') }}</div>
         @endif
+
         @if ($errors->any())
-            <div class="pf-alert-error">
-                <div class="pf-alert-title"><i class="fi-alert-circle me-1"></i>Please fix the following:</div>
-                <ul>
+            <div class="alert alert-danger">
+                <div class="fw-semibold mb-2">Please fix the following:</div>
+                <ul class="mb-0 ps-3">
                     @foreach ($errors->all() as $error)
                         <li>{{ $error }}</li>
                     @endforeach
@@ -283,69 +105,41 @@
             </div>
         @endif
 
-        {{-- Steps --}}
         <div class="pf-steps">
-            <button type="button" class="pf-step-btn active" data-step="1">
-                <span class="pf-step-num">1</span>
-                <span class="pf-step-label">Details</span>
-            </button>
-            <button type="button" class="pf-step-btn" data-step="2">
-                <span class="pf-step-num">2</span>
-                <span class="pf-step-label">Location</span>
-            </button>
-            <button type="button" class="pf-step-btn" data-step="3">
-                <span class="pf-step-num">3</span>
-                <span class="pf-step-label">Pricing</span>
-            </button>
-            <button type="button" class="pf-step-btn" data-step="4">
-                <span class="pf-step-num">4</span>
-                <span class="pf-step-label">Media</span>
-            </button>
+            <button type="button" class="pf-step active" data-step="1">1. Core Details</button>
+            <button type="button" class="pf-step" data-step="2">2. Type Details</button>
+            <button type="button" class="pf-step" data-step="3">3. Location</button>
+            <button type="button" class="pf-step" data-step="4">4. Pricing</button>
+            <button type="button" class="pf-step" data-step="5">5. Media</button>
         </div>
 
-        @php
-            $selectedAmenities = old('amenities', $property->amenities ?? []);
-            $selectedPets = old('pets_allowed', $property->pets_allowed ?? []);
-            $currentListingType = old('listing_type', $property->listing_type);
-            $currentPropertyType = old('property_type', $property->property_type);
-            $currentCurrency = strtoupper((string) old('currency', $property->currency ?: \App\Models\Property::defaultCurrency()));
-
-            $petEmojis = ['Cats' => '🐱', 'Dogs' => '🐶', 'Small pets' => '🐹'];
-            $amenityIcons = [
-                'WiFi' => 'fi-wifi', 'Dishwasher' => 'fi-dish', 'Air conditioning' => 'fi-wind',
-                'Parking' => 'fi-car', 'Laundry' => 'fi-droplet', 'Security cameras' => 'fi-lock',
-                'Pool' => 'fi-droplet', 'Gym' => 'fi-zap', 'Balcony' => 'fi-sun',
-            ];
-        @endphp
-
-        <form method="POST" action="{{ route('agent.properties.update', $property) }}" id="propertyForm">
+        <form method="POST" action="{{ route('agent.properties.update', $property) }}" id="propertyEditForm" enctype="multipart/form-data" data-agent-property-form>
             @csrf
             @method('PUT')
 
-            {{-- Step 1: Details --}}
-            <div class="pf-panel active" data-panel="1">
+            <section class="pf-panel active" data-panel="1">
                 <div class="pf-card">
                     <div class="pf-section-head">
                         <div class="pf-section-icon"><i class="fi-home"></i></div>
                         <div>
-                            <h2>Property details</h2>
-                            <p>Update the type, size, and key features.</p>
+                            <h2>Core details</h2>
+                            <p>Choose listing mode, property class, title, and description.</p>
                         </div>
                     </div>
                     <div class="row g-3">
-                        <div class="col-sm-6">
+                        <div class="col-md-6">
                             <label class="form-label">Listing type</label>
                             <select class="form-select" name="listing_type" required>
                                 @foreach ($listingTypes as $value => $label)
-                                    <option value="{{ $value }}" @selected(\Illuminate\Support\Str::lower((string) $currentListingType) === $value)>{{ $label }}</option>
+                                    <option value="{{ $value }}" @selected($currentListingType === $value)>{{ $label }}</option>
                                 @endforeach
                             </select>
                         </div>
-                        <div class="col-sm-6">
+                        <div class="col-md-6">
                             <label class="form-label">Property type</label>
-                            <select class="form-select" name="property_type" required>
+                            <select class="form-select" name="property_type" data-property-type required>
                                 @foreach ($propertyTypes as $value => $label)
-                                    <option value="{{ $value }}" @selected(\Illuminate\Support\Str::lower((string) $currentPropertyType) === $value)>{{ $label }}</option>
+                                    <option value="{{ $value }}" @selected($currentPropertyType === $value)>{{ $label }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -353,130 +147,117 @@
                             <label class="form-label">Property title</label>
                             <input type="text" class="form-control" name="title" value="{{ old('title', $property->title) }}" required>
                         </div>
+                        <div class="col-12">
+                            <label class="form-label">Description</label>
+                            <textarea class="form-control" rows="5" name="description" required>{{ old('description', $property->description) }}</textarea>
+                        </div>
                     </div>
                 </div>
+                <div class="pf-nav">
+                    <a href="{{ route('agent.properties.index') }}" class="btn btn-outline-secondary">Cancel</a>
+                    <button type="button" class="btn btn-primary" data-next="2">Type-Specific Details</button>
+                </div>
+            </section>
 
+            <section class="pf-panel" data-panel="2">
                 <div class="pf-card">
                     <div class="pf-section-head">
                         <div class="pf-section-icon"><i class="fi-grid"></i></div>
                         <div>
-                            <h2>Rooms &amp; dimensions</h2>
-                            <p>How many rooms and what size is the property?</p>
+                            <h2>Type-specific details</h2>
+                            <p>Land, residential, and commercial listings use different field sets.</p>
                         </div>
                     </div>
                     <div class="row g-3">
-                        <div class="col-6 col-sm-3">
-                            <div class="pf-num-card">
-                                <span class="pf-num-icon"><i class="fi-bed-single"></i></span>
-                                <label>Beds</label>
-                                <input type="number" name="bedrooms" min="0" value="{{ old('bedrooms', $property->bedrooms) }}">
-                            </div>
+                        <div class="col-12">
+                            <label class="form-label" data-area-label>Property size (sq.m)</label>
+                            <input type="number" class="form-control" name="area" min="0" step="0.01" value="{{ old('area', $property->area) }}" required>
+                            <div class="pf-note" data-area-help>Use the relevant usable size for this listing.</div>
                         </div>
-                        <div class="col-6 col-sm-3">
-                            <div class="pf-num-card">
-                                <span class="pf-num-icon"><i class="fi-shower"></i></span>
-                                <label>Baths</label>
-                                <input type="number" name="bathrooms" min="0" value="{{ old('bathrooms', $property->bathrooms) }}">
-                            </div>
+                    </div>
+
+                    <div class="pf-helper mt-3" data-conditional-section data-property-groups="land">
+                        Land mode hides room, parking, floor, year-built, and pet fields. Use amenities to describe title, access, fencing, servicing, and utilities.
+                    </div>
+
+                    <div class="row g-3 mt-1" data-conditional-section data-property-groups="residential">
+                        <div class="col-6 col-md-3">
+                            <label class="form-label">Bedrooms</label>
+                            <input type="number" class="form-control" name="bedrooms" min="0" value="{{ old('bedrooms', $property->bedrooms) }}">
                         </div>
-                        <div class="col-6 col-sm-3">
-                            <div class="pf-num-card">
-                                <span class="pf-num-icon"><i class="fi-car"></i></span>
-                                <label>Garage</label>
-                                <input type="number" name="garage_spaces" min="0" value="{{ old('garage_spaces', $property->garage_spaces) }}">
-                            </div>
+                        <div class="col-6 col-md-3">
+                            <label class="form-label">Bathrooms</label>
+                            <input type="number" class="form-control" name="bathrooms" min="0" value="{{ old('bathrooms', $property->bathrooms) }}">
                         </div>
-                        <div class="col-6 col-sm-3">
-                            <div class="pf-num-card">
-                                <span class="pf-num-icon"><i class="fi-layers"></i></span>
-                                <label>Rooms</label>
-                                <input type="number" name="total_rooms" min="0" value="{{ old('total_rooms', $property->total_rooms) }}">
-                            </div>
+                        <div class="col-6 col-md-3">
+                            <label class="form-label">Garage / parking</label>
+                            <input type="number" class="form-control" name="garage_spaces" min="0" value="{{ old('garage_spaces', $property->garage_spaces) }}">
                         </div>
-                        <div class="col-sm-4">
+                        <div class="col-6 col-md-3">
+                            <label class="form-label">Total rooms</label>
+                            <input type="number" class="form-control" name="total_rooms" min="0" value="{{ old('total_rooms', $property->total_rooms) }}">
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mt-1" data-conditional-section data-property-groups="residential,commercial">
+                        <div class="col-md-6">
                             <label class="form-label">Floor</label>
                             <input type="number" class="form-control" name="floor" min="0" value="{{ old('floor', $property->floor) }}">
                         </div>
-                        <div class="col-sm-4">
+                        <div class="col-md-6">
                             <label class="form-label">Year built</label>
                             <input type="number" class="form-control" name="year_built" min="1800" value="{{ old('year_built', $property->year_built) }}">
                         </div>
-                        <div class="col-sm-4">
-                            <label class="form-label">Size (sq.m)</label>
-                            <input type="number" class="form-control" name="area" min="0" step="0.1" value="{{ old('area', $property->area) }}">
+                    </div>
+
+                    <div class="row g-3 mt-1" data-conditional-section data-property-groups="commercial">
+                        <div class="col-md-6">
+                            <label class="form-label">Parking / loading spaces</label>
+                            <input type="number" class="form-control" name="garage_spaces" min="0" value="{{ old('garage_spaces', $property->garage_spaces) }}">
                         </div>
                     </div>
                 </div>
-
-                <div class="pf-card">
-                    <div class="pf-section-head">
-                        <div class="pf-section-icon"><i class="fi-file-text"></i></div>
-                        <div>
-                            <h2>Description</h2>
-                            <p>Highlight what makes this property special.</p>
-                        </div>
-                    </div>
-                    <textarea class="form-control" rows="5" name="description" required>{{ old('description', $property->description) }}</textarea>
+                <div class="pf-nav">
+                    <button type="button" class="btn btn-outline-secondary" data-prev="1">Core Details</button>
+                    <button type="button" class="btn btn-primary" data-next="3">Location</button>
                 </div>
+            </section>
 
-                <div class="pf-nav-bar">
-                    <a href="{{ route('agent.properties.index') }}" class="pf-btn-secondary">
-                        <i class="fi-arrow-left fs-sm"></i> Cancel
-                    </a>
-                    <button type="button" class="pf-btn-primary" data-next="2">
-                        Location <i class="fi-arrow-right fs-sm"></i>
-                    </button>
-                </div>
-            </div>
-
-            {{-- Step 2: Location --}}
-            <div class="pf-panel" data-panel="2">
+            <section class="pf-panel" data-panel="3">
                 <div class="pf-card">
                     <div class="pf-section-head">
                         <div class="pf-section-icon"><i class="fi-map-pin"></i></div>
                         <div>
                             <h2>Location</h2>
-                            <p>Where is the property located?</p>
+                            <p>Location data powers search, cards, and map previews.</p>
                         </div>
                     </div>
                     <div class="row g-3">
                         <div class="col-12">
                             <label class="form-label">Street address</label>
-                            <input type="text" class="form-control" name="address" value="{{ old('address', $property->address) }}">
+                            <input type="text" class="form-control" name="address" value="{{ old('address', $property->address) }}" required>
                         </div>
-                        <div class="col-sm-6">
+                        <div class="col-md-6">
                             <label class="form-label">City</label>
-                            <input type="text" class="form-control" name="city" value="{{ old('city', $property->city) }}">
+                            <input type="text" class="form-control" name="city" value="{{ old('city', $property->city) }}" required>
                         </div>
-                        <div class="col-sm-6">
+                        <div class="col-md-6">
                             <label class="form-label">Region</label>
-                            <input type="text" class="form-control" name="region" value="{{ old('region', $property->region) }}">
+                            <input type="text" class="form-control" name="region" value="{{ old('region', $property->region) }}" required>
                         </div>
-                        <div class="col-sm-6">
+                        <div class="col-md-6">
                             <label class="form-label">Postal code</label>
                             <input type="text" class="form-control" name="postal_code" value="{{ old('postal_code', $property->postal_code) }}">
                         </div>
-                        <div class="col-sm-6">
+                        <div class="col-md-6">
                             <label class="form-label">Country</label>
-                            <input type="text" class="form-control" name="country" value="{{ old('country', $property->country) }}">
+                            <input type="text" class="form-control" name="country" value="{{ old('country', $property->country ?: 'Ghana') }}" required>
                         </div>
-                    </div>
-                </div>
-
-                <div class="pf-card">
-                    <div class="pf-section-head">
-                        <div class="pf-section-icon"><i class="fi-map"></i></div>
-                        <div>
-                            <h2>Map coordinates</h2>
-                            <p>Optional — helps display the property on maps.</p>
-                        </div>
-                    </div>
-                    <div class="row g-3">
-                        <div class="col-sm-6">
+                        <div class="col-md-6">
                             <label class="form-label">Latitude</label>
                             <input type="number" class="form-control" name="latitude" step="0.000001" value="{{ old('latitude', $property->latitude) }}">
                         </div>
-                        <div class="col-sm-6">
+                        <div class="col-md-6">
                             <label class="form-label">Longitude</label>
                             <input type="number" class="form-control" name="longitude" step="0.000001" value="{{ old('longitude', $property->longitude) }}">
                         </div>
@@ -486,33 +267,27 @@
                         </div>
                     </div>
                 </div>
-
-                <div class="pf-nav-bar">
-                    <button type="button" class="pf-btn-secondary" data-prev="1">
-                        <i class="fi-arrow-left fs-sm"></i> Details
-                    </button>
-                    <button type="button" class="pf-btn-primary" data-next="3">
-                        Pricing <i class="fi-arrow-right fs-sm"></i>
-                    </button>
+                <div class="pf-nav">
+                    <button type="button" class="btn btn-outline-secondary" data-prev="2">Type-Specific Details</button>
+                    <button type="button" class="btn btn-primary" data-next="4">Pricing & Amenities</button>
                 </div>
-            </div>
+            </section>
 
-            {{-- Step 3: Pricing & Amenities --}}
-            <div class="pf-panel" data-panel="3">
+            <section class="pf-panel" data-panel="4">
                 <div class="pf-card">
                     <div class="pf-section-head">
                         <div class="pf-section-icon"><i class="fi-dollar-sign"></i></div>
                         <div>
                             <h2>Pricing</h2>
-                            <p>Set the price and billing frequency.</p>
+                            <p>Currency, period, and deposit are stored per property.</p>
                         </div>
                     </div>
                     <div class="row g-3">
-                        <div class="col-sm-3">
+                        <div class="col-md-3">
                             <label class="form-label">Price</label>
                             <input type="number" class="form-control" name="price" min="0" value="{{ old('price', $property->price) }}" required>
                         </div>
-                        <div class="col-sm-3">
+                        <div class="col-md-3">
                             <label class="form-label">Currency</label>
                             <select class="form-select" name="currency" required>
                                 @foreach ($currencyOptions as $value => $currency)
@@ -520,7 +295,7 @@
                                 @endforeach
                             </select>
                         </div>
-                        <div class="col-sm-3">
+                        <div class="col-md-3">
                             <label class="form-label">Period</label>
                             <select class="form-select" name="price_period" required>
                                 @foreach ($pricePeriods as $value => $label)
@@ -528,7 +303,7 @@
                                 @endforeach
                             </select>
                         </div>
-                        <div class="col-sm-3">
+                        <div class="col-md-3">
                             <label class="form-label">Deposit</label>
                             <input type="number" class="form-control" name="deposit" min="0" value="{{ old('deposit', $property->deposit) }}">
                         </div>
@@ -539,85 +314,87 @@
                     <div class="pf-section-head">
                         <div class="pf-section-icon"><i class="fi-star"></i></div>
                         <div>
-                            <h2>Amenities</h2>
-                            <p>Select what's available at this property.</p>
+                            <h2>Type-specific amenities</h2>
+                            <p>Only amenities for the selected property type are submitted.</p>
                         </div>
                     </div>
-                    <div class="pf-chip-grid">
-                        @foreach ($amenityOptions as $amenity)
-                            <div class="pf-chip">
-                                <input type="checkbox" name="amenities[]" id="amenity-{{ \Illuminate\Support\Str::slug($amenity) }}" value="{{ $amenity }}" @checked(in_array($amenity, $selectedAmenities, true))>
-                                <label class="pf-chip-label" for="amenity-{{ \Illuminate\Support\Str::slug($amenity) }}">
-                                    <i class="{{ $amenityIcons[$amenity] ?? 'fi-check' }}"></i>
-                                    {{ $amenity }}
-                                </label>
+                    @foreach ($amenityOptionSets as $scope => $set)
+                        <div class="mb-3" data-conditional-section data-property-types="{{ implode(',', $set['property_types']) }}">
+                            <div class="fw-semibold mb-2">{{ $set['title'] }}</div>
+                            <div class="pf-chip-grid">
+                                @foreach ($set['options'] as $optionKey => $optionLabel)
+                                    <div class="pf-chip">
+                                        <input id="amenity-{{ $scope }}-{{ $optionKey }}" name="amenities[]" type="checkbox" value="{{ $optionLabel }}" @checked(in_array($optionLabel, $selectedAmenities, true))>
+                                        <label class="pf-chip-label" for="amenity-{{ $scope }}-{{ $optionKey }}">
+                                            <i class="{{ $amenityIcons[$optionKey] ?? 'fi-check' }}"></i>{{ $optionLabel }}
+                                        </label>
+                                    </div>
+                                @endforeach
                             </div>
-                        @endforeach
-                    </div>
+                        </div>
+                    @endforeach
                 </div>
 
-                <div class="pf-card">
+                <div class="pf-card" data-conditional-section data-property-groups="residential">
                     <div class="pf-section-head">
                         <div class="pf-section-icon"><i class="fi-heart"></i></div>
                         <div>
                             <h2>Pets allowed</h2>
-                            <p>Which pets are welcome?</p>
+                            <p>Hidden automatically for land and commercial listings.</p>
                         </div>
                     </div>
                     <div class="pf-pet-grid">
-                        @foreach ($petOptions as $pet)
+                        @foreach ($petChoices as $petKey => $petLabel)
                             <div class="pf-pet">
-                                <input type="checkbox" name="pets_allowed[]" id="pet-{{ \Illuminate\Support\Str::slug($pet) }}" value="{{ $pet }}" @checked(in_array($pet, $selectedPets, true))>
-                                <label class="pf-pet-label" for="pet-{{ \Illuminate\Support\Str::slug($pet) }}">
-                                    <span class="pf-pet-emoji">{{ $petEmojis[$pet] ?? '🐾' }}</span>
-                                    {{ $pet }}
-                                </label>
+                                <input id="pet-{{ $petKey }}" name="pets_allowed[]" type="checkbox" value="{{ $petLabel }}" @checked(in_array($petLabel, $selectedPets, true))>
+                                <label class="pf-pet-label" for="pet-{{ $petKey }}">{{ $petEmojis[$petKey] ?? '🐾' }} {{ $petLabel }}</label>
                             </div>
                         @endforeach
                     </div>
                 </div>
 
-                <div class="pf-nav-bar">
-                    <button type="button" class="pf-btn-secondary" data-prev="2">
-                        <i class="fi-arrow-left fs-sm"></i> Location
-                    </button>
-                    <button type="button" class="pf-btn-primary" data-next="4">
-                        Media <i class="fi-arrow-right fs-sm"></i>
-                    </button>
+                <div class="pf-nav">
+                    <button type="button" class="btn btn-outline-secondary" data-prev="3">Location</button>
+                    <button type="button" class="btn btn-primary" data-next="5">Media</button>
                 </div>
-            </div>
+            </section>
 
-            {{-- Step 4: Media --}}
-            <div class="pf-panel" data-panel="4">
+            <section class="pf-panel" data-panel="5">
                 <div class="pf-card">
                     <div class="pf-section-head">
                         <div class="pf-section-icon"><i class="fi-image"></i></div>
                         <div>
                             <h2>Property images</h2>
-                            <p>Update image paths — one per line. The first image becomes the cover.</p>
+                            <p>Upload new files to replace the current gallery. The first uploaded image becomes the cover.</p>
                         </div>
                     </div>
-                    <div class="pf-image-area">
-                        <div class="pf-image-hint">
-                            <div class="pf-image-hint-icon"><i class="fi-camera"></i></div>
-                            <div>
-                                <h6>Image paths</h6>
-                                <p>Enter one path per line, e.g. <code style="font-size: 0.72rem; color: var(--pf-sky);">assets/img/listings/real-estate/01.jpg</code></p>
-                            </div>
-                        </div>
-                        <textarea class="form-control" rows="6" name="images" placeholder="assets/img/listings/real-estate/01.jpg">{{ old('images', $imagesText) }}</textarea>
-                    </div>
-                </div>
+                    <div class="pf-upload">
+                        <label class="form-label">Upload images</label>
+                        <input type="file" class="form-control" name="images[]" multiple accept="image/*">
+                        <div class="pf-note mt-2">Leave blank to keep the current images.</div>
 
-                <div class="pf-nav-bar">
-                    <button type="button" class="pf-btn-secondary" data-prev="3">
-                        <i class="fi-arrow-left fs-sm"></i> Pricing
-                    </button>
-                    <button type="submit" class="pf-btn-primary pf-btn-submit">
-                        <i class="fi-check fs-sm"></i> Save changes
-                    </button>
+                        @if ($existingImages->isNotEmpty())
+                            <div class="fw-semibold fs-sm mt-3 mb-2">Current gallery</div>
+                            <div class="pf-media-grid">
+                                @foreach ($existingImages as $image)
+                                    <div class="pf-media-card">
+                                        @if ($image->is_cover)
+                                            <span class="pf-cover-badge">Cover</span>
+                                        @endif
+                                        <img src="{{ asset($image->path) }}" alt="{{ $property->title }}">
+                                    </div>
+                                @endforeach
+                            </div>
+                        @endif
+
+                        <div class="pf-media-grid" data-image-preview></div>
+                    </div>
                 </div>
-            </div>
+                <div class="pf-nav">
+                    <button type="button" class="btn btn-outline-secondary" data-prev="4">Pricing & Amenities</button>
+                    <button type="submit" class="btn btn-primary">Save changes</button>
+                </div>
+            </section>
         </form>
     </div>
 </div>
@@ -625,43 +402,114 @@
 
 @push('scripts')
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const stepBtns = document.querySelectorAll('.pf-step-btn');
-    const panels = document.querySelectorAll('.pf-panel');
-
-    function goToStep(num) {
-        stepBtns.forEach(btn => {
-            const s = parseInt(btn.dataset.step);
-            btn.classList.remove('active', 'completed');
-            if (s === num) btn.classList.add('active');
-            else if (s < num) btn.classList.add('completed');
-        });
-        panels.forEach(p => {
-            p.classList.toggle('active', parseInt(p.dataset.panel) === num);
-        });
-        document.querySelector('.pf-steps').scrollIntoView({ behavior: 'smooth', block: 'start' });
+document.addEventListener('DOMContentLoaded', () => {
+    const form = document.querySelector('[data-agent-property-form]');
+    if (!form) {
+        return;
     }
 
-    stepBtns.forEach(btn => {
-        btn.addEventListener('click', () => goToStep(parseInt(btn.dataset.step)));
-    });
-    document.querySelectorAll('[data-next]').forEach(btn => {
-        btn.addEventListener('click', () => goToStep(parseInt(btn.dataset.next)));
-    });
-    document.querySelectorAll('[data-prev]').forEach(btn => {
-        btn.addEventListener('click', () => goToStep(parseInt(btn.dataset.prev)));
-    });
+    const steps = Array.from(document.querySelectorAll('.pf-step'));
+    const panels = Array.from(document.querySelectorAll('.pf-panel'));
+    const propertyTypeSelect = form.querySelector('[data-property-type]');
+    const conditionalSections = Array.from(form.querySelectorAll('[data-conditional-section]'));
+    const areaLabel = form.querySelector('[data-area-label]');
+    const areaHelp = form.querySelector('[data-area-help]');
+    const imageInput = form.querySelector('input[type="file"][name="images[]"]');
+    const imagePreview = form.querySelector('[data-image-preview]');
+    const propertyTypeGroupMap = @json($propertyTypeGroupMap);
+    const fieldStepMap = {
+        1: ['listing_type', 'property_type', 'title', 'description'],
+        2: ['area', 'bedrooms', 'bathrooms', 'garage_spaces', 'total_rooms', 'floor', 'year_built'],
+        3: ['address', 'city', 'region', 'postal_code', 'country', 'latitude', 'longitude', 'map_embed_url'],
+        4: ['price', 'currency', 'price_period', 'deposit', 'amenities', 'pets_allowed'],
+        5: ['images'],
+    };
 
-    @if ($errors->any())
-        const errorFields = @json($errors->keys());
-        const step1 = ['title','listing_type','property_type','bedrooms','bathrooms','garage_spaces','total_rooms','floor','year_built','area','description'];
-        const step2 = ['address','city','region','postal_code','country','latitude','longitude','map_embed_url'];
-        const step3 = ['price','currency','price_period','deposit','amenities','pets_allowed'];
+    const normalizeType = (value) => (value || 'house').toLowerCase().replaceAll('-', '_');
+    const getPropertyType = () => normalizeType(propertyTypeSelect?.value);
+    const getPropertyGroup = () => propertyTypeGroupMap[getPropertyType()] || 'residential';
 
-        if (errorFields.some(f => step2.includes(f))) goToStep(2);
-        else if (errorFields.some(f => step3.includes(f))) goToStep(3);
-        else if (errorFields.some(f => f === 'images')) goToStep(4);
-    @endif
+    const setStep = (step) => {
+        steps.forEach((button) => button.classList.toggle('active', Number(button.dataset.step) === step));
+        panels.forEach((panel) => panel.classList.toggle('active', Number(panel.dataset.panel) === step));
+        document.querySelector('.pf-steps')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+
+    const matchesSection = (section, propertyType, propertyGroup) => {
+        const allowedGroups = (section.dataset.propertyGroups || '').split(',').map((value) => value.trim()).filter(Boolean);
+        const allowedTypes = (section.dataset.propertyTypes || '').split(',').map((value) => normalizeType(value.trim())).filter(Boolean);
+
+        return (allowedGroups.length > 0 && allowedGroups.includes(propertyGroup))
+            || (allowedTypes.length > 0 && allowedTypes.includes(propertyType))
+            || (allowedGroups.length === 0 && allowedTypes.length === 0);
+    };
+
+    const refreshConditionalSections = () => {
+        const propertyType = getPropertyType();
+        const propertyGroup = getPropertyGroup();
+
+        conditionalSections.forEach((section) => {
+            const enabled = matchesSection(section, propertyType, propertyGroup);
+            section.hidden = !enabled;
+            section.setAttribute('aria-hidden', String(!enabled));
+            section.querySelectorAll('input, select, textarea').forEach((field) => {
+                field.disabled = !enabled;
+            });
+        });
+
+        if (propertyGroup === 'land') {
+            areaLabel.textContent = 'Plot size (sq.m)';
+            areaHelp.textContent = 'Use the total plot or parcel size for the land listing.';
+        } else if (propertyGroup === 'commercial') {
+            areaLabel.textContent = 'Usable area (sq.m)';
+            areaHelp.textContent = 'Use lettable or operational area for the business listing.';
+        } else {
+            areaLabel.textContent = 'Property size (sq.m)';
+            areaHelp.textContent = 'Use the total internal or usable size for the residential listing.';
+        }
+    };
+
+    const renderImagePreview = () => {
+        if (!imagePreview || !imageInput) {
+            return;
+        }
+
+        imagePreview.innerHTML = '';
+        Array.from(imageInput.files || []).forEach((file, index) => {
+            const url = URL.createObjectURL(file);
+            const card = document.createElement('div');
+            card.className = 'pf-media-card';
+            card.innerHTML = `
+                ${index === 0 ? '<span class="pf-cover-badge">Cover</span>' : ''}
+                <img src="${url}" alt="">
+            `;
+            imagePreview.appendChild(card);
+        });
+    };
+
+    const resolveStepFromErrors = () => {
+        const errorKeys = @json($errors->keys());
+        if (errorKeys.length === 0) {
+            return 1;
+        }
+
+        for (const [step, fields] of Object.entries(fieldStepMap)) {
+            if (errorKeys.some((errorKey) => fields.some((field) => errorKey === field || errorKey.startsWith(`${field}.`)))) {
+                return Number(step);
+            }
+        }
+
+        return 1;
+    };
+
+    steps.forEach((button) => button.addEventListener('click', () => setStep(Number(button.dataset.step))));
+    form.querySelectorAll('[data-next]').forEach((button) => button.addEventListener('click', () => setStep(Number(button.dataset.next))));
+    form.querySelectorAll('[data-prev]').forEach((button) => button.addEventListener('click', () => setStep(Number(button.dataset.prev))));
+    propertyTypeSelect?.addEventListener('change', refreshConditionalSections);
+    imageInput?.addEventListener('change', renderImagePreview);
+
+    refreshConditionalSections();
+    setStep(resolveStepFromErrors());
 });
 </script>
 @endpush

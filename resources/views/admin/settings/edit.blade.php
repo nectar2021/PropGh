@@ -6,7 +6,7 @@
 <div class="admin-page-header d-flex flex-wrap align-items-center justify-content-between gap-3">
     <div>
         <h1 class="h3 mb-1">Site settings</h1>
-        <p class="text-body-secondary mb-0">Manage footer content, contact info, and social media links.</p>
+        <p class="text-body-secondary mb-0">Manage branding, footer content, contact info, and social media links.</p>
     </div>
 </div>
 
@@ -16,9 +16,46 @@
     </div>
 @endif
 
-<form method="POST" action="{{ route('admin.settings.update') }}">
+<form method="POST" action="{{ route('admin.settings.update') }}" enctype="multipart/form-data">
     @csrf
     @method('PUT')
+
+    {{-- Header logo --}}
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <h2 class="h5 mb-3">Header logo</h2>
+            <p class="text-body-secondary fs-sm mb-3">Upload a logo image for the header. The frontend keeps a fixed display size for consistency.</p>
+
+            @if (!empty($settings['header_logo_path']))
+                <div class="mb-3">
+                    <div class="small text-body-secondary mb-2">Current logo</div>
+                    <img
+                        src="{{ asset('storage/'.$settings['header_logo_path']) }}"
+                        alt="Current header logo"
+                        style="max-height: 48px; width: auto; object-fit: contain;"
+                    >
+                </div>
+            @endif
+
+            <div class="row g-3 align-items-end">
+                <div class="col-md-8">
+                    <label for="header_logo" class="form-label">Logo image</label>
+                    <input type="file" name="header_logo" id="header_logo" class="form-control @error('header_logo') is-invalid @enderror" accept="image/*">
+                    @error('header_logo')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+                @if (!empty($settings['header_logo_path']))
+                    <div class="col-md-4">
+                        <div class="form-check mt-md-0 mt-2">
+                            <input class="form-check-input" type="checkbox" name="remove_header_logo" id="remove_header_logo" value="1">
+                            <label class="form-check-label" for="remove_header_logo">Remove current logo</label>
+                        </div>
+                    </div>
+                @endif
+            </div>
+        </div>
+    </div>
 
     {{-- Contact info --}}
     <div class="card border-0 shadow-sm mb-4">

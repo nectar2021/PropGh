@@ -3,22 +3,28 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\StorePropertyRequest;
+use App\Http\Requests\Admin\UpdatePropertyRequest;
 use App\Models\Property;
 use App\Models\User;
 use App\Support\PropertyCatalog;
+use App\Support\PropertyImageUploader;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
-use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class PropertyController extends Controller
 {
+    public function __construct(private PropertyImageUploader $propertyImageUploader) {}
+
     public function index(Request $request): View
     {
         $search = $request->string('search')->trim()->toString();
         $status = $request->string('status')->trim()->toString();
         $sort = $request->string('sort', 'newest')->trim()->toString();
+        $hasFilters = $search !== '' || ($status !== '' && $status !== 'all') || $sort !== 'newest';
 
         $query = Property::query()->with(['owner', 'images']);
 
@@ -54,12 +60,20 @@ class PropertyController extends Controller
         }
 
         $properties = $query->paginate(10)->withQueryString();
+        $summary = [
+            'total' => Property::count(),
+            'live' => Property::where('status', 'live')->count(),
+            'review' => Property::where('status', 'review')->count(),
+            'draft' => Property::where('status', 'draft')->count(),
+        ];
 
         return view('admin.properties.index', [
             'properties' => $properties,
             'search' => $search,
             'status' => $status ?: 'all',
             'sort' => $sort,
+            'hasFilters' => $hasFilters,
+            'summary' => $summary,
             'statusOptions' => ['all' => 'All statuses'] + $this->statusOptions(),
             'sortOptions' => $this->sortOptions(),
         ]);
@@ -72,25 +86,18 @@ class PropertyController extends Controller
         return view('admin.properties.create', [
             'property' => $property,
             'owners' => $this->ownerOptions(),
-            'imagesText' => '',
             ...$this->formOptions(),
         ]);
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(StorePropertyRequest $request): RedirectResponse
     {
-        $data = $this->validatedData($request);
+        $data = $request->propertyData();
 
         $data['slug'] = $this->uniqueSlug($data['slug'] ?? $data['title']);
         $data['owner_id'] = $data['owner_id'] ?? $request->user()?->id;
-        $data['listing_type'] = strtolower($data['listing_type']);
-        $data['property_type'] = PropertyCatalog::normalizePropertyType($data['property_type']);
-        $data['currency'] = strtoupper($data['currency']);
-        $data['price_period'] = strtolower($data['price_period']);
         $data['is_featured'] = $request->boolean('is_featured');
         $data['is_verified'] = $request->boolean('is_verified');
-        $data['amenities'] = array_values(array_filter($data['amenities'] ?? []));
-        $data['pets_allowed'] = array_values(array_filter($data['pets_allowed'] ?? []));
 
         if ($data['status'] === 'live' && empty($data['published_at'])) {
             $data['published_at'] = now();
@@ -98,7 +105,7 @@ class PropertyController extends Controller
 
         $property = Property::create($data);
 
-        $this->syncImages($property, $request->input('images'));
+        $this->propertyImageUploader->store($property, (array) $request->file('images', []));
 
         return redirect()
             ->route('admin.properties.edit', $property)
@@ -109,33 +116,21 @@ class PropertyController extends Controller
     {
         $property->load(['images', 'owner']);
 
-        $imagesText = $property->images
-            ->sortBy('sort_order')
-            ->pluck('path')
-            ->implode("\n");
-
         return view('admin.properties.edit', [
             'property' => $property,
             'owners' => $this->ownerOptions(),
-            'imagesText' => $imagesText,
             ...$this->formOptions(),
         ]);
     }
 
-    public function update(Request $request, Property $property): RedirectResponse
+    public function update(UpdatePropertyRequest $request, Property $property): RedirectResponse
     {
-        $data = $this->validatedData($request, $property);
+        $data = $request->propertyData();
 
         $data['slug'] = $this->uniqueSlug($data['slug'] ?? $data['title'], $property->id);
         $data['owner_id'] = $data['owner_id'] ?? $request->user()?->id;
-        $data['listing_type'] = strtolower($data['listing_type']);
-        $data['property_type'] = PropertyCatalog::normalizePropertyType($data['property_type']);
-        $data['currency'] = strtoupper($data['currency']);
-        $data['price_period'] = strtolower($data['price_period']);
         $data['is_featured'] = $request->boolean('is_featured');
         $data['is_verified'] = $request->boolean('is_verified');
-        $data['amenities'] = array_values(array_filter($data['amenities'] ?? []));
-        $data['pets_allowed'] = array_values(array_filter($data['pets_allowed'] ?? []));
 
         if ($data['status'] === 'live' && empty($data['published_at'])) {
             $data['published_at'] = $property->published_at ?? now();
@@ -143,7 +138,7 @@ class PropertyController extends Controller
 
         $property->update($data);
 
-        $this->syncImages($property, $request->input('images'));
+        $this->propertyImageUploader->store($property, (array) $request->file('images', []), replaceExisting: true);
 
         return redirect()
             ->route('admin.properties.edit', $property)
@@ -152,53 +147,13 @@ class PropertyController extends Controller
 
     public function destroy(Property $property): RedirectResponse
     {
+        $this->propertyImageUploader->deleteManagedImages($property);
         $property->images()->delete();
         $property->delete();
 
         return redirect()
             ->route('admin.properties.index')
             ->with('status', 'Property deleted.');
-    }
-
-    private function validatedData(Request $request, ?Property $property = null): array
-    {
-        $yearMax = now()->year + 1;
-
-        return $request->validate([
-            'owner_id' => ['nullable', 'exists:users,id'],
-            'title' => ['required', 'string', 'max:255'],
-            'slug' => ['nullable', 'string', 'max:255'],
-            'description' => ['required', 'string'],
-            'listing_type' => ['required', Rule::in(array_keys(PropertyCatalog::listingTypes()))],
-            'property_type' => ['required', Rule::in(array_keys(PropertyCatalog::propertyTypes()))],
-            'price' => ['required', 'numeric', 'min:0'],
-            'currency' => ['required', Rule::in(array_keys(PropertyCatalog::currencyOptions()))],
-            'price_period' => ['required', Rule::in(array_keys(PropertyCatalog::pricePeriods()))],
-            'deposit' => ['nullable', 'numeric', 'min:0'],
-            'bedrooms' => ['nullable', 'integer', 'min:0'],
-            'bathrooms' => ['nullable', 'integer', 'min:0'],
-            'garage_spaces' => ['nullable', 'integer', 'min:0'],
-            'area' => ['nullable', 'numeric', 'min:0'],
-            'year_built' => ['nullable', 'integer', 'min:1800', 'max:'.$yearMax],
-            'floor' => ['nullable', 'integer', 'min:0'],
-            'total_rooms' => ['nullable', 'integer', 'min:0'],
-            'address' => ['nullable', 'string', 'max:255'],
-            'city' => ['nullable', 'string', 'max:255'],
-            'region' => ['nullable', 'string', 'max:255'],
-            'country' => ['nullable', 'string', 'max:255'],
-            'postal_code' => ['nullable', 'string', 'max:40'],
-            'latitude' => ['nullable', 'numeric', 'between:-90,90'],
-            'longitude' => ['nullable', 'numeric', 'between:-180,180'],
-            'map_embed_url' => ['nullable', 'url', 'max:2048'],
-            'amenities' => ['nullable', 'array'],
-            'amenities.*' => ['string', 'max:50'],
-            'pets_allowed' => ['nullable', 'array'],
-            'pets_allowed.*' => ['string', 'max:50'],
-            'status' => ['required', 'string', 'in:'.implode(',', array_keys($this->statusOptions()))],
-            'visibility' => ['required', 'string', 'in:'.implode(',', array_keys($this->visibilityOptions()))],
-            'published_at' => ['nullable', 'date'],
-            'images' => ['nullable', 'string'],
-        ]);
     }
 
     private function uniqueSlug(string $value, ?int $ignoreId = null): string
@@ -226,25 +181,7 @@ class PropertyController extends Controller
         return $query->exists();
     }
 
-    private function syncImages(Property $property, ?string $imagesText): void
-    {
-        $paths = collect(preg_split('/\r\n|\r|\n/', (string) $imagesText))
-            ->map(fn ($path) => trim($path))
-            ->filter()
-            ->values();
-
-        $property->images()->delete();
-
-        foreach ($paths as $index => $path) {
-            $property->images()->create([
-                'path' => $path,
-                'is_cover' => $index === 0,
-                'sort_order' => $index,
-            ]);
-        }
-    }
-
-    private function ownerOptions()
+    private function ownerOptions(): EloquentCollection
     {
         return User::whereIn('role', ['agent', 'admin'])
             ->orderBy('name')
@@ -258,22 +195,13 @@ class PropertyController extends Controller
             'propertyTypes' => PropertyCatalog::propertyTypes(),
             'currencyOptions' => PropertyCatalog::currencyOptions(),
             'pricePeriods' => PropertyCatalog::pricePeriods(),
-            'amenityOptions' => [
-                'WiFi',
-                'Dishwasher',
-                'Air conditioning',
-                'Parking',
-                'Laundry',
-                'Security cameras',
-                'Pool',
-                'Gym',
-                'Balcony',
-            ],
-            'petOptions' => [
-                'Cats',
-                'Dogs',
-                'Small pets',
-            ],
+            'propertyTypeGroups' => PropertyCatalog::propertyTypeGroups(),
+            'propertyTypeGroupMap' => PropertyCatalog::propertyTypeGroupMap(),
+            'amenityOptionSets' => PropertyCatalog::amenityOptionSets(),
+            'amenityIcons' => PropertyCatalog::amenityIcons(),
+            'petChoices' => PropertyCatalog::petOptions(),
+            'petEmojis' => PropertyCatalog::petEmojis(),
+            'petOptions' => PropertyCatalog::petLabels(),
             'statusOptions' => $this->statusOptions(),
             'visibilityOptions' => $this->visibilityOptions(),
         ];

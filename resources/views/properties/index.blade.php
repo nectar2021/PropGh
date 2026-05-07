@@ -14,19 +14,22 @@
   $selectedPropertyType = $filters['property_type'] ?? '';
   $selectedLocation = $filters['location'] ?? '';
   $selectedMaxPrice = $filters['max_price'] ?? null;
+  $selectedSort = $sort ?? 'updated';
+  $selectedSortLabel = $sortOptions[$selectedSort] ?? 'Updated';
   $activeFilterCount = count(array_filter([
     $selectedListingType,
     $selectedPropertyType,
     $selectedLocation,
     $selectedMaxPrice,
   ], static fn ($value) => $value !== null && $value !== ''));
-  $mapFilters = array_filter([
-    'listing_type' => $selectedListingType,
-    'property_type' => $selectedPropertyType,
-    'location' => $selectedLocation,
-    'max_price' => $selectedMaxPrice,
-  ], static fn ($value) => $value !== null && $value !== '');
   $defaultCurrencySymbol = \App\Models\Property::defaultCurrencySymbol();
+  $activeStatePills = array_filter([
+    $selectedLocation !== '' ? ['label' => $selectedLocation, 'tone' => 'neutral'] : null,
+    $selectedListingType !== '' ? ['label' => $listingTypeOptions[$selectedListingType] ?? $selectedListingType, 'tone' => 'neutral'] : null,
+    $selectedPropertyType !== '' ? ['label' => $propertyTypeOptions[$selectedPropertyType] ?? $selectedPropertyType, 'tone' => 'neutral'] : null,
+    $selectedMaxPrice ? ['label' => 'Up to '.$defaultCurrencySymbol.number_format((float) $selectedMaxPrice), 'tone' => 'neutral'] : null,
+    $selectedSort !== 'updated' ? ['label' => 'Sorted: '.$selectedSortLabel, 'tone' => 'accent'] : null,
+  ]);
   $mapPopupTemplate = $isLandSearch
     ? '<div class="card bg-transparent border-0" data-bs-theme="light"><div class="card-img-top position-relative bg-body-tertiary overflow-hidden"><div class="ratio d-block" style="--fn-aspect-ratio: calc(248 / 362 * 100%)"><img src="@{{image}}" alt="Image"></div></div><div class="card-body p-3"><div class="h5 mb-2">@{{formattedPrice}}</div><h3 class="fs-sm fw-normal text-body mb-2"><a class="stretched-link text-body" href="@{{url}}">@{{address}}</a></h3><div class="h6 fs-sm mb-0">@{{area}} sq.m</div></div><div class="card-footer border-0 bg-transparent pt-0 pb-3 px-3 mt-n1"><div class="d-flex align-items-center fs-sm gap-1"><i class="fi-map-pin fs-base text-secondary-emphasis"></i>@{{location}}</div></div></div>'
     : '<div class="card bg-transparent border-0" data-bs-theme="light"><div class="card-img-top position-relative bg-body-tertiary overflow-hidden"><div class="ratio d-block" style="--fn-aspect-ratio: calc(248 / 362 * 100%)"><img src="@{{image}}" alt="Image"></div></div><div class="card-body p-3"><div class="h5 mb-2">@{{formattedPrice}}</div><h3 class="fs-sm fw-normal text-body mb-2"><a class="stretched-link text-body" href="@{{url}}">@{{address}}</a></h3><div class="h6 fs-sm mb-0">@{{area}} sq.m</div></div><div class="card-footer d-flex gap-2 border-0 bg-transparent pt-0 pb-3 px-3 mt-n1"><div class="d-flex align-items-center fs-sm gap-1 me-1">@{{bedrooms}}<i class="fi-bed-single fs-base text-secondary-emphasis"></i></div><div class="d-flex align-items-center fs-sm gap-1 me-1">@{{bathrooms}}<i class="fi-shower fs-base text-secondary-emphasis"></i></div><div class="d-flex align-items-center fs-sm gap-1 me-1">@{{garage}}<i class="fi-car-garage fs-base text-secondary-emphasis"></i></div></div></div>';
@@ -128,7 +131,7 @@
               <button type="button" class="btn btn-icon btn-outline-secondary bg-body shadow position-absolute top-0 z-5 mt-2 d-lg-none" style="right: 0; margin-right: 8px; z-index: 500" data-bs-dismiss="offcanvas" data-bs-target="#map" aria-label="Close">
                 <i class="fi-close fs-lg"></i>
               </button>
-              <div class="position-absolute top-0 start-0 w-100 h-100 bg-body-tertiary" data-map='@json($mapConfig)' data-map-markers="{{ route('properties.map', $mapFilters) }}"></div>
+              <div class="position-absolute top-0 start-0 w-100 h-100 bg-body-tertiary" data-map='@json($mapConfig)' data-map-markers='@json($mapMarkers)'></div>
             </div>
           </div>
         </div>
@@ -167,6 +170,7 @@
               @if ($selectedMaxPrice)
                 <input type="hidden" name="max_price" value="{{ $selectedMaxPrice }}">
               @endif
+              <input type="hidden" name="sort" value="{{ $selectedSort }}">
               <button type="submit" class="btn btn-primary d-none d-sm-inline-flex px-3">
                 Update
               </button>
@@ -189,25 +193,58 @@
               </div>
             </form>
           </div>
-
-
-          <!-- Sort selector -->
-          <div class="d-flex align-items-center gap-2 gap-sm-3 mb-3">
-            <div class="fs-sm text-nowrap">Showing {{ number_format($properties->count()) }} results</div>
-            <div class="position-relative ms-auto" style="width: 150px">
-              <i class="fi-sort position-absolute top-50 start-0 translate-middle-y z-2"></i>
-              <select class="form-select border-0 rounded-0 ps-4 pe-1" data-select="{
-                &quot;removeItemButton&quot;: false,
-                &quot;classNames&quot;: {
-                  &quot;containerInner&quot;: [&quot;form-select&quot;, &quot;border-0&quot;, &quot;rounded-0&quot;, &quot;ps-4&quot;, &quot;pe-1&quot;]
-                }
-              }">
-              <option value="Price Asc">Price Asc</option>
-              <option value="Price Desc">Price Desc</option>
-              <option value="Updated">Updated</option>
-              <option value="Video">Video</option>
-              <option value="3D Tour">3D Tour</option>
-              </select>
+          <div class="pg-results-toolbar mb-4">
+            <div class="pg-results-copy">
+              <div class="pg-results-kicker">List view</div>
+              <div class="pg-results-summary">
+                Showing {{ number_format($properties->firstItem() ?? 0) }}-{{ number_format($properties->lastItem() ?? 0) }} of {{ number_format($properties->total()) }} results
+              </div>
+              <div class="pg-results-note">
+                Map markers stay synced with your current filters and {{ strtolower($selectedSortLabel) }} ordering.
+              </div>
+              @if ($activeStatePills)
+                <div class="pg-results-pills">
+                  @foreach ($activeStatePills as $pill)
+                    <span class="pg-results-pill {{ $pill['tone'] === 'accent' ? 'is-accent' : '' }}">{{ $pill['label'] }}</span>
+                  @endforeach
+                  <a href="{{ route('properties.index') }}" class="pg-results-clear">Clear all</a>
+                </div>
+              @endif
+            </div>
+            <div class="pg-results-actions">
+              <div class="pg-map-sync d-none d-lg-inline-flex">
+                <i class="fi-map me-2"></i>
+                <span>Map synced</span>
+              </div>
+              <form action="{{ route('properties.index') }}" method="GET" class="pg-sort-panel">
+                @if ($selectedLocation !== '')
+                  <input type="hidden" name="location" value="{{ $selectedLocation }}">
+                @endif
+                @if ($selectedListingType !== '')
+                  <input type="hidden" name="listing_type" value="{{ $selectedListingType }}">
+                @endif
+                @if ($selectedPropertyType !== '')
+                  <input type="hidden" name="property_type" value="{{ $selectedPropertyType }}">
+                @endif
+                @if ($selectedMaxPrice)
+                  <input type="hidden" name="max_price" value="{{ $selectedMaxPrice }}">
+                @endif
+                <label class="pg-sort-label" for="propertiesSort">Sort listings</label>
+                <div class="position-relative">
+                  <i class="fi-sort position-absolute top-50 start-0 translate-middle-y z-2 ms-3"></i>
+                  <select
+                    id="propertiesSort"
+                    class="form-select pg-sort-select ps-5"
+                    name="sort"
+                    aria-label="Sort listings"
+                    onchange="this.form.submit()"
+                  >
+                    @foreach ($sortOptions as $value => $label)
+                      <option value="{{ $value }}" @selected($selectedSort === $value)>{{ $label }}</option>
+                    @endforeach
+                  </select>
+                </div>
+              </form>
             </div>
           </div>
 
@@ -329,79 +366,15 @@
           </div>
 
           <!-- Pagination -->
-          <nav class="pt-3 mt-3" aria-label="Listings pagination">
-            <ul class="pagination pagination-lg justify-content-center">
-              <li class="page-item active" aria-current="page">
-                <span class="page-link">
-                  1
-                  <span class="visually-hidden">(current)</span>
-                </span>
-              </li>
-              <li class="page-item">
-                <a class="page-link" href="#!">2</a>
-              </li>
-              <li class="page-item">
-                <a class="page-link" href="#!">3</a>
-              </li>
-              <li class="page-item">
-                <a class="page-link" href="#!">4</a>
-              </li>
-              <li class="page-item">
-                <a class="page-link" href="#!">5</a>
-              </li>
-              <li class="page-item">
-                <span class="page-link px-2 pe-none">...</span>
-              </li>
-              <li class="page-item">
-                <a class="page-link" href="#!">16</a>
-              </li>
-            </ul>
-          </nav>
-
-          <!-- Footer -->
-          <footer class="text-center pt-4 pt-md-5">
-            <hr class="pb-4">
-            <a class="d-inline-flex align-items-center text-dark-emphasis text-decoration-none mb-4" href="#">
-              <span class="shrink-0 text-primary rtl-flip me-2">
-                <svg xmlns="http://www.w3.org/2000/svg" width="35" height="34"><path d="M34.5 16.894v10.731c0 3.506-2.869 6.375-6.375 6.375H17.5h-.85C7.725 33.575.5 26.138.5 17c0-9.35 7.65-17 17-17s17 7.544 17 16.894z" fill="currentColor"></path><g fill-rule="evenodd"><path d="M17.5 13.258c-3.101 0-5.655 2.554-5.655 5.655s2.554 5.655 5.655 5.655 5.655-2.554 5.655-5.655-2.554-5.655-5.655-5.655zm-9.433 5.655c0-5.187 4.246-9.433 9.433-9.433s9.433 4.246 9.433 9.433a9.36 9.36 0 0 1-1.569 5.192l2.397 2.397a1.89 1.89 0 0 1 0 2.671 1.89 1.89 0 0 1-2.671 0l-2.397-2.397a9.36 9.36 0 0 1-5.192 1.569c-5.187 0-9.433-4.246-9.433-9.433z" fill="#000" fill-opacity=".05"></path><g fill="#fff"><path d="M17.394 10.153c-3.723 0-6.741 3.018-6.741 6.741s3.018 6.741 6.741 6.741 6.741-3.018 6.741-6.741-3.018-6.741-6.741-6.741zM7.347 16.894A10.05 10.05 0 0 1 17.394 6.847 10.05 10.05 0 0 1 27.44 16.894 10.05 10.05 0 0 1 17.394 26.94 10.05 10.05 0 0 1 7.347 16.894z"></path><path d="M23.025 22.525c.645-.645 1.692-.645 2.337 0l3.188 3.188c.645.645.645 1.692 0 2.337s-1.692.645-2.337 0l-3.187-3.187c-.645-.646-.645-1.692 0-2.337z"></path></g></g><path d="M23.662 14.663c2.112 0 3.825-1.713 3.825-3.825s-1.713-3.825-3.825-3.825-3.825 1.713-3.825 3.825 1.713 3.825 3.825 3.825z" fill="#fff"></path><path fill-rule="evenodd" d="M23.663 8.429a2.41 2.41 0 0 0-2.408 2.408 2.41 2.41 0 0 0 2.408 2.408 2.41 2.41 0 0 0 2.408-2.408 2.41 2.41 0 0 0-2.408-2.408zm-5.242 2.408c0-2.895 2.347-5.242 5.242-5.242s5.242 2.347 5.242 5.242-2.347 5.242-5.242 5.242-5.242-2.347-5.242-5.242z" fill="currentColor"></path></svg>
-              </span>
-              <span class="fs-4 fw-semibold">Finder</span>
-            </a>
-            <ul class="list-inline justify-content-center gap-2">
-              <li class="me-3">
-                <div class="position-relative d-flex align-items-center">
-                  <i class="fi-mail fs-lg text-body me-2"></i>
-                  <a class="text-dark-emphasis text-decoration-none hover-effect-underline stretched-link" href="mailto:contact@example.com">contact@example.com</a>
-                </div>
-              </li>
-              <li>
-                <div class="position-relative d-flex align-items-center">
-                  <i class="fi-phone-call fs-lg text-body me-2"></i>
-                  <a class="text-dark-emphasis text-decoration-none hover-effect-underline stretched-link" href="tel:+15053753082">+1&nbsp;50&nbsp;537&nbsp;53&nbsp;082</a>
-                </div>
-              </li>
-            </ul>
-            <div class="d-flex justify-content-center pt-2 mt-3">
-              <a class="btn btn-icon fs-base btn-outline-secondary border-0" href="#!" data-bs-toggle="tooltip" data-bs-template="<div class=&quot;tooltip fs-xs mb-n2&quot; role=&quot;tooltip&quot;><div class=&quot;tooltip-inner bg-transparent text-body opacity-75 p-0&quot;></div></div>" title="Instagram" aria-label="Follow us on Instagram">
-                <i class="fi-instagram"></i>
-              </a>
-              <a class="btn btn-icon fs-base btn-outline-secondary border-0" href="#!" data-bs-toggle="tooltip" data-bs-template="<div class=&quot;tooltip fs-xs mb-n2&quot; role=&quot;tooltip&quot;><div class=&quot;tooltip-inner bg-transparent text-body opacity-75 p-0&quot;></div></div>" title="Facebook" aria-label="Follow us on Facebook">
-                <i class="fi-facebook"></i>
-              </a>
-              <a class="btn btn-icon fs-base btn-outline-secondary border-0" href="#!" data-bs-toggle="tooltip" data-bs-template="<div class=&quot;tooltip fs-xs mb-n2&quot; role=&quot;tooltip&quot;><div class=&quot;tooltip-inner bg-transparent text-body opacity-75 p-0&quot;></div></div>" title="X (Twitter)" aria-label="Follow us on X (Twitter)">
-                <i class="fi-x"></i>
-              </a>
+          @if ($properties->hasPages())
+            <div class="pt-4 mt-4 pg-listings-pagination">
+              {{ $properties->onEachSide(1)->links('pagination::bootstrap-5') }}
             </div>
-            <div class="py-4">
-              <p class="text-body-secondary fs-sm mb-0 mb-sm-2">© All rights reserved. Made by <a class="text-body fw-medium text-decoration-none hover-effect-underline" href="https://createx.studio/" target="_blank" rel="noreferrer">Createx Studio</a></p>
-            </div>
-          </footer>
+          @endif
         </div>
       </div>
     </div>
 
-
-    
 @endsection
 
 @push('scripts')

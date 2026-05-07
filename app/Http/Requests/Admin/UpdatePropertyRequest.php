@@ -1,19 +1,17 @@
 <?php
 
-namespace App\Http\Requests\Agent;
+namespace App\Http\Requests\Admin;
 
 use App\Http\Requests\Concerns\ValidatesPropertyListing;
 use Illuminate\Foundation\Http\FormRequest;
 
-class StorePropertyRequest extends FormRequest
+class UpdatePropertyRequest extends FormRequest
 {
     use ValidatesPropertyListing;
 
     public function authorize(): bool
     {
-        $user = $this->user();
-
-        return $user !== null && ($user->isAgent() || $user->isAdmin());
+        return $this->user()?->role === 'admin';
     }
 
     /**
@@ -21,7 +19,7 @@ class StorePropertyRequest extends FormRequest
      */
     public function rules(): array
     {
-        return $this->propertyRules(requiresImages: true);
+        return $this->propertyRules(requiresImages: false, includeAdminFields: true);
     }
 
     protected function prepareForValidation(): void

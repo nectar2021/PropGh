@@ -23,6 +23,24 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        View::composer('partials.header', function ($view): void {
+            $headerLogoUrl = null;
+
+            try {
+                if (Schema::hasTable('site_settings')) {
+                    $headerLogoPath = SiteSetting::get('header_logo_path');
+
+                    if ($headerLogoPath) {
+                        $headerLogoUrl = asset('storage/'.$headerLogoPath);
+                    }
+                }
+            } catch (\Throwable) {
+                $headerLogoUrl = null;
+            }
+
+            $view->with('headerLogoUrl', $headerLogoUrl);
+        });
+
         View::composer('partials.footer', function ($view): void {
             $keys = [
                 'contact_email',
