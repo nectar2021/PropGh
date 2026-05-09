@@ -6,6 +6,7 @@ use App\Models\Property;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Tests\TestCase;
@@ -41,8 +42,8 @@ class StorePropertyListingTest extends TestCase
             'deposit' => 25000,
             'amenities' => ['Titled', 'Roadside', 'Utility access'],
             'images' => [
-                UploadedFile::fake()->image('land-cover.jpg'),
-                UploadedFile::fake()->image('land-access.jpg'),
+                UploadedFile::fake()->image('land-cover.jpg', 2400, 1800),
+                UploadedFile::fake()->image('land-access.jpg', 3200, 1800),
             ],
         ]);
 
@@ -69,13 +70,37 @@ class StorePropertyListingTest extends TestCase
 
         foreach ($property->images as $image) {
             $this->assertTrue(Str::startsWith($image->path, 'storage/properties/'));
-            Storage::disk('public')->assertExists(Str::after($image->path, 'storage/'));
+            $this->assertTrue(Storage::disk('public')->exists(Str::after($image->path, 'storage/')));
         }
+
+        $coverImageDimensions = getimagesizefromstring(
+            Storage::disk('public')->get(Str::after($property->images[0]->path, 'storage/'))
+        );
+
+        $galleryImageDimensions = getimagesizefromstring(
+            Storage::disk('public')->get(Str::after($property->images[1]->path, 'storage/'))
+        );
+
+        $this->assertNotFalse($coverImageDimensions);
+        $this->assertNotFalse($galleryImageDimensions);
+        $this->assertSame(1600, $coverImageDimensions[0]);
+        $this->assertSame(1200, $coverImageDimensions[1]);
+        $this->assertSame(1600, $galleryImageDimensions[0]);
+        $this->assertSame(900, $galleryImageDimensions[1]);
     }
 
     public function test_agent_can_store_a_residential_listing_with_optional_numeric_fields_left_blank(): void
     {
         Storage::fake('public');
+        Http::fake([
+            'https://nominatim.openstreetmap.org/search*' => Http::response([
+                [
+                    'lat' => '5.560011',
+                    'lon' => '-0.175432',
+                    'display_name' => 'Cantonments, Accra, Greater Accra Region, Ghana',
+                ],
+            ]),
+        ]);
 
         $agent = User::factory()->create([
             'role' => 'agent',
@@ -123,11 +148,54 @@ class StorePropertyListingTest extends TestCase
         $this->assertNull($property->floor);
         $this->assertNull($property->year_built);
         $this->assertNull($property->deposit);
+        $this->assertSame(5.560011, (float) $property->latitude);
+        $this->assertSame(-0.175432, (float) $property->longitude);
+        $this->assertSame('https://www.google.com/maps?q=5.560011,-0.175432&output=embed', $property->map_embed_url);
         $this->assertSame(['WiFi', 'Pool', 'Balcony'], $property->amenities);
         $this->assertSame(['Cats'], $property->pets_allowed);
         $this->assertCount(1, $property->images);
         $this->assertTrue((bool) $property->images[0]->is_cover);
-        Storage::disk('public')->assertExists(Str::after($property->images[0]->path, 'storage/'));
+        $this->assertTrue(Storage::disk('public')->exists(Str::after($property->images[0]->path, 'storage/')));
+
+        Http::assertSentCount(1);
+    }
+
+    public function test_agent_cannot_store_property_with_a_non_ghana_region(): void
+    {
+        Storage::fake('public');
+
+        $agent = User::factory()->create([
+            'role' => 'agent',
+        ]);
+
+        $response = $this
+            ->actingAs($agent)
+            ->from(route('agent.properties.create'))
+            ->post(route('agent.properties.store'), [
+                'listing_type' => 'sale',
+                'property_type' => 'apartment',
+                'title' => 'Invalid region listing',
+                'description' => 'This should fail region validation.',
+                'area' => 120,
+                'address' => '5 Test Street',
+                'city' => 'Accra',
+                'region' => 'Brooklyn',
+                'country' => 'Ghana',
+                'price' => 450000,
+                'currency' => 'GHS',
+                'price_period' => 'year',
+                'bedrooms' => 2,
+                'bathrooms' => 2,
+                'images' => [
+                    UploadedFile::fake()->image('invalid-region.jpg'),
+                ],
+            ]);
+
+        $response
+            ->assertRedirect(route('agent.properties.create'))
+            ->assertSessionHasErrors(['region']);
+
+        $this->assertDatabaseCount('properties', 0);
     }
 
     public function test_land_listing_rejects_amenities_that_do_not_match_the_property_type(): void
@@ -166,5 +234,73 @@ class StorePropertyListingTest extends TestCase
 
         $this->assertDatabaseCount('properties', 0);
         $this->assertDatabaseCount('property_images', 0);
+    }
+
+    public function test_uploaded_property_images_are_rendered_on_listing_pages_without_stock_fallbacks(): void
+    {
+        Storage::fake('public');
+        Http::fake([
+            'https://nominatim.openstreetmap.org/search*' => Http::response([
+                [
+                    'lat' => '5.571419',
+                    'lon' => '-0.187094',
+                    'display_name' => 'Ridge, Accra, Greater Accra Region, Ghana',
+                ],
+            ]),
+        ]);
+
+        $agent = User::factory()->create([
+            'role' => 'agent',
+        ]);
+
+        $this->actingAs($agent)->post(route('agent.properties.store'), [
+            'listing_type' => 'sale',
+            'property_type' => 'apartment',
+            'title' => 'Gallery-ready apartment in Ridge',
+            'description' => 'Freshly listed apartment with a real uploaded gallery image.',
+            'area' => 180,
+            'address' => '14 Ridge Street',
+            'city' => 'Accra',
+            'region' => 'Greater Accra',
+            'postal_code' => 'GA-201-4421',
+            'country' => 'Ghana',
+            'price' => 640000,
+            'currency' => 'GHS',
+            'price_period' => 'year',
+            'bedrooms' => 3,
+            'bathrooms' => 2,
+            'images' => [
+                UploadedFile::fake()->image('ridge-cover.jpg', 2200, 1600),
+            ],
+        ])->assertRedirect(route('agent.properties.index'));
+
+        $property = Property::query()->with('images')->sole();
+
+        $property->update([
+            'status' => 'live',
+            'visibility' => 'public',
+            'published_at' => now(),
+        ]);
+
+        $property->refresh()->load('images');
+        $imagePath = $property->images->firstOrFail()->path;
+
+        $this->actingAs($agent)
+            ->get(route('agent.properties.index'))
+            ->assertOk()
+            ->assertSee($imagePath, false)
+            ->assertDontSee('assets/img/listings/real-estate/01.jpg', false);
+
+        $this->get(route('properties.index'))
+            ->assertOk()
+            ->assertSee($imagePath, false)
+            ->assertDontSee('assets/img/listings/real-estate/01.jpg', false);
+
+        $this->get(route('properties.show', $property))
+            ->assertOk()
+            ->assertSee($imagePath, false)
+            ->assertDontSee('assets/img/listings/real-estate/single/01.jpg', false)
+            ->assertDontSee('assets/img/listings/real-estate/single/02.jpg', false)
+            ->assertDontSee('assets/img/listings/real-estate/single/03.jpg', false);
     }
 }

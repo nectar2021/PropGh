@@ -44,7 +44,7 @@ class HomePageSettings
             'home_action_buy_button_url' => route('properties.index', ['listing_type' => 'sale']),
             'home_action_sell_title' => 'Sell a property',
             'home_action_sell_button_label' => 'Place an ad',
-            'home_action_sell_button_url' => route('register'),
+            'home_action_sell_button_url' => route('properties.index', ['listing_type' => 'sale']),
             'home_action_rent_title' => 'Rent a property',
             'home_action_rent_button_label' => 'Find a rental',
             'home_action_rent_button_url' => route('properties.index', ['listing_type' => 'rent']),
@@ -143,7 +143,7 @@ class HomePageSettings
     public static function imageSettingKeys(): array
     {
         return array_map(
-            static fn(array $config): string => $config['key'],
+            static fn (array $config): string => $config['key'],
             self::imageSettingInputs(),
         );
     }
@@ -303,7 +303,7 @@ class HomePageSettings
                 'image_input' => 'home_action_sell_image',
                 'image_setting' => 'home_action_sell_image_path',
                 'remove_key' => self::removeInputName('home_action_sell_image'),
-                'placeholder_url' => route('register'),
+                'placeholder_url' => route('properties.index', ['listing_type' => 'sale']),
             ],
             [
                 'title' => 'Rent card',
@@ -425,13 +425,13 @@ class HomePageSettings
 
     public static function removeInputName(string $inputName): string
     {
-        return 'remove_' . $inputName;
+        return 'remove_'.$inputName;
     }
 
     private static function imageUrl(?string $storedPath, string $defaultAssetPath): string
     {
         if ($storedPath) {
-            return asset('storage/' . $storedPath);
+            return asset('storage/'.$storedPath);
         }
 
         return asset($defaultAssetPath);

@@ -6,6 +6,7 @@ use App\Models\Property;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Tests\TestCase;
@@ -17,6 +18,7 @@ class ManagePropertyCurrencyTest extends TestCase
     public function test_admin_can_store_property_with_selected_currency(): void
     {
         Storage::fake('public');
+        Http::fake();
 
         $admin = User::factory()->create([
             'role' => 'admin',
@@ -73,5 +75,6 @@ class ManagePropertyCurrencyTest extends TestCase
             'id' => $property->id,
             'currency' => 'EUR',
         ]);
+        Http::assertNothingSent();
     }
 }

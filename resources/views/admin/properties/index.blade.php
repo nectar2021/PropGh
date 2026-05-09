@@ -136,14 +136,19 @@
                                 'review' => 'text-bg-warning',
                                 'draft' => 'text-bg-secondary',
                             ];
-                            $coverImage = $property->cover_image?->path ?? 'assets/img/listings/real-estate/01.jpg';
                             $location = collect([$property->city, $property->region])->filter()->implode(', ');
                             $pricePeriod = $property->price_period ? ' / ' . \Illuminate\Support\Str::headline($property->price_period) : '';
                         @endphp
                         <tr>
                             <td>
                                 <div class="d-flex align-items-center gap-3">
-                                    <img src="{{ asset($coverImage) }}" class="rounded-3" style="width: 64px; height: 48px; object-fit: cover;" alt="{{ $property->title }}">
+                                    @if ($property->cover_image?->path)
+                                        <img src="{{ asset($property->cover_image->path) }}" class="rounded-3" style="width: 64px; height: 48px; object-fit: cover;" alt="{{ $property->title }}">
+                                    @else
+                                        <div class="d-flex align-items-center justify-content-center rounded-3 bg-body-tertiary text-body-secondary" style="width: 64px; height: 48px;">
+                                            <i class="fi-image fs-sm"></i>
+                                        </div>
+                                    @endif
                                     <div>
                                         <div class="fw-semibold">{{ $property->title }}</div>
                                         <div class="text-body-secondary fs-xs">PR-{{ str_pad($property->id, 3, '0', STR_PAD_LEFT) }} &middot; {{ $property->property_type_label ?? 'Property' }}</div>

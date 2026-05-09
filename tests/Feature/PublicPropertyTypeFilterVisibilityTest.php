@@ -37,6 +37,15 @@ class PublicPropertyTypeFilterVisibilityTest extends TestCase
         $response->assertSeeInOrder(['Townhouses', 'Office', 'More']);
     }
 
+    public function test_home_page_sell_card_links_to_sale_results_page(): void
+    {
+        $response = $this->get(route('home'));
+
+        $response->assertStatus(200);
+        $response->assertSee(route('properties.index', ['listing_type' => 'sale']), false);
+        $response->assertDontSee(route('register'), false);
+    }
+
     public function test_home_page_more_dropdown_items_link_to_property_results_pages(): void
     {
         $response = $this->get(route('home'));

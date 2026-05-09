@@ -117,42 +117,62 @@
       $images = $property->images->count() ? $property->images : collect();
       $primaryImage = $images->first();
       $secondaryImages = $images->skip(1)->take(2)->values();
-      $primarySrc = $primaryImage?->path ? asset($primaryImage->path) : asset('assets/img/listings/real-estate/single/01.jpg');
-      $secondaryFallbacks = [
-          asset('assets/img/listings/real-estate/single/02.jpg'),
-          asset('assets/img/listings/real-estate/single/03.jpg'),
-      ];
       $galleryCount = $images->count();
     @endphp
     <div class="row g-3 g-lg-4">
       <div class="col-md-8">
-        <a class="hover-effect-scale hover-effect-opacity position-relative d-flex rounded overflow-hidden" href="{{ $primarySrc }}" data-glightbox data-gallery="image-gallery">
-          <i class="fi-zoom-in hover-effect-target fs-3 text-white position-absolute top-50 start-50 translate-middle opacity-0 z-2"></i>
-          <span class="hover-effect-target position-absolute top-0 start-0 w-100 h-100 bg-black bg-opacity-25 opacity-0 z-1"></span>
-          <div class="ratio hover-effect-target bg-body-tertiary rounded" style="--fn-aspect-ratio: calc(450 / 856 * 100%)">
-            <img src="{{ $primarySrc }}" alt="{{ $property->title }}">
+        @if ($primaryImage?->path)
+          <a class="hover-effect-scale hover-effect-opacity position-relative d-flex rounded overflow-hidden" href="{{ asset($primaryImage->path) }}" data-glightbox data-gallery="image-gallery">
+            <i class="fi-zoom-in hover-effect-target fs-3 text-white position-absolute top-50 start-50 translate-middle opacity-0 z-2"></i>
+            <span class="hover-effect-target position-absolute top-0 start-0 w-100 h-100 bg-black bg-opacity-25 opacity-0 z-1"></span>
+            <div class="ratio hover-effect-target bg-body-tertiary rounded" style="--fn-aspect-ratio: calc(450 / 856 * 100%)">
+              <img src="{{ asset($primaryImage->path) }}" alt="{{ $property->title }}" style="width: 100%; height: 100%; object-fit: cover;">
+            </div>
+          </a>
+        @else
+          <div class="ratio bg-body-tertiary rounded" style="--fn-aspect-ratio: calc(450 / 856 * 100%)">
+            <div class="d-flex h-100 w-100 align-items-center justify-content-center text-body-secondary">
+              <div class="px-3 text-center">
+                <i class="fi-image d-block fs-1 mb-2"></i>
+                <span class="fw-medium">No image uploaded</span>
+              </div>
+            </div>
           </div>
-        </a>
+        @endif
       </div>
       <div class="col-md-4 vstack gap-3 gap-lg-4">
         @for ($index = 0; $index < 2; $index++)
           @php
             $image = $secondaryImages[$index] ?? null;
-            $src = $image?->path ? asset($image->path) : $secondaryFallbacks[$index];
           @endphp
-          <a class="hover-effect-scale hover-effect-opacity position-relative d-flex rounded overflow-hidden" href="{{ $src }}" data-glightbox data-gallery="image-gallery">
-            <i class="fi-zoom-in hover-effect-target fs-3 text-white position-absolute top-50 start-50 translate-middle opacity-0 z-2"></i>
-            <span class="hover-effect-target position-absolute top-0 start-0 w-100 h-100 bg-black bg-opacity-25 opacity-0 z-1"></span>
-            <div class="ratio hover-effect-target bg-body-tertiary rounded" style="--fn-aspect-ratio: calc(213 / 416 * 100%)">
-              <img src="{{ $src }}" alt="{{ $property->title }}">
-            </div>
-            @if ($index === 1 && $galleryCount > 2)
-              <div class="btn btn-sm btn-light pe-none position-absolute end-0 bottom-0 z-2 mb-3 me-3">
-                <i class="fi-camera fs-sm me-1 ms-n1"></i>
-                {{ $galleryCount }}
+          @if ($image?->path)
+            <a class="hover-effect-scale hover-effect-opacity position-relative d-flex rounded overflow-hidden" href="{{ asset($image->path) }}" data-glightbox data-gallery="image-gallery">
+              <i class="fi-zoom-in hover-effect-target fs-3 text-white position-absolute top-50 start-50 translate-middle opacity-0 z-2"></i>
+              <span class="hover-effect-target position-absolute top-0 start-0 w-100 h-100 bg-black bg-opacity-25 opacity-0 z-1"></span>
+              <div class="ratio hover-effect-target bg-body-tertiary rounded" style="--fn-aspect-ratio: calc(213 / 416 * 100%)">
+                <img src="{{ asset($image->path) }}" alt="{{ $property->title }}" style="width: 100%; height: 100%; object-fit: cover;">
               </div>
-            @endif
-          </a>
+              @if ($index === 1 && $galleryCount > 2)
+                <div class="btn btn-sm btn-light pe-none position-absolute end-0 bottom-0 z-2 mb-3 me-3">
+                  <i class="fi-camera fs-sm me-1 ms-n1"></i>
+                  {{ $galleryCount }}
+                </div>
+              @endif
+            </a>
+          @else
+            <div class="ratio bg-body-tertiary rounded" style="--fn-aspect-ratio: calc(213 / 416 * 100%)">
+              <div class="d-flex h-100 w-100 align-items-center justify-content-center text-body-secondary">
+                @if ($galleryCount === 0)
+                  <div class="px-3 text-center">
+                    <i class="fi-image d-block fs-3 mb-2"></i>
+                    <span class="fw-medium fs-sm">No image uploaded</span>
+                  </div>
+                @else
+                  <i class="fi-image fs-3"></i>
+                @endif
+              </div>
+            </div>
+          @endif
         @endfor
       </div>
     </div>

@@ -607,6 +607,14 @@
         font-size: 0.75rem;
     }
 
+    .pw-field-note.is-success {
+        color: var(--pw-teal);
+    }
+
+    .pw-field-note.is-error {
+        color: #b91c1c;
+    }
+
     @keyframes pwPulse {
         0%, 100% {
             opacity: 1;
@@ -687,6 +695,8 @@
         $currentPropertyType = \App\Support\PropertyCatalog::normalizePropertyType(old('property_type', $property->property_type ?: 'house'));
         $currentCurrency = strtoupper((string) old('currency', $property->currency ?: \App\Models\Property::defaultCurrency()));
         $currentPropertyGroup = $propertyTypeGroupMap[$currentPropertyType] ?? 'residential';
+        $currentRegion = (string) old('region', $property->region);
+        $hasLegacyRegion = $currentRegion !== '' && ! in_array($currentRegion, $ghanaRegions, true);
     @endphp
 
     <div class="pw-shell">
@@ -1007,12 +1017,20 @@
                                     >
                                 </div>
                                 <div class="col-md-6">
-                                    <label class="form-label" for="city">City</label>
-                                    <input class="form-control" id="city" name="city" type="text" value="{{ old('city', $property->city) }}" placeholder="Accra" required>
+                                    <label class="form-label" for="city">City / Area</label>
+                                    <input class="form-control" id="city" name="city" type="text" value="{{ old('city', $property->city) }}" placeholder="Tesano" required>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label" for="region">Region / State</label>
-                                    <input class="form-control" id="region" name="region" type="text" value="{{ old('region', $property->region) }}" placeholder="Greater Accra" required>
+                                    <select class="form-select" id="region" name="region" required>
+                                        <option value="" @selected($currentRegion === '')>Select region</option>
+                                        @if ($hasLegacyRegion)
+                                            <option value="{{ $currentRegion }}" selected>{{ $currentRegion }} (update required)</option>
+                                        @endif
+                                        @foreach ($ghanaRegions as $region)
+                                            <option value="{{ $region }}" @selected($currentRegion === $region)>{{ $region }}</option>
+                                        @endforeach
+                                    </select>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label" for="postal_code">Postal code</label>
@@ -1029,12 +1047,19 @@
                             <div class="pw-card-head">
                                 <div class="pw-card-icon"><i class="fi-map"></i></div>
                                 <div>
-                                    <h2>Coordinates and embed map</h2>
-                                    <p>Coordinates are optional, but if you add one, add both. They improve map previews and listing accuracy.</p>
+                                    <h2>Map lookup and coordinates</h2>
+                                    <p>Use the city or area plus region to find the location automatically, then fine-tune the coordinates if needed.</p>
                                 </div>
                             </div>
 
                             <div class="row g-3">
+                                <div class="col-12 d-flex flex-column gap-2 align-items-start">
+                                    <button type="button" class="pw-btn-secondary" id="findOnMapButton">
+                                        <i class="fi-map-pin"></i>
+                                        Find on map
+                                    </button>
+                                    <div class="pw-field-note" id="locationLookupStatus">Enter a city or area like Tesano, choose a region, then find the location on the map.</div>
+                                </div>
                                 <div class="col-md-6">
                                     <label class="form-label" for="latitude">Latitude</label>
                                     <input class="form-control" id="latitude" name="latitude" type="number" step="0.000001" value="{{ old('latitude', $property->latitude) }}" placeholder="5.603717">
@@ -1263,8 +1288,18 @@
         const conditionalSections = Array.from(document.querySelectorAll('[data-conditional-section]'));
         const imageInput = document.getElementById('images');
         const imagePreviewGrid = document.getElementById('imagePreviewGrid');
+        const addressField = document.getElementById('address');
+        const cityField = document.getElementById('city');
+        const regionField = document.getElementById('region');
+        const countryField = document.getElementById('country');
+        const latitudeField = document.getElementById('latitude');
+        const longitudeField = document.getElementById('longitude');
+        const mapEmbedField = document.getElementById('map_embed_url');
+        const findOnMapButton = document.getElementById('findOnMapButton');
+        const locationLookupStatus = document.getElementById('locationLookupStatus');
 
         const propertyTypeGroupMap = @json($propertyTypeGroupMap);
+        const locationLookupUrl = @json(route('properties.location.lookup'));
         const fieldStepMap = {
             1: ['listing_type', 'property_type', 'title', 'description'],
             2: ['area', 'bedrooms', 'bathrooms', 'garage_spaces', 'total_rooms', 'floor', 'year_built'],
@@ -1275,9 +1310,85 @@
 
         let activeStep = 1;
         let previewUrls = [];
+        let isLookingUpLocation = false;
 
         const getPropertyType = () => (propertyTypeSelect?.value || 'house').toLowerCase().replaceAll('-', '_');
         const getPropertyGroup = () => propertyTypeGroupMap[getPropertyType()] || 'residential';
+        const getPanelForStep = (step) => panels.find((panel) => Number(panel.dataset.panel) === step) || null;
+
+        const getValidatableFields = (step) => {
+            return Array.from(getPanelForStep(step)?.querySelectorAll('input, select, textarea') || []).filter((field) => {
+                return !field.disabled && field.willValidate;
+            });
+        };
+
+        const revealFieldStep = (field) => {
+            const ownerPanel = field.closest('.pw-panel');
+
+            if (ownerPanel?.dataset.panel) {
+                setStep(Number(ownerPanel.dataset.panel));
+            }
+        };
+
+        const focusInvalidField = (field) => {
+            revealFieldStep(field);
+
+            requestAnimationFrame(() => {
+                field.reportValidity();
+
+                if (typeof field.focus === 'function') {
+                    try {
+                        field.focus({ preventScroll: true });
+                    } catch (error) {
+                        field.focus();
+                    }
+                }
+
+                field.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            });
+        };
+
+        const findFirstInvalidStep = (maxStep = panels.length) => {
+            for (let step = 1; step <= maxStep; step++) {
+                const invalidField = getValidatableFields(step).find((field) => !field.checkValidity());
+
+                if (invalidField) {
+                    return { step, field: invalidField };
+                }
+            }
+
+            return null;
+        };
+
+        const validateStep = (step) => {
+            const invalidState = findFirstInvalidStep(step);
+
+            if (!invalidState || invalidState.step !== step) {
+                return true;
+            }
+
+            focusInvalidField(invalidState.field);
+
+            return false;
+        };
+
+        const moveToStep = (step) => {
+            if (step <= activeStep) {
+                setStep(step);
+
+                return;
+            }
+
+            const invalidState = findFirstInvalidStep(step - 1);
+
+            if (invalidState) {
+                focusInvalidField(invalidState.field);
+
+                return;
+            }
+
+            setStep(step);
+        };
 
         const setStep = (step) => {
             activeStep = step;
@@ -1394,6 +1505,93 @@
             });
         };
 
+        const setLocationLookupStatus = (message, state = '') => {
+            if (!locationLookupStatus) {
+                return;
+            }
+
+            locationLookupStatus.textContent = message;
+            locationLookupStatus.classList.remove('is-error', 'is-success');
+
+            if (state === 'error') {
+                locationLookupStatus.classList.add('is-error');
+            }
+
+            if (state === 'success') {
+                locationLookupStatus.classList.add('is-success');
+            }
+        };
+
+        const applyResolvedLocation = (location) => {
+            if (!latitudeField || !longitudeField || !mapEmbedField) {
+                return;
+            }
+
+            latitudeField.value = location.latitude ?? '';
+            longitudeField.value = location.longitude ?? '';
+
+            if (!mapEmbedField.value && location.map_embed_url) {
+                mapEmbedField.value = location.map_embed_url;
+            }
+
+            setLocationLookupStatus(location.display_name || 'Location found.', 'success');
+        };
+
+        const lookupLocation = async ({ force = false } = {}) => {
+            if (!cityField || !regionField || !countryField || !latitudeField || !longitudeField || isLookingUpLocation) {
+                return;
+            }
+
+            const city = cityField.value.trim();
+            const region = regionField.value.trim();
+            const country = countryField.value.trim();
+
+            if (!city || !region || !country) {
+                if (force) {
+                    setLocationLookupStatus('Enter a city or area, choose a region, and confirm the country first.', 'error');
+                }
+
+                return;
+            }
+
+            if (!force && (latitudeField.value || longitudeField.value)) {
+                return;
+            }
+
+            isLookingUpLocation = true;
+            findOnMapButton?.setAttribute('disabled', 'disabled');
+            setLocationLookupStatus('Looking up the map location...');
+
+            try {
+                const url = new URL(locationLookupUrl, window.location.origin);
+                url.searchParams.set('address', addressField?.value?.trim() || '');
+                url.searchParams.set('city', city);
+                url.searchParams.set('region', region);
+                url.searchParams.set('country', country);
+
+                const response = await fetch(url.toString(), {
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                });
+
+                const payload = await response.json().catch(() => null);
+
+                if (!response.ok || !payload) {
+                    throw new Error(payload?.message || 'We could not find that location on the map.');
+                }
+
+                applyResolvedLocation(payload);
+            } catch (error) {
+                const message = error instanceof Error ? error.message : 'We could not find that location on the map.';
+                setLocationLookupStatus(message, 'error');
+            } finally {
+                isLookingUpLocation = false;
+                findOnMapButton?.removeAttribute('disabled');
+            }
+        };
+
         const resolveStepFromErrors = () => {
             const errorKeys = @json($errors->keys());
 
@@ -1414,16 +1612,22 @@
 
         propertyTypeSelect?.addEventListener('change', refreshConditionalSections);
         imageInput?.addEventListener('change', renderImagePreview);
+        findOnMapButton?.addEventListener('click', () => lookupLocation({ force: true }));
+        cityField?.addEventListener('blur', () => lookupLocation());
+        regionField?.addEventListener('change', () => lookupLocation());
+        countryField?.addEventListener('blur', () => lookupLocation());
 
         stepButtons.forEach((button) => {
             button.addEventListener('click', () => {
-                setStep(Number(button.dataset.step));
+                moveToStep(Number(button.dataset.step));
             });
         });
 
         wizard?.querySelectorAll('[data-next]').forEach((button) => {
             button.addEventListener('click', () => {
-                setStep(Number(button.dataset.next));
+                if (validateStep(activeStep)) {
+                    setStep(Number(button.dataset.next));
+                }
             });
         });
 
@@ -1431,6 +1635,17 @@
             button.addEventListener('click', () => {
                 setStep(Number(button.dataset.prev));
             });
+        });
+
+        wizard?.addEventListener('submit', (event) => {
+            const invalidState = findFirstInvalidStep();
+
+            if (!invalidState) {
+                return;
+            }
+
+            event.preventDefault();
+            focusInvalidField(invalidState.field);
         });
 
         refreshConditionalSections();

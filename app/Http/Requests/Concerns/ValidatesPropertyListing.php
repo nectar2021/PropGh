@@ -22,7 +22,7 @@ trait ValidatesPropertyListing
             'area' => ['required', 'numeric', 'min:0.01'],
             'address' => ['required', 'string', 'max:255'],
             'city' => ['required', 'string', 'max:255'],
-            'region' => ['required', 'string', 'max:255'],
+            'region' => ['required', 'string', 'max:255', Rule::in(PropertyCatalog::ghanaRegions())],
             'postal_code' => ['nullable', 'string', 'max:40'],
             'country' => ['required', 'string', 'max:255'],
             'latitude' => ['nullable', 'numeric', 'between:-90,90', 'required_with:longitude'],
@@ -98,6 +98,7 @@ trait ValidatesPropertyListing
             'images.*.image' => 'Each uploaded file must be an image.',
             'amenities.*.in' => 'One of the selected amenities does not apply to this property type.',
             'pets_allowed.*.in' => 'The selected pet option is not available for this property type.',
+            'region.in' => 'Select one of the 16 regions in Ghana.',
         ];
     }
 
@@ -106,6 +107,9 @@ trait ValidatesPropertyListing
         $this->merge([
             'listing_type' => Str::of((string) $this->input('listing_type'))->trim()->lower()->value(),
             'property_type' => PropertyCatalog::normalizePropertyType($this->input('property_type')),
+            'city' => Str::of((string) $this->input('city'))->trim()->value(),
+            'region' => Str::of((string) $this->input('region'))->trim()->title()->value(),
+            'country' => Str::of((string) $this->input('country', 'Ghana'))->trim()->title()->value(),
             'currency' => Str::of((string) $this->input('currency', PropertyCatalog::defaultCurrency()))->trim()->upper()->value(),
             'price_period' => Str::of((string) $this->input('price_period'))->trim()->lower()->value(),
         ]);

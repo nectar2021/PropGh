@@ -71,6 +71,8 @@
     $currentPropertyType = \App\Support\PropertyCatalog::normalizePropertyType(old('property_type', $property->property_type ?: 'house'));
     $currentCurrency = strtoupper((string) old('currency', $property->currency ?: \App\Models\Property::defaultCurrency()));
     $existingImages = $property->exists ? $property->images->sortBy('sort_order') : collect();
+    $currentRegion = (string) old('region', $property->region);
+    $hasLegacyRegion = $currentRegion !== '' && ! in_array($currentRegion, $ghanaRegions, true);
 @endphp
 
 <div class="col-lg-8">
@@ -185,15 +187,23 @@
             <div class="row g-3">
                 <div class="col-12">
                     <label class="form-label">Street address</label>
-                    <input type="text" class="form-control" name="address" value="{{ old('address', $property->address) }}" placeholder="No. 12 Liberation Road" required>
+                    <input type="text" class="form-control" id="address" name="address" value="{{ old('address', $property->address) }}" placeholder="No. 12 Liberation Road" required>
                 </div>
                 <div class="col-md-6">
-                    <label class="form-label">City</label>
-                    <input type="text" class="form-control" name="city" value="{{ old('city', $property->city) }}" placeholder="Accra" required>
+                    <label class="form-label">City / Area</label>
+                    <input type="text" class="form-control" id="city" name="city" value="{{ old('city', $property->city) }}" placeholder="Tesano" required>
                 </div>
                 <div class="col-md-6">
-                    <label class="form-label">Region</label>
-                    <input type="text" class="form-control" name="region" value="{{ old('region', $property->region) }}" placeholder="Greater Accra" required>
+                    <label class="form-label">Region / State</label>
+                    <select class="form-select" id="region" name="region" required>
+                        <option value="" @selected($currentRegion === '')>Select region</option>
+                        @if ($hasLegacyRegion)
+                            <option value="{{ $currentRegion }}" selected>{{ $currentRegion }} (update required)</option>
+                        @endif
+                        @foreach ($ghanaRegions as $region)
+                            <option value="{{ $region }}" @selected($currentRegion === $region)>{{ $region }}</option>
+                        @endforeach
+                    </select>
                 </div>
                 <div class="col-md-6">
                     <label class="form-label">Postal code</label>
@@ -201,19 +211,23 @@
                 </div>
                 <div class="col-md-6">
                     <label class="form-label">Country</label>
-                    <input type="text" class="form-control" name="country" value="{{ old('country', $property->country ?: 'Ghana') }}" placeholder="Ghana" required>
+                    <input type="text" class="form-control" id="country" name="country" value="{{ old('country', $property->country ?: 'Ghana') }}" placeholder="Ghana" required>
+                </div>
+                <div class="col-12 d-flex flex-column gap-2 align-items-start">
+                    <button type="button" class="btn btn-outline-secondary" id="findOnMapButton">Find on map</button>
+                    <div class="form-text mt-0" id="locationLookupStatus">Enter a city or area like Tesano, choose a region, then find the location on the map.</div>
                 </div>
                 <div class="col-md-6">
                     <label class="form-label">Latitude</label>
-                    <input type="number" class="form-control" name="latitude" step="0.000001" value="{{ old('latitude', $property->latitude) }}">
+                    <input type="number" class="form-control" id="latitude" name="latitude" step="0.000001" value="{{ old('latitude', $property->latitude) }}">
                 </div>
                 <div class="col-md-6">
                     <label class="form-label">Longitude</label>
-                    <input type="number" class="form-control" name="longitude" step="0.000001" value="{{ old('longitude', $property->longitude) }}">
+                    <input type="number" class="form-control" id="longitude" name="longitude" step="0.000001" value="{{ old('longitude', $property->longitude) }}">
                 </div>
                 <div class="col-12">
                     <label class="form-label">Map embed URL</label>
-                    <input type="url" class="form-control" name="map_embed_url" value="{{ old('map_embed_url', $property->map_embed_url) }}" placeholder="https://www.google.com/maps/embed?...">
+                    <input type="url" class="form-control" id="map_embed_url" name="map_embed_url" value="{{ old('map_embed_url', $property->map_embed_url) }}" placeholder="https://www.google.com/maps/embed?...">
                 </div>
             </div>
         </div>
@@ -228,7 +242,7 @@
                 <div class="form-text">Upload real image files. The first uploaded image becomes the cover. Uploading new images on edit replaces the existing gallery.</div>
 
                 @if ($existingImages->isNotEmpty())
-                    <div class="mt-3">
+                    <div class="mt-3" data-current-gallery>
                         <div class="fw-semibold fs-sm mb-2">Current gallery</div>
                         <div class="admin-property-image-grid">
                             @foreach ($existingImages as $image)
@@ -376,7 +390,19 @@
                 const areaHelp = form.querySelector('[data-area-help]');
                 const imageInput = form.querySelector('input[type="file"][name="images[]"]');
                 const imagePreview = form.querySelector('[data-image-preview]');
+                const currentGallery = form.querySelector('[data-current-gallery]');
                 const propertyTypeGroupMap = @json($propertyTypeGroupMap);
+                const locationLookupUrl = @json(route('properties.location.lookup'));
+                const addressField = form.querySelector('#address');
+                const cityField = form.querySelector('#city');
+                const regionField = form.querySelector('#region');
+                const countryField = form.querySelector('#country');
+                const latitudeField = form.querySelector('#latitude');
+                const longitudeField = form.querySelector('#longitude');
+                const mapEmbedField = form.querySelector('#map_embed_url');
+                const findOnMapButton = form.querySelector('#findOnMapButton');
+                const locationLookupStatus = form.querySelector('#locationLookupStatus');
+                let isLookingUpLocation = false;
 
                 const normalizeType = (value) => (value || 'house').toLowerCase().replaceAll('-', '_');
                 const getPropertyType = () => normalizeType(propertyTypeSelect?.value);
@@ -420,14 +446,30 @@
                     }
                 };
 
+                let previewUrls = [];
+
+                const clearPreviewUrls = () => {
+                    previewUrls.forEach((url) => URL.revokeObjectURL(url));
+                    previewUrls = [];
+                };
+
                 const renderImagePreview = () => {
                     if (!imagePreview || !imageInput) {
                         return;
                     }
 
+                    clearPreviewUrls();
+
+                    const files = Array.from(imageInput.files || []);
+
                     imagePreview.innerHTML = '';
-                    Array.from(imageInput.files || []).forEach((file, index) => {
+                    if (currentGallery) {
+                        currentGallery.hidden = files.length > 0;
+                    }
+
+                    files.forEach((file, index) => {
                         const url = URL.createObjectURL(file);
+                        previewUrls.push(url);
                         const item = document.createElement('div');
                         item.className = 'admin-property-image';
                         item.innerHTML = `
@@ -438,9 +480,101 @@
                     });
                 };
 
+                const setLocationLookupStatus = (message, state = '') => {
+                    if (!locationLookupStatus) {
+                        return;
+                    }
+
+                    locationLookupStatus.textContent = message;
+                    locationLookupStatus.classList.remove('text-danger', 'text-success');
+
+                    if (state === 'error') {
+                        locationLookupStatus.classList.add('text-danger');
+                    }
+
+                    if (state === 'success') {
+                        locationLookupStatus.classList.add('text-success');
+                    }
+                };
+
+                const applyResolvedLocation = (location) => {
+                    if (!latitudeField || !longitudeField || !mapEmbedField) {
+                        return;
+                    }
+
+                    latitudeField.value = location.latitude ?? '';
+                    longitudeField.value = location.longitude ?? '';
+
+                    if (!mapEmbedField.value && location.map_embed_url) {
+                        mapEmbedField.value = location.map_embed_url;
+                    }
+
+                    setLocationLookupStatus(location.display_name || 'Location found.', 'success');
+                };
+
+                const lookupLocation = async ({ force = false } = {}) => {
+                    if (!cityField || !regionField || !countryField || !latitudeField || !longitudeField || isLookingUpLocation) {
+                        return;
+                    }
+
+                    const city = cityField.value.trim();
+                    const region = regionField.value.trim();
+                    const country = countryField.value.trim();
+
+                    if (!city || !region || !country) {
+                        if (force) {
+                            setLocationLookupStatus('Enter a city or area, choose a region, and confirm the country first.', 'error');
+                        }
+
+                        return;
+                    }
+
+                    if (!force && (latitudeField.value || longitudeField.value)) {
+                        return;
+                    }
+
+                    isLookingUpLocation = true;
+                    findOnMapButton?.setAttribute('disabled', 'disabled');
+                    setLocationLookupStatus('Looking up the map location...');
+
+                    try {
+                        const url = new URL(locationLookupUrl, window.location.origin);
+                        url.searchParams.set('address', addressField?.value?.trim() || '');
+                        url.searchParams.set('city', city);
+                        url.searchParams.set('region', region);
+                        url.searchParams.set('country', country);
+
+                        const response = await fetch(url.toString(), {
+                            headers: {
+                                'Accept': 'application/json',
+                                'X-Requested-With': 'XMLHttpRequest',
+                            },
+                        });
+
+                        const payload = await response.json().catch(() => null);
+
+                        if (!response.ok || !payload) {
+                            throw new Error(payload?.message || 'We could not find that location on the map.');
+                        }
+
+                        applyResolvedLocation(payload);
+                    } catch (error) {
+                        const message = error instanceof Error ? error.message : 'We could not find that location on the map.';
+                        setLocationLookupStatus(message, 'error');
+                    } finally {
+                        isLookingUpLocation = false;
+                        findOnMapButton?.removeAttribute('disabled');
+                    }
+                };
+
                 propertyTypeSelect?.addEventListener('change', refreshConditionalSections);
                 imageInput?.addEventListener('change', renderImagePreview);
+                findOnMapButton?.addEventListener('click', () => lookupLocation({ force: true }));
+                cityField?.addEventListener('blur', () => lookupLocation());
+                regionField?.addEventListener('change', () => lookupLocation());
+                countryField?.addEventListener('blur', () => lookupLocation());
                 refreshConditionalSections();
+                renderImagePreview();
             });
         </script>
     @endpush

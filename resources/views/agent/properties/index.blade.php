@@ -34,10 +34,15 @@
                     <div class="card border-0 shadow-sm h-100">
                         @php
                             $cover = $property->cover_image;
-                            $coverSrc = $cover?->path ? asset($cover->path) : asset('assets/img/listings/real-estate/01.jpg');
                         @endphp
                         <div class="position-relative">
-                            <img src="{{ $coverSrc }}" class="card-img-top" alt="{{ $property->title }}" style="height: 180px; object-fit: cover;">
+                            @if ($cover?->path)
+                                <img src="{{ asset($cover->path) }}" class="card-img-top" alt="{{ $property->title }}" style="height: 180px; object-fit: cover;">
+                            @else
+                                <div class="d-flex align-items-center justify-content-center bg-body-tertiary text-body-secondary" style="height: 180px;">
+                                    <i class="fi-image fs-2"></i>
+                                </div>
+                            @endif
                             <div class="position-absolute top-0 end-0 m-2 d-flex gap-1">
                                 @if ($property->status === 'live')
                                     <span class="badge text-bg-success">Live</span>

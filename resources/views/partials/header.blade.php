@@ -101,23 +101,38 @@
 
             {{-- User / Login --}}
             @auth
+                @php
+                    $currentUser = Auth::user();
+                    $accountAvatar = $currentUser->avatar_path ? asset($currentUser->avatar_path) : null;
+                @endphp
                 <div class="dropdown">
                     <button class="pg-action-btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Account menu">
-                        <i class="fi-user"></i>
+                        @if ($accountAvatar)
+                            <span class="d-inline-flex align-items-center justify-content-center overflow-hidden rounded-circle" style="width: 34px; height: 34px;">
+                                <img src="{{ $accountAvatar }}" alt="{{ $currentUser->name }}" class="w-100 h-100" style="object-fit: cover;">
+                            </span>
+                        @else
+                            <i class="fi-user"></i>
+                        @endif
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end" style="min-width: 210px;">
                         <li class="px-3 py-2 border-bottom">
-                            <div class="fw-semibold text-truncate">{{ Auth::user()->name }}</div>
-                            <div class="text-body-secondary fs-xs text-truncate">{{ Auth::user()->email }}</div>
+                            <div class="fw-semibold text-truncate">{{ $currentUser->name }}</div>
+                            <div class="text-body-secondary fs-xs text-truncate">{{ $currentUser->email }}</div>
                         </li>
-                        @if(Auth::user()->isAdmin())
+                        <li>
+                            <a class="dropdown-item" href="{{ route('profile.edit') }}">
+                                <i class="fi-user fs-sm me-2"></i>Profile
+                            </a>
+                        </li>
+                        @if($currentUser->isAdmin())
                             <li>
                                 <a class="dropdown-item" href="{{ route('admin.dashboard') }}">
                                     <i class="fi-bar-chart-2 fs-sm me-2"></i>Admin panel
                                 </a>
                             </li>
                         @endif
-                        @if(Auth::user()->isAgent() || Auth::user()->isAdmin())
+                        @if($currentUser->isAgent() || $currentUser->isAdmin())
                             <li>
                                 <a class="dropdown-item" href="{{ route('agent.properties.index') }}">
                                     <i class="fi-grid fs-sm me-2"></i>My Properties

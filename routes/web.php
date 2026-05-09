@@ -17,8 +17,10 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\ProfileController as FrontendProfileController;
 use App\Http\Controllers\PropertyController;
 use App\Http\Controllers\PropertyInquiryController;
+use App\Http\Controllers\PropertyLocationLookupController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -52,6 +54,13 @@ Route::middleware('guest')->group(function (): void {
 Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
     ->middleware('auth')
     ->name('logout');
+
+Route::middleware('auth')->group(function (): void {
+    Route::get('/profile', [FrontendProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/profile', [FrontendProfileController::class, 'update'])->name('profile.update');
+    Route::put('/profile/password', [FrontendProfileController::class, 'updatePassword'])->name('profile.password');
+    Route::get('/property-location-lookup', PropertyLocationLookupController::class)->name('properties.location.lookup');
+});
 
 Route::middleware('auth')->prefix('dashboard')->name('agent.')->group(function (): void {
     Route::get('/properties', [AgentPropertyController::class, 'index'])->name('properties.index');

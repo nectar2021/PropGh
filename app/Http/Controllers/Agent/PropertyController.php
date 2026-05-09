@@ -8,6 +8,7 @@ use App\Http\Requests\Agent\UpdatePropertyRequest;
 use App\Models\Property;
 use App\Support\PropertyCatalog;
 use App\Support\PropertyImageUploader;
+use App\Support\PropertyLocationResolver;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -15,7 +16,10 @@ use Illuminate\View\View;
 
 class PropertyController extends Controller
 {
-    public function __construct(private PropertyImageUploader $propertyImageUploader) {}
+    public function __construct(
+        private PropertyImageUploader $propertyImageUploader,
+        private PropertyLocationResolver $propertyLocationResolver,
+    ) {}
 
     public function index(Request $request): View
     {
@@ -43,7 +47,7 @@ class PropertyController extends Controller
     {
         $this->authorizeAgent($request);
 
-        $data = $request->propertyData();
+        $data = $this->propertyLocationResolver->hydrate($request->propertyData());
 
         $data['owner_id'] = $request->user()->id;
         $data['slug'] = $this->uniqueSlug($data['title']);
@@ -85,7 +89,7 @@ class PropertyController extends Controller
             abort(403);
         }
 
-        $data = $request->propertyData();
+        $data = $this->propertyLocationResolver->hydrate($request->propertyData());
 
         $property->update($data);
 
@@ -125,6 +129,7 @@ class PropertyController extends Controller
         return [
             'listingTypes' => PropertyCatalog::listingTypes(),
             'propertyTypes' => PropertyCatalog::propertyTypes(),
+            'ghanaRegions' => PropertyCatalog::ghanaRegions(),
             'propertyTypeGroups' => PropertyCatalog::propertyTypeGroups(),
             'propertyTypeGroupMap' => PropertyCatalog::propertyTypeGroupMap(),
             'currencyOptions' => PropertyCatalog::currencyOptions(),

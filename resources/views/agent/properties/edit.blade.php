@@ -40,6 +40,8 @@
     .pf-section-icon { display: inline-flex; width: 42px; height: 42px; align-items: center; justify-content: center; border-radius: .9rem; background: rgba(14, 165, 233, .08); color: var(--pf-sky); }
     .pf-section-head h2 { margin: 0 0 .1rem; font-size: 1.05rem; font-weight: 800; color: var(--pf-dark); }
     .pf-section-head p, .pf-note { margin: 0; color: var(--pf-muted); font-size: .78rem; }
+    .pf-note.is-success { color: var(--pf-emerald); }
+    .pf-note.is-error { color: #dc2626; }
     .pf-panel { display: none; }
     .pf-panel.active { display: block; }
     .pf-shell .form-label { color: var(--pf-slate); font-size: .8rem; font-weight: 700; }
@@ -69,6 +71,8 @@
     $currentPropertyType = \App\Support\PropertyCatalog::normalizePropertyType(old('property_type', $property->property_type ?: 'house'));
     $currentCurrency = strtoupper((string) old('currency', $property->currency ?: \App\Models\Property::defaultCurrency()));
     $existingImages = $property->images->sortBy('sort_order');
+    $currentRegion = (string) old('region', $property->region);
+    $hasLegacyRegion = $currentRegion !== '' && ! in_array($currentRegion, $ghanaRegions, true);
 @endphp
 
 <div class="pf-shell">
@@ -235,15 +239,23 @@
                     <div class="row g-3">
                         <div class="col-12">
                             <label class="form-label">Street address</label>
-                            <input type="text" class="form-control" name="address" value="{{ old('address', $property->address) }}" required>
+                            <input type="text" class="form-control" id="address" name="address" value="{{ old('address', $property->address) }}" required>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label">City</label>
-                            <input type="text" class="form-control" name="city" value="{{ old('city', $property->city) }}" required>
+                            <label class="form-label">City / Area</label>
+                            <input type="text" class="form-control" id="city" name="city" value="{{ old('city', $property->city) }}" placeholder="Tesano" required>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label">Region</label>
-                            <input type="text" class="form-control" name="region" value="{{ old('region', $property->region) }}" required>
+                            <label class="form-label">Region / State</label>
+                            <select class="form-select" id="region" name="region" required>
+                                <option value="" @selected($currentRegion === '')>Select region</option>
+                                @if ($hasLegacyRegion)
+                                    <option value="{{ $currentRegion }}" selected>{{ $currentRegion }} (update required)</option>
+                                @endif
+                                @foreach ($ghanaRegions as $region)
+                                    <option value="{{ $region }}" @selected($currentRegion === $region)>{{ $region }}</option>
+                                @endforeach
+                            </select>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Postal code</label>
@@ -251,19 +263,23 @@
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Country</label>
-                            <input type="text" class="form-control" name="country" value="{{ old('country', $property->country ?: 'Ghana') }}" required>
+                            <input type="text" class="form-control" id="country" name="country" value="{{ old('country', $property->country ?: 'Ghana') }}" required>
+                        </div>
+                        <div class="col-12 d-flex flex-column gap-2 align-items-start">
+                            <button type="button" class="btn btn-outline-secondary" id="findOnMapButton">Find on map</button>
+                            <div class="pf-note" id="locationLookupStatus">Enter a city or area like Tesano, choose a region, then find the location on the map.</div>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Latitude</label>
-                            <input type="number" class="form-control" name="latitude" step="0.000001" value="{{ old('latitude', $property->latitude) }}">
+                            <input type="number" class="form-control" id="latitude" name="latitude" step="0.000001" value="{{ old('latitude', $property->latitude) }}">
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Longitude</label>
-                            <input type="number" class="form-control" name="longitude" step="0.000001" value="{{ old('longitude', $property->longitude) }}">
+                            <input type="number" class="form-control" id="longitude" name="longitude" step="0.000001" value="{{ old('longitude', $property->longitude) }}">
                         </div>
                         <div class="col-12">
                             <label class="form-label">Map embed URL</label>
-                            <input type="url" class="form-control" name="map_embed_url" value="{{ old('map_embed_url', $property->map_embed_url) }}">
+                            <input type="url" class="form-control" id="map_embed_url" name="map_embed_url" value="{{ old('map_embed_url', $property->map_embed_url) }}">
                         </div>
                     </div>
                 </div>
@@ -374,16 +390,18 @@
                         <div class="pf-note mt-2">Leave blank to keep the current images.</div>
 
                         @if ($existingImages->isNotEmpty())
-                            <div class="fw-semibold fs-sm mt-3 mb-2">Current gallery</div>
-                            <div class="pf-media-grid">
-                                @foreach ($existingImages as $image)
-                                    <div class="pf-media-card">
-                                        @if ($image->is_cover)
-                                            <span class="pf-cover-badge">Cover</span>
-                                        @endif
-                                        <img src="{{ asset($image->path) }}" alt="{{ $property->title }}">
-                                    </div>
-                                @endforeach
+                            <div class="mt-3" data-current-gallery>
+                                <div class="fw-semibold fs-sm mb-2">Current gallery</div>
+                                <div class="pf-media-grid">
+                                    @foreach ($existingImages as $image)
+                                        <div class="pf-media-card">
+                                            @if ($image->is_cover)
+                                                <span class="pf-cover-badge">Cover</span>
+                                            @endif
+                                            <img src="{{ asset($image->path) }}" alt="{{ $property->title }}">
+                                        </div>
+                                    @endforeach
+                                </div>
                             </div>
                         @endif
 
@@ -416,7 +434,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const areaHelp = form.querySelector('[data-area-help]');
     const imageInput = form.querySelector('input[type="file"][name="images[]"]');
     const imagePreview = form.querySelector('[data-image-preview]');
+    const currentGallery = form.querySelector('[data-current-gallery]');
     const propertyTypeGroupMap = @json($propertyTypeGroupMap);
+    const locationLookupUrl = @json(route('properties.location.lookup'));
     const fieldStepMap = {
         1: ['listing_type', 'property_type', 'title', 'description'],
         2: ['area', 'bedrooms', 'bathrooms', 'garage_spaces', 'total_rooms', 'floor', 'year_built'],
@@ -424,6 +444,16 @@ document.addEventListener('DOMContentLoaded', () => {
         4: ['price', 'currency', 'price_period', 'deposit', 'amenities', 'pets_allowed'],
         5: ['images'],
     };
+    const addressField = form.querySelector('#address');
+    const cityField = form.querySelector('#city');
+    const regionField = form.querySelector('#region');
+    const countryField = form.querySelector('#country');
+    const latitudeField = form.querySelector('#latitude');
+    const longitudeField = form.querySelector('#longitude');
+    const mapEmbedField = form.querySelector('#map_embed_url');
+    const findOnMapButton = form.querySelector('#findOnMapButton');
+    const locationLookupStatus = form.querySelector('#locationLookupStatus');
+    let isLookingUpLocation = false;
 
     const normalizeType = (value) => (value || 'house').toLowerCase().replaceAll('-', '_');
     const getPropertyType = () => normalizeType(propertyTypeSelect?.value);
@@ -469,14 +499,30 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    let previewUrls = [];
+
+    const clearPreviewUrls = () => {
+        previewUrls.forEach((url) => URL.revokeObjectURL(url));
+        previewUrls = [];
+    };
+
     const renderImagePreview = () => {
         if (!imagePreview || !imageInput) {
             return;
         }
 
+        clearPreviewUrls();
+
+        const files = Array.from(imageInput.files || []);
+
         imagePreview.innerHTML = '';
-        Array.from(imageInput.files || []).forEach((file, index) => {
+        if (currentGallery) {
+            currentGallery.hidden = files.length > 0;
+        }
+
+        files.forEach((file, index) => {
             const url = URL.createObjectURL(file);
+            previewUrls.push(url);
             const card = document.createElement('div');
             card.className = 'pf-media-card';
             card.innerHTML = `
@@ -485,6 +531,93 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
             imagePreview.appendChild(card);
         });
+    };
+
+    const setLocationLookupStatus = (message, state = '') => {
+        if (!locationLookupStatus) {
+            return;
+        }
+
+        locationLookupStatus.textContent = message;
+        locationLookupStatus.classList.remove('is-error', 'is-success');
+
+        if (state === 'error') {
+            locationLookupStatus.classList.add('is-error');
+        }
+
+        if (state === 'success') {
+            locationLookupStatus.classList.add('is-success');
+        }
+    };
+
+    const applyResolvedLocation = (location) => {
+        if (!latitudeField || !longitudeField || !mapEmbedField) {
+            return;
+        }
+
+        latitudeField.value = location.latitude ?? '';
+        longitudeField.value = location.longitude ?? '';
+
+        if (!mapEmbedField.value && location.map_embed_url) {
+            mapEmbedField.value = location.map_embed_url;
+        }
+
+        setLocationLookupStatus(location.display_name || 'Location found.', 'success');
+    };
+
+    const lookupLocation = async ({ force = false } = {}) => {
+        if (!cityField || !regionField || !countryField || !latitudeField || !longitudeField || isLookingUpLocation) {
+            return;
+        }
+
+        const city = cityField.value.trim();
+        const region = regionField.value.trim();
+        const country = countryField.value.trim();
+
+        if (!city || !region || !country) {
+            if (force) {
+                setLocationLookupStatus('Enter a city or area, choose a region, and confirm the country first.', 'error');
+            }
+
+            return;
+        }
+
+        if (!force && (latitudeField.value || longitudeField.value)) {
+            return;
+        }
+
+        isLookingUpLocation = true;
+        findOnMapButton?.setAttribute('disabled', 'disabled');
+        setLocationLookupStatus('Looking up the map location...');
+
+        try {
+            const url = new URL(locationLookupUrl, window.location.origin);
+            url.searchParams.set('address', addressField?.value?.trim() || '');
+            url.searchParams.set('city', city);
+            url.searchParams.set('region', region);
+            url.searchParams.set('country', country);
+
+            const response = await fetch(url.toString(), {
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+            });
+
+            const payload = await response.json().catch(() => null);
+
+            if (!response.ok || !payload) {
+                throw new Error(payload?.message || 'We could not find that location on the map.');
+            }
+
+            applyResolvedLocation(payload);
+        } catch (error) {
+            const message = error instanceof Error ? error.message : 'We could not find that location on the map.';
+            setLocationLookupStatus(message, 'error');
+        } finally {
+            isLookingUpLocation = false;
+            findOnMapButton?.removeAttribute('disabled');
+        }
     };
 
     const resolveStepFromErrors = () => {
@@ -507,8 +640,13 @@ document.addEventListener('DOMContentLoaded', () => {
     form.querySelectorAll('[data-prev]').forEach((button) => button.addEventListener('click', () => setStep(Number(button.dataset.prev))));
     propertyTypeSelect?.addEventListener('change', refreshConditionalSections);
     imageInput?.addEventListener('change', renderImagePreview);
+    findOnMapButton?.addEventListener('click', () => lookupLocation({ force: true }));
+    cityField?.addEventListener('blur', () => lookupLocation());
+    regionField?.addEventListener('change', () => lookupLocation());
+    countryField?.addEventListener('blur', () => lookupLocation());
 
     refreshConditionalSections();
+    renderImagePreview();
     setStep(resolveStepFromErrors());
 });
 </script>

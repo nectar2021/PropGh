@@ -9,6 +9,7 @@ use App\Models\Property;
 use App\Models\User;
 use App\Support\PropertyCatalog;
 use App\Support\PropertyImageUploader;
+use App\Support\PropertyLocationResolver;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -17,7 +18,10 @@ use Illuminate\View\View;
 
 class PropertyController extends Controller
 {
-    public function __construct(private PropertyImageUploader $propertyImageUploader) {}
+    public function __construct(
+        private PropertyImageUploader $propertyImageUploader,
+        private PropertyLocationResolver $propertyLocationResolver,
+    ) {}
 
     public function index(Request $request): View
     {
@@ -92,7 +96,7 @@ class PropertyController extends Controller
 
     public function store(StorePropertyRequest $request): RedirectResponse
     {
-        $data = $request->propertyData();
+        $data = $this->propertyLocationResolver->hydrate($request->propertyData());
 
         $data['slug'] = $this->uniqueSlug($data['slug'] ?? $data['title']);
         $data['owner_id'] = $data['owner_id'] ?? $request->user()?->id;
@@ -125,7 +129,7 @@ class PropertyController extends Controller
 
     public function update(UpdatePropertyRequest $request, Property $property): RedirectResponse
     {
-        $data = $request->propertyData();
+        $data = $this->propertyLocationResolver->hydrate($request->propertyData());
 
         $data['slug'] = $this->uniqueSlug($data['slug'] ?? $data['title'], $property->id);
         $data['owner_id'] = $data['owner_id'] ?? $request->user()?->id;
@@ -163,7 +167,7 @@ class PropertyController extends Controller
         $counter = 1;
 
         while ($this->slugExists($slug, $ignoreId)) {
-            $slug = $base . '-' . $counter;
+            $slug = $base.'-'.$counter;
             $counter++;
         }
 
@@ -193,6 +197,7 @@ class PropertyController extends Controller
         return [
             'listingTypes' => PropertyCatalog::listingTypes(),
             'propertyTypes' => PropertyCatalog::propertyTypes(),
+            'ghanaRegions' => PropertyCatalog::ghanaRegions(),
             'currencyOptions' => PropertyCatalog::currencyOptions(),
             'pricePeriods' => PropertyCatalog::pricePeriods(),
             'propertyTypeGroups' => PropertyCatalog::propertyTypeGroups(),

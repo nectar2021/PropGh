@@ -122,12 +122,17 @@
                                         'review' => 'text-bg-warning',
                                         'draft' => 'text-bg-secondary',
                                     ];
-                                    $coverImage = $property->cover_image?->path ?? 'assets/img/listings/real-estate/01.jpg';
                                 @endphp
                                 <tr>
                                     <td>
                                         <div class="d-flex align-items-center gap-2">
-                                            <img src="{{ asset($coverImage) }}" class="rounded-3 flex-shrink-0" style="width: 44px; height: 34px; object-fit: cover;" alt="">
+                                            @if ($property->cover_image?->path)
+                                                <img src="{{ asset($property->cover_image->path) }}" class="rounded-3 flex-shrink-0" style="width: 44px; height: 34px; object-fit: cover;" alt="">
+                                            @else
+                                                <div class="d-flex align-items-center justify-content-center rounded-3 bg-body-tertiary text-body-secondary flex-shrink-0" style="width: 44px; height: 34px;">
+                                                    <i class="fi-image fs-xs"></i>
+                                                </div>
+                                            @endif
                                             <span class="fw-semibold">{{ \Illuminate\Support\Str::limit($property->title, 28) }}</span>
                                         </div>
                                     </td>
