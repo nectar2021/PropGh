@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Property;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -57,5 +58,34 @@ class PublicPropertyTypeFilterVisibilityTest extends TestCase
         $response->assertSee(route('properties.index', ['property_type' => 'vacation_home']), false);
         $response->assertSee(route('properties.index', ['property_type' => 'commercial']), false);
         $response->assertDontSee('<a class="hover-effect-underline stretched-link" href="#">More</a>', false);
+    }
+
+    public function test_properties_page_uses_a_default_ghana_map_center_when_no_mappable_results_exist(): void
+    {
+        Property::query()->create([
+            'title' => 'Unmapped Accra listing',
+            'slug' => 'unmapped-accra-listing',
+            'description' => 'Visible in the list but missing coordinates.',
+            'price' => 450000,
+            'currency' => 'GHS',
+            'price_period' => 'year',
+            'listing_type' => 'sale',
+            'property_type' => 'apartment',
+            'area' => 120,
+            'address' => '14 Test Lane',
+            'city' => 'Accra',
+            'region' => 'Greater Accra',
+            'country' => 'Ghana',
+            'status' => 'live',
+            'visibility' => 'public',
+            'published_at' => now(),
+        ]);
+
+        $response = $this->get(route('properties.index'));
+
+        $response->assertStatus(200);
+        $response->assertSee('Unmapped Accra listing');
+        $response->assertSee('"center":[7.946527,-1.023194]', false);
+        $response->assertSee('"setViewStrategy":"center"', false);
     }
 }

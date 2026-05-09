@@ -33,6 +33,7 @@
   $mapPopupTemplate = $isLandSearch
     ? '<div class="card bg-transparent border-0" data-bs-theme="light"><div class="card-img-top position-relative bg-body-tertiary overflow-hidden"><div class="ratio d-block" style="--fn-aspect-ratio: calc(248 / 362 * 100%)"><img src="@{{image}}" alt="Image"></div></div><div class="card-body p-3"><div class="h5 mb-2">@{{formattedPrice}}</div><h3 class="fs-sm fw-normal text-body mb-2"><a class="stretched-link text-body" href="@{{url}}">@{{address}}</a></h3><div class="h6 fs-sm mb-0">@{{area}} sq.m</div></div><div class="card-footer border-0 bg-transparent pt-0 pb-3 px-3 mt-n1"><div class="d-flex align-items-center fs-sm gap-1"><i class="fi-map-pin fs-base text-secondary-emphasis"></i>@{{location}}</div></div></div>'
     : '<div class="card bg-transparent border-0" data-bs-theme="light"><div class="card-img-top position-relative bg-body-tertiary overflow-hidden"><div class="ratio d-block" style="--fn-aspect-ratio: calc(248 / 362 * 100%)"><img src="@{{image}}" alt="Image"></div></div><div class="card-body p-3"><div class="h5 mb-2">@{{formattedPrice}}</div><h3 class="fs-sm fw-normal text-body mb-2"><a class="stretched-link text-body" href="@{{url}}">@{{address}}</a></h3><div class="h6 fs-sm mb-0">@{{area}} sq.m</div></div><div class="card-footer d-flex gap-2 border-0 bg-transparent pt-0 pb-3 px-3 mt-n1"><div class="d-flex align-items-center fs-sm gap-1 me-1">@{{bedrooms}}<i class="fi-bed-single fs-base text-secondary-emphasis"></i></div><div class="d-flex align-items-center fs-sm gap-1 me-1">@{{bathrooms}}<i class="fi-shower fs-base text-secondary-emphasis"></i></div><div class="d-flex align-items-center fs-sm gap-1 me-1">@{{garage}}<i class="fi-car-garage fs-base text-secondary-emphasis"></i></div></div></div>';
+  $defaultMapCenter = [7.946527, -1.023194];
   $mapConfig = [
     'tileLayer' => 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
     'attribution' => '© OpenStreetMap contributors',
@@ -44,6 +45,12 @@
       'popup' => $mapPopupTemplate,
     ],
   ];
+
+  if ($mapMarkers === []) {
+    $mapConfig['center'] = $defaultMapCenter;
+    $mapConfig['zoom'] = 7;
+    $mapConfig['setViewStrategy'] = 'center';
+  }
 @endphp
 
 <!-- Filters offcanvas -->
