@@ -40,7 +40,7 @@ class PropertyImage extends Model
 
                 return str_starts_with($path, 'storage/') || str_starts_with($path, 'assets/')
                     ? asset($path)
-                    : asset('storage/'.ltrim($path, '/'));
+                    : asset('storage/' . ltrim($path, '/'));
             },
         );
     }
