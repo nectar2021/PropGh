@@ -250,7 +250,7 @@
                                     @if ($image->is_cover)
                                         <span class="admin-property-cover-badge">Cover</span>
                                     @endif
-                                    <img src="{{ asset($image->path) }}" alt="{{ $property->title }}">
+                                    <img src="{{ $image->url }}" alt="{{ $property->title }}">
                                 </div>
                             @endforeach
                         </div>

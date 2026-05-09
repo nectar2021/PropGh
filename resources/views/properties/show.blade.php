@@ -121,12 +121,12 @@
     @endphp
     <div class="row g-3 g-lg-4">
       <div class="col-md-8">
-        @if ($primaryImage?->path)
-          <a class="hover-effect-scale hover-effect-opacity position-relative d-flex rounded overflow-hidden" href="{{ asset($primaryImage->path) }}" data-glightbox data-gallery="image-gallery">
+        @if ($primaryImage?->url)
+          <a class="hover-effect-scale hover-effect-opacity position-relative d-flex rounded overflow-hidden" href="{{ $primaryImage->url }}" data-glightbox data-gallery="image-gallery">
             <i class="fi-zoom-in hover-effect-target fs-3 text-white position-absolute top-50 start-50 translate-middle opacity-0 z-2"></i>
             <span class="hover-effect-target position-absolute top-0 start-0 w-100 h-100 bg-black bg-opacity-25 opacity-0 z-1"></span>
             <div class="ratio hover-effect-target bg-body-tertiary rounded" style="--fn-aspect-ratio: calc(450 / 856 * 100%)">
-              <img src="{{ asset($primaryImage->path) }}" alt="{{ $property->title }}" style="width: 100%; height: 100%; object-fit: cover;">
+              <img src="{{ $primaryImage->url }}" alt="{{ $property->title }}" style="width: 100%; height: 100%; object-fit: cover;">
             </div>
           </a>
         @else
@@ -145,12 +145,12 @@
           @php
             $image = $secondaryImages[$index] ?? null;
           @endphp
-          @if ($image?->path)
-            <a class="hover-effect-scale hover-effect-opacity position-relative d-flex rounded overflow-hidden" href="{{ asset($image->path) }}" data-glightbox data-gallery="image-gallery">
+          @if ($image?->url)
+            <a class="hover-effect-scale hover-effect-opacity position-relative d-flex rounded overflow-hidden" href="{{ $image->url }}" data-glightbox data-gallery="image-gallery">
               <i class="fi-zoom-in hover-effect-target fs-3 text-white position-absolute top-50 start-50 translate-middle opacity-0 z-2"></i>
               <span class="hover-effect-target position-absolute top-0 start-0 w-100 h-100 bg-black bg-opacity-25 opacity-0 z-1"></span>
               <div class="ratio hover-effect-target bg-body-tertiary rounded" style="--fn-aspect-ratio: calc(213 / 416 * 100%)">
-                <img src="{{ asset($image->path) }}" alt="{{ $property->title }}" style="width: 100%; height: 100%; object-fit: cover;">
+                <img src="{{ $image->url }}" alt="{{ $property->title }}" style="width: 100%; height: 100%; object-fit: cover;">
               </div>
               @if ($index === 1 && $galleryCount > 2)
                 <div class="btn btn-sm btn-light pe-none position-absolute end-0 bottom-0 z-2 mb-3 me-3">

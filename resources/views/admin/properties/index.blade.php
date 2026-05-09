@@ -142,8 +142,8 @@
                         <tr>
                             <td>
                                 <div class="d-flex align-items-center gap-3">
-                                    @if ($property->cover_image?->path)
-                                        <img src="{{ asset($property->cover_image->path) }}" class="rounded-3" style="width: 64px; height: 48px; object-fit: cover;" alt="{{ $property->title }}">
+                                    @if ($property->cover_image?->url)
+                                        <img src="{{ $property->cover_image->url }}" class="rounded-3" style="width: 64px; height: 48px; object-fit: cover;" alt="{{ $property->title }}">
                                     @else
                                         <div class="d-flex align-items-center justify-content-center rounded-3 bg-body-tertiary text-body-secondary" style="width: 64px; height: 48px;">
                                             <i class="fi-image fs-sm"></i>

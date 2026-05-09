@@ -328,7 +328,7 @@
                     @forelse ($images->take(3) as $image)
                       <div class="swiper-slide">
                         <div class="ratio d-block" style="--fn-aspect-ratio: calc(248 / 362 * 100%)">
-                          <img src="{{ asset($image->path) }}" alt="{{ $property->title }}" style="width: 100%; height: 100%; object-fit: cover;">
+                          <img src="{{ $image->url }}" alt="{{ $property->title }}" style="width: 100%; height: 100%; object-fit: cover;">
                           <span class="position-absolute top-0 start-0 w-100 h-100 z-1" style="background: linear-gradient(180deg, rgba(0,0,0, 0) 0%, rgba(0,0,0, .11) 100%)"></span>
                         </div>
                       </div>

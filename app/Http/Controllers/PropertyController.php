@@ -72,7 +72,7 @@ class PropertyController extends Controller
             ->get();
 
         $markers = $properties->values()->map(function (Property $property, int $index): array {
-            $imagePath = $property->cover_image?->path ?? 'assets/img/listings/real-estate/01.jpg';
+            $imageUrl = $property->cover_image?->url ?? asset('assets/img/listings/real-estate/01.jpg');
 
             $addressParts = array_filter([
                 $property->address,
@@ -97,7 +97,7 @@ class PropertyController extends Controller
                 'bedrooms' => (string) ($property->bedrooms ?? 0),
                 'bathrooms' => (string) ($property->bathrooms ?? 0),
                 'garage' => (string) ($property->garage_spaces ?? 0),
-                'image' => asset($imagePath),
+                'image' => $imageUrl,
                 'url' => route('properties.show', $property),
             ];
         })->values();

@@ -36,8 +36,8 @@
                             $cover = $property->cover_image;
                         @endphp
                         <div class="position-relative">
-                            @if ($cover?->path)
-                                <img src="{{ asset($cover->path) }}" class="card-img-top" alt="{{ $property->title }}" style="height: 180px; object-fit: cover;">
+                            @if ($cover?->url)
+                                <img src="{{ $cover->url }}" class="card-img-top" alt="{{ $property->title }}" style="height: 180px; object-fit: cover;">
                             @else
                                 <div class="d-flex align-items-center justify-content-center bg-body-tertiary text-body-secondary" style="height: 180px;">
                                     <i class="fi-image fs-2"></i>
