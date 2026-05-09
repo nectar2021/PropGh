@@ -6,6 +6,11 @@
 @push('styles')
 <link rel="stylesheet" href="{{ asset('assets/vendor/leaflet/leaflet.css') }}">
 <link rel="stylesheet" href="{{ asset('assets/vendor/choices.js/choices.min.css') }}">
+<style>
+  .leaflet-container img.leaflet-tile {
+    mix-blend-mode: normal;
+  }
+</style>
 @endpush
 
 @section('content')
