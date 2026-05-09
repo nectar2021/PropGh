@@ -3,6 +3,7 @@
 namespace App\Support;
 
 use App\Models\Property;
+use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -41,7 +42,7 @@ class PropertyImageUploader
             $storedPath = $this->storeUploadedImage($property, $uploadedImage);
 
             $property->images()->create([
-                'path' => 'storage/' . $storedPath,
+                'path' => 'storage/'.$storedPath,
                 'is_cover' => ! $hasCover && $index === 0,
                 'sort_order' => $sortOffset + $index,
             ]);
@@ -57,31 +58,55 @@ class PropertyImageUploader
                 continue;
             }
 
-            Storage::disk('public')->delete(Str::after($image->path, 'storage/'));
+            $relativePath = Str::after($image->path, 'storage/');
+
+            $this->propertyImageDisk()->delete($relativePath);
+
+            if (! app()->runningUnitTests()) {
+                Storage::disk('public')->delete($relativePath);
+            }
         }
     }
 
     private function storeUploadedImage(Property $property, UploadedFile $uploadedImage): string
     {
-        $directory = 'properties/' . $property->id;
+        $directory = 'properties/'.$property->id;
+        $propertyImageDisk = $this->propertyImageDisk();
 
         if (! $this->gdIsAvailable()) {
-            return $uploadedImage->store($directory, 'public');
+            $storedPath = $propertyImageDisk->putFile($directory, $uploadedImage);
+
+            return is_string($storedPath) ? $storedPath : $uploadedImage->store($directory, 'public');
         }
 
         $normalizedImage = $this->createNormalizedImage($uploadedImage);
 
         if ($normalizedImage === null) {
-            return $uploadedImage->store($directory, 'public');
+            $storedPath = $propertyImageDisk->putFile($directory, $uploadedImage);
+
+            return is_string($storedPath) ? $storedPath : $uploadedImage->store($directory, 'public');
         }
 
-        $relativePath = $directory . '/' . Str::ulid() . '.' . $normalizedImage['extension'];
+        $relativePath = $directory.'/'.Str::ulid().'.'.$normalizedImage['extension'];
 
-        if (! Storage::disk('public')->put($relativePath, $normalizedImage['contents'])) {
+        if (! $propertyImageDisk->put($relativePath, $normalizedImage['contents'])) {
             return $uploadedImage->store($directory, 'public');
         }
 
         return $relativePath;
+    }
+
+    private function propertyImageDisk(): FilesystemAdapter
+    {
+        if (app()->runningUnitTests()) {
+            return Storage::disk('public');
+        }
+
+        return Storage::build([
+            'driver' => 'local',
+            'root' => public_path('storage'),
+            'throw' => false,
+        ]);
     }
 
     private function gdIsAvailable(): bool
