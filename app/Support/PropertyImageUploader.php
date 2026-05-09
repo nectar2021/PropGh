@@ -42,7 +42,7 @@ class PropertyImageUploader
             $storedPath = $this->storeUploadedImage($property, $uploadedImage);
 
             $property->images()->create([
-                'path' => 'storage/' . $storedPath,
+                'path' => 'storage/'.$storedPath,
                 'is_cover' => ! $hasCover && $index === 0,
                 'sort_order' => $sortOffset + $index,
             ]);
@@ -61,16 +61,12 @@ class PropertyImageUploader
             $relativePath = Str::after($image->path, 'storage/');
 
             $this->propertyImageDisk()->delete($relativePath);
-
-            if (! app()->runningUnitTests()) {
-                Storage::disk('public')->delete($relativePath);
-            }
         }
     }
 
     private function storeUploadedImage(Property $property, UploadedFile $uploadedImage): string
     {
-        $directory = 'properties/' . $property->id;
+        $directory = 'properties/'.$property->id;
         $propertyImageDisk = $this->propertyImageDisk();
 
         if (! $this->gdIsAvailable()) {
@@ -87,7 +83,7 @@ class PropertyImageUploader
             return is_string($storedPath) ? $storedPath : $uploadedImage->store($directory, 'public');
         }
 
-        $relativePath = $directory . '/' . Str::ulid() . '.' . $normalizedImage['extension'];
+        $relativePath = $directory.'/'.Str::ulid().'.'.$normalizedImage['extension'];
 
         if (! $propertyImageDisk->put($relativePath, $normalizedImage['contents'])) {
             return $uploadedImage->store($directory, 'public');
@@ -98,15 +94,7 @@ class PropertyImageUploader
 
     private function propertyImageDisk(): FilesystemAdapter
     {
-        if (app()->runningUnitTests()) {
-            return Storage::disk('public');
-        }
-
-        return Storage::build([
-            'driver' => 'local',
-            'root' => public_path('storage'),
-            'throw' => false,
-        ]);
+        return Storage::disk('public');
     }
 
     private function gdIsAvailable(): bool
