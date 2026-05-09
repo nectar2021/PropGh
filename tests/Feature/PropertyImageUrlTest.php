@@ -24,4 +24,13 @@ class PropertyImageUrlTest extends TestCase
 
         $this->assertSame(asset('storage/properties/9/example.jpg'), $image->url);
     }
+
+    public function test_it_preserves_public_asset_paths(): void
+    {
+        $image = new PropertyImage([
+            'path' => 'assets/img/listings/real-estate/01.jpg',
+        ]);
+
+        $this->assertSame(asset('assets/img/listings/real-estate/01.jpg'), $image->url);
+    }
 }
