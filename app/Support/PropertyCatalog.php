@@ -318,7 +318,7 @@ class PropertyCatalog
     public static function flatAmenityLabels(): array
     {
         return array_values(array_unique(Arr::flatten(array_map(
-            static fn (array $set): array => array_values($set['options']),
+            static fn(array $set): array => array_values($set['options']),
             self::amenityOptionSets(),
         ))));
     }

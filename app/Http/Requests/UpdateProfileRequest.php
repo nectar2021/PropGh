@@ -26,7 +26,7 @@ class UpdateProfileRequest extends FormRequest
             'phone' => ['nullable', 'string', 'max:30'],
             'company_name' => [
                 'nullable',
-                Rule::requiredIf(fn (): bool => (bool) $user?->isAgent()),
+                Rule::requiredIf(fn(): bool => (bool) $user?->isAgent()),
                 'string',
                 'max:255',
             ],

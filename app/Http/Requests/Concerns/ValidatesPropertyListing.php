@@ -162,7 +162,7 @@ trait ValidatesPropertyListing
             'nullable',
             'integer',
             'min:1800',
-            'max:'.(now()->year + 1),
+            'max:' . (now()->year + 1),
         ];
     }
 

@@ -61,7 +61,7 @@ class ManageProfileTest extends TestCase
         $this->assertSame('updated-agent@example.com', $user->email);
         $this->assertSame('+233 55 111 2222', $user->phone);
         $this->assertSame('Updated Agency', $user->company_name);
-        $this->assertStringStartsWith('storage/avatars/'.$user->id.'/', $user->avatar_path);
+        $this->assertStringStartsWith('storage/avatars/' . $user->id . '/', $user->avatar_path);
         $this->assertFalse(Storage::disk('public')->exists('avatars/1/old-avatar.jpg'));
         $this->assertTrue(Storage::disk('public')->exists(Str::after($user->avatar_path, 'storage/')));
     }
@@ -77,7 +77,7 @@ class ManageProfileTest extends TestCase
         ]);
 
         $response
-            ->assertRedirect(route('profile.edit').'#password')
+            ->assertRedirect(route('profile.edit') . '#password')
             ->assertSessionHas('password_status', 'Password updated.');
 
         $this->assertTrue(Hash::check('new-secure-password', $user->fresh()->password));

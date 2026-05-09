@@ -41,7 +41,7 @@ class PropertyImageUploader
             $storedPath = $this->storeUploadedImage($property, $uploadedImage);
 
             $property->images()->create([
-                'path' => 'storage/'.$storedPath,
+                'path' => 'storage/' . $storedPath,
                 'is_cover' => ! $hasCover && $index === 0,
                 'sort_order' => $sortOffset + $index,
             ]);
@@ -63,7 +63,7 @@ class PropertyImageUploader
 
     private function storeUploadedImage(Property $property, UploadedFile $uploadedImage): string
     {
-        $directory = 'properties/'.$property->id;
+        $directory = 'properties/' . $property->id;
 
         if (! $this->gdIsAvailable()) {
             return $uploadedImage->store($directory, 'public');
@@ -75,7 +75,7 @@ class PropertyImageUploader
             return $uploadedImage->store($directory, 'public');
         }
 
-        $relativePath = $directory.'/'.Str::ulid().'.'.$normalizedImage['extension'];
+        $relativePath = $directory . '/' . Str::ulid() . '.' . $normalizedImage['extension'];
 
         if (! Storage::disk('public')->put($relativePath, $normalizedImage['contents'])) {
             return $uploadedImage->store($directory, 'public');

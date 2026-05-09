@@ -150,7 +150,7 @@ class PropertyController extends Controller
         $counter = 1;
 
         while (Property::where('slug', $slug)->exists()) {
-            $slug = $original.'-'.$counter++;
+            $slug = $original . '-' . $counter++;
         }
 
         return $slug;

@@ -143,7 +143,7 @@ class HomePageSettings
     public static function imageSettingKeys(): array
     {
         return array_map(
-            static fn (array $config): string => $config['key'],
+            static fn(array $config): string => $config['key'],
             self::imageSettingInputs(),
         );
     }
@@ -425,13 +425,13 @@ class HomePageSettings
 
     public static function removeInputName(string $inputName): string
     {
-        return 'remove_'.$inputName;
+        return 'remove_' . $inputName;
     }
 
     private static function imageUrl(?string $storedPath, string $defaultAssetPath): string
     {
         if ($storedPath) {
-            return asset('storage/'.$storedPath);
+            return asset('storage/' . $storedPath);
         }
 
         return asset($defaultAssetPath);

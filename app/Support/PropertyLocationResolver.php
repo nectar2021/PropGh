@@ -102,8 +102,8 @@ class PropertyLocationResolver
         ])
             ->map(function (array $parts): string {
                 return collect($parts)
-                    ->filter(fn ($value) => filled($value))
-                    ->map(fn ($value) => Str::of((string) $value)->trim()->value())
+                    ->filter(fn($value) => filled($value))
+                    ->map(fn($value) => Str::of((string) $value)->trim()->value())
                     ->implode(', ');
             })
             ->filter()

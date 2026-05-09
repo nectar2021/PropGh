@@ -12,7 +12,7 @@ class UserAvatarUploader
 {
     public function store(User $user, UploadedFile $uploadedAvatar): string
     {
-        $relativePath = $uploadedAvatar->store('avatars/'.$user->id, 'public');
+        $relativePath = $uploadedAvatar->store('avatars/' . $user->id, 'public');
 
         if (! is_string($relativePath)) {
             throw new RuntimeException('Unable to store avatar.');
@@ -20,7 +20,7 @@ class UserAvatarUploader
 
         $this->deleteManagedAvatar($user->avatar_path);
 
-        return 'storage/'.$relativePath;
+        return 'storage/' . $relativePath;
     }
 
     public function deleteManagedAvatar(?string $avatarPath): void

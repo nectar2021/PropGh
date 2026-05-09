@@ -41,6 +41,6 @@ class ProfileController extends Controller
             'password' => Hash::make($request->string('password')->toString()),
         ]);
 
-        return redirect(route('profile.edit').'#password')->with('password_status', 'Password updated.');
+        return redirect(route('profile.edit') . '#password')->with('password_status', 'Password updated.');
     }
 }

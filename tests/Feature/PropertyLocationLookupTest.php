@@ -60,6 +60,6 @@ class PropertyLocationLookupTest extends TestCase
                 && str_contains(urldecode($url), 'Greater Accra');
         });
 
-            Http::assertSentCount(2);
+        Http::assertSentCount(2);
     }
 }
