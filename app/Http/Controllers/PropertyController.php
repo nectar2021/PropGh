@@ -23,7 +23,7 @@ class PropertyController extends Controller
             $this->filteredPropertiesQuery($filters)->with('images'),
             $sort,
         )
-            ->paginate(4)
+            ->paginate(10)
             ->withQueryString();
 
         return response()->view('properties.index', [

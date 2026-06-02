@@ -94,7 +94,10 @@ class PropertyImageUploader
 
     private function propertyImageDisk(): FilesystemAdapter
     {
-        return Storage::disk('public');
+        /** @var FilesystemAdapter $disk */
+        $disk = Storage::disk('public');
+
+        return $disk;
     }
 
     private function gdIsAvailable(): bool

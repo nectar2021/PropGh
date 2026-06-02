@@ -6,6 +6,52 @@
 @push('styles')
 <link rel="stylesheet" href="{{ asset('assets/vendor/glightbox/glightbox.min.css') }}">
 <link rel="stylesheet" href="{{ asset('assets/vendor/flatpickr/flatpickr.min.css') }}">
+<style>
+  /* GLightbox navigation button fixes */
+  .glightbox-container .gbtn {
+    width: 48px !important;
+    height: 48px !important;
+    border-radius: 50% !important;
+    background: rgba(255, 255, 255, 0.15) !important;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+    color: #fff !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: background 0.2s ease, transform 0.2s ease;
+  }
+  .glightbox-container .gbtn:hover {
+    background: rgba(255, 255, 255, 0.3) !important;
+    transform: scale(1.08);
+  }
+  .glightbox-container .gbtn svg {
+    width: 22px;
+    height: 22px;
+    fill: #fff;
+    stroke: #fff;
+  }
+  .glightbox-container .gclose {
+    top: 20px !important;
+    right: 20px !important;
+    position: absolute !important;
+  }
+  .glightbox-container .gprev {
+    left: 20px !important;
+    top: 50% !important;
+    transform: translateY(-50%);
+  }
+  .glightbox-container .gnext {
+    right: 20px !important;
+    top: 50% !important;
+    transform: translateY(-50%);
+  }
+  /* Ensure buttons are above the overlay */
+  .glightbox-container .gbtn {
+    z-index: 99999 !important;
+  }
+</style>
 @endpush
 
 @section('content')
@@ -176,6 +222,13 @@
         @endfor
       </div>
     </div>
+
+    {{-- Hidden lightbox links for remaining images --}}
+    @foreach ($images->skip(3) as $hiddenImage)
+      @if ($hiddenImage->url)
+        <a href="{{ $hiddenImage->url }}" data-glightbox data-gallery="image-gallery" class="d-none"></a>
+      @endif
+    @endforeach
 
     <!-- Listing details -->
     <div class="row pt-4 pb-2 pb-sm-3 pb-md-4 py-lg-5 mt-sm-2 mt-lg-0">
